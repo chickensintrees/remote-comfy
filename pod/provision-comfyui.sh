@@ -124,6 +124,16 @@ for s in $SETS; do case "$s" in
   none) : ;;
   *) echo "unknown model set: $s" ;;
 esac; done
+# Extra models picked from the catalogue: `catalog.py --dl <id>... > extra-models.txt`,
+# scp it to /workspace. One "<repo> <path> <dest>" per line. dl's stdin is /dev/null so
+# a download can never swallow the remaining lines of the list.
+EXTRA=/workspace/extra-models.txt
+if [ -f "$EXTRA" ]; then
+  while read -r repo path dest; do
+    case "$repo" in ''|\#*) continue ;; esac
+    dl "$repo" "$path" "$dest" </dev/null
+  done < "$EXTRA"
+fi
 rm -rf "$STAGE"
 
 # --- fail loudly on missing models, BEFORE any workflow runs ---------------------

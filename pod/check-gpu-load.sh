@@ -15,51 +15,66 @@
 # a fast one. ALWAYS run this after launching per-GPU instances and BEFORE trusting any
 # throughput projection - a half-speed shard doubles the bill silently.
 #
-#   bash check-gpu-load.sh <host> <port> [logglob]
+# CURRENT COMFYUI NO LONGER PRINTS "loaded completely/partially" - its dynamic-VRAM loader
+# logs "prepared for dynamic VRAM loading. NNNNMB Staged" instead (seen on 0.42.0,
+# 2026-10-23). A check keyed only on the old line could never pass and blamed CPU
+# streaming that was not happening. So the primary signal is now SPEED PARITY: every
+# instance runs the same model on the same card, so one shard far slower than the
+# fastest is the degradation itself, whatever the log wording. The old line is still
+# honoured when present.
 #
-# Exit 0 = every instance loaded completely. Exit 1 = at least one is degraded; kill the
-# stale squatters (pkill -f 'main.py --listen'), confirm nvidia-smi shows no compute apps,
-# and relaunch.
+#   bash check-gpu-load.sh <host> <port> [logglob]
+#   CHECK_GPU_LOAD_INPUT=<file> bash check-gpu-load.sh - -    # offline: "log|loadline|rate"
+#
+# Exit 0 = every instance has a rate within SLOW_RATIO (default 0.7) of the fastest and
+# none reports "loaded partially". Exit 1 = degraded, or no signal yet (a missing signal
+# is NOT a pass). Fix: pkill -f 'main\.py.*--listen', confirm nvidia-smi shows no compute
+# apps, relaunch.
 set -u
 HOST="${1:?host}"; PORT="${2:?ssh port}"; GLOB="${3:-/workspace/comfy_g*.log}"
+SLOW_RATIO="${SLOW_RATIO:-0.7}"
 SSHOPT="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=20"
 
-OUT=$(ssh $SSHOPT -p "$PORT" root@"$HOST" "
-  for L in $GLOB; do
-    [ -e \"\$L\" ] || continue
-    LAST=\$(grep -E 'loaded (completely|partially)' \"\$L\" | tail -1)
-    echo \"\$L|\$LAST\"
-  done" 2>/dev/null)
+if [ -n "${CHECK_GPU_LOAD_INPUT:-}" ]; then
+  OUT=$(cat "$CHECK_GPU_LOAD_INPUT")
+else
+  # one line per log: <log>|<last old-style load line>|<last tqdm rate, e.g. 1.18it/s>
+  OUT=$(ssh $SSHOPT -p "$PORT" root@"$HOST" "
+    for L in $GLOB; do
+      [ -e \"\$L\" ] || continue
+      LOAD=\$(grep -aE 'loaded (completely|partially)' \"\$L\" | tail -n 1)
+      RATE=\$(grep -aoE '[0-9]+(\.[0-9]+)?(it/s|s/it)' \"\$L\" | tail -n 1)
+      echo \"\$L|\$LOAD|\$RATE\"
+    done" 2>/dev/null)
+fi
 
 if [ -z "$OUT" ]; then
-  echo "check-gpu-load: NO LOAD LINES FOUND in $GLOB - models have not loaded yet (or the"
-  echo "  log path is wrong). A missing signal is NOT a pass; re-run once loading starts."
+  echo "check-gpu-load: NO LOGS FOUND in $GLOB - nothing has launched, or the path is wrong."
+  echo "  A missing signal is NOT a pass."
   exit 1
 fi
 
-BAD=0
-while IFS= read -r line; do
-  LOG="${line%%|*}"; MSG="${line#*|}"
-  case "$MSG" in
-    *"loaded partially"*)
-      echo "DEGRADED  $LOG"
-      echo "          $MSG"
-      BAD=1 ;;
-    *"loaded completely"*)
-      echo "ok        $LOG" ;;
-    *)
-      echo "UNKNOWN   $LOG (no load line) "; BAD=1 ;;
-  esac
-done <<EOF
-$OUT
-EOF
-
-if [ "$BAD" -ne 0 ]; then
-  echo
-  echo "At least one instance is streaming weights from CPU. Do not project throughput from"
-  echo "the fast shard. Kill every 'main.py --listen', verify with:"
-  echo "  nvidia-smi --query-compute-apps=pid,used_memory --format=csv"
-  echo "that no process still holds VRAM, then relaunch."
-  exit 1
-fi
-echo "all instances loaded completely"
+# normalise each rate to it/s, then judge against the fastest instance
+echo "$OUT" | awk -F'|' -v ratio="$SLOW_RATIO" '
+  { log_[NR]=$1; load[NR]=$2; r=$3; v=0
+    if (r ~ /it\/s$/) { sub(/it\/s$/, "", r); v=r+0 }
+    else if (r ~ /s\/it$/) { sub(/s\/it$/, "", r); if (r+0 > 0) v=1/(r+0) }
+    rate[NR]=v; if (v > best) best=v; n=NR }
+  END {
+    bad=0
+    for (i=1; i<=n; i++) {
+      if (load[i] ~ /loaded partially/) { printf "DEGRADED  %s  (%s)\n", log_[i], load[i]; bad=1 }
+      else if (rate[i] == 0)            { printf "NO SIGNAL %s  (no sampling rate yet)\n", log_[i]; bad=1 }
+      else if (rate[i] < ratio*best)    { printf "SLOW      %s  %.2f it/s vs fastest %.2f\n", log_[i], rate[i], best; bad=1 }
+      else                              { printf "ok        %s  %.2f it/s\n", log_[i], rate[i] }
+    }
+    if (bad) {
+      print ""
+      print "Degraded or not yet sampling. A slow shard is usually a VRAM squatter forcing a"
+      print "partial load: do not project throughput from the fast shard. Kill every"
+      print "main.py --listen, check  nvidia-smi --query-compute-apps=pid,used_memory --format=csv"
+      print "shows nothing, relaunch, and re-run this once sampling has started."
+      exit 1
+    }
+    print "all instances sampling at matching speed"
+  }'

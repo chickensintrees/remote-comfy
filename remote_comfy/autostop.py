@@ -19,6 +19,21 @@ first and remove it after, or it will be killed mid-flight.
 import argparse, json, os, sys, time, urllib.error, urllib.request
 
 LOCK = "/workspace/.busy"
+# Cloudflare answers 403/1010 to urllib's default User-Agent on rest.runpod.io AND the
+# GraphQL API. EVERY RunPod call must go through _runpod(): on 2026-10-23 the stock check,
+# stop and terminate all 403'd while only GraphQL carried a browser UA, so the watchdog
+# could never retire the pod it was guarding.
+BROWSER_UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120 Safari/537.36"
+
+
+def _runpod(url, key, method="GET", body=None, timeout=30):
+    req = urllib.request.Request(url, method=method,
+                                 data=(json.dumps(body).encode() if body is not None else
+                                       (b"" if method == "POST" else None)),
+                                 headers={"Authorization": "Bearer " + key,
+                                          "Content-Type": "application/json",
+                                          "User-Agent": BROWSER_UA})
+    return urllib.request.urlopen(req, timeout=timeout).read()
 
 
 def log(msg):
@@ -39,13 +54,9 @@ def stop_pod(pod_id, key, dry):
     if dry:
         log("DRY-RUN: would stop pod %s now" % pod_id)
         return True
-    req = urllib.request.Request("https://rest.runpod.io/v1/pods/%s/stop" % pod_id,
-                                 data=b"", method="POST",
-                                 headers={"Authorization": "Bearer " + key,
-                                          "Content-Type": "application/json"})
     for attempt in range(5):
         try:
-            urllib.request.urlopen(req, timeout=30).read()
+            _runpod("https://rest.runpod.io/v1/pods/%s/stop" % pod_id, key, method="POST")
             log("STOPPED pod %s" % pod_id)
             return True
         except urllib.error.HTTPError as e:
@@ -86,18 +97,13 @@ def gpu_stock(pod_id, key):
     A stop is only a PAUSE when the card is easy to get back.
     """
     try:
-        r = urllib.request.Request("https://rest.runpod.io/v1/pods/" + pod_id,
-                                   headers={"Authorization": "Bearer " + key})
-        pod = json.loads(urllib.request.urlopen(r, timeout=20).read())
+        pod = json.loads(_runpod("https://rest.runpod.io/v1/pods/" + pod_id, key, timeout=20))
         want = (pod.get("machine") or {}).get("gpuTypeId") or pod.get("gpuTypeId")
         if not want:
             return None
-        ua = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120 Safari/537.36"
         q = {"query": "query{gpuTypes{id lowestPrice(input:{gpuCount:1}){stockStatus}}}"}
-        g = urllib.request.Request("https://api.runpod.io/graphql", data=json.dumps(q).encode(),
-                                   headers={"Content-Type": "application/json",
-                                            "Authorization": "Bearer " + key, "User-Agent": ua})
-        types = json.loads(urllib.request.urlopen(g, timeout=20).read())["data"]["gpuTypes"]
+        types = json.loads(_runpod("https://api.runpod.io/graphql", key, method="POST", body=q,
+                                   timeout=20))["data"]["gpuTypes"]
         for t in types:
             if t["id"] == want:
                 return (t.get("lowestPrice") or {}).get("stockStatus")
@@ -107,15 +113,19 @@ def gpu_stock(pod_id, key):
 
 
 def terminate_pod(pod_id, key, dry):
+    """True only if RunPod accepted the terminate. A failure must reach the caller: the
+    watchdog used to log it and exit, leaving the pod billing unguarded (2026-10-23)."""
     if dry:
-        log("DRY-RUN: would TERMINATE pod %s now" % pod_id); return
-    req = urllib.request.Request("https://rest.runpod.io/v1/pods/" + pod_id, method="DELETE",
-                                 headers={"Authorization": "Bearer " + key})
-    try:
-        urllib.request.urlopen(req, timeout=45)
-        log("TERMINATED pod %s (billing stops; pod-local disk destroyed)" % pod_id)
-    except Exception as e:
-        log("terminate error: %s" % str(e)[:120])
+        log("DRY-RUN: would TERMINATE pod %s now" % pod_id); return True
+    for attempt in range(3):
+        try:
+            _runpod("https://rest.runpod.io/v1/pods/" + pod_id, key, method="DELETE", timeout=45)
+            log("TERMINATED pod %s (billing stops; pod-local disk destroyed)" % pod_id)
+            return True
+        except Exception as e:
+            log("terminate error: %s" % str(e)[:120])
+        time.sleep(5 * (attempt + 1))
+    return False
 
 
 SYNCED_D = "/workspace/.synced.d"   # per-directory sentinels: one file per synced remote dir
@@ -140,17 +150,19 @@ def unsynced_dirs(roots, max_age_min=15.0):
     bad = []
     now = time.time()
     for root in roots:
+        root = root.rstrip("/") or "/"
         try:
             entries = sorted(os.listdir(root))
         except OSError:
             continue
-        for name in entries:
-            d = os.path.join(root, name)
-            if not os.path.isdir(d):
-                continue
+        # The root ITSELF is an output dir when files sit directly in it. Checking only its
+        # subdirectories let a flat /workspace/out read as "synced" with nothing checked.
+        cands = [root] if any(os.path.isfile(os.path.join(root, n)) for n in entries) else []
+        cands += [os.path.join(root, n) for n in entries if os.path.isdir(os.path.join(root, n))]
+        for d in cands:
             try:
-                newest = max((os.path.getmtime(os.path.join(d, f)) for f in os.listdir(d)),
-                             default=0)
+                newest = max((os.path.getmtime(os.path.join(d, f)) for f in os.listdir(d)
+                              if os.path.isfile(os.path.join(d, f))), default=0)
             except OSError:
                 continue
             if newest == 0:
@@ -197,12 +209,12 @@ def retire_pod(pod_id, key, dry, why, roots=()):
         ("" if roots else " [WEAK: no --outputs-root, global sentinel only]")))
     if stock == "High":
         log("stock is High - a stop should be resumable; stopping")
-        stop_pod(pod_id, key, dry); return True
+        return stop_pod(pod_id, key, dry)
     if synced:
         log("stock=%s: a stop would likely STRAND this pod. Outputs are synced, so "
-            "terminating instead — re-provisioning is cheaper than an unreachable volume."
+            "terminating instead - re-provisioning is cheaper than an unreachable volume."
             % stock)
-        terminate_pod(pod_id, key, dry); return True
+        return terminate_pod(pod_id, key, dry)
     log("WILL NOT RETIRE: stock=%s so a stop risks stranding, and outputs are NOT "
         "confirmed local (%s) so a terminate risks losing work. Run sync-outputs.sh."
         % (stock, unsynced if unsynced else SYNCED))
@@ -239,6 +251,8 @@ def main():
         if time.time() - start > a.max_hours * 3600:
             if retire_pod(a.pod_id, key, a.dry_run, "MAX-HOURS ceiling hit", a.outputs_root):
                 return
+            log("retire FAILED or refused - pod still billing; retrying next poll")
+            continue
         held, age = lock_held(a.lock_ttl_min)
         if held:
             last_busy = time.time()
@@ -261,9 +275,11 @@ def main():
                           "idle %.1fmin >= %.1fmin" % (idle_for / 60, a.idle_min),
                           a.outputs_root):
                 return
-            return
+            # NEVER exit while the pod may still bill: retry every poll until it is gone.
+            log("retire FAILED or refused - pod still billing; retrying next poll")
+            continue
         log("idle %.1fmin (limit %.1f)" % (idle_for / 60, a.idle_min))
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

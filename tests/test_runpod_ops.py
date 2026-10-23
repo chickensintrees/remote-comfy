@@ -194,6 +194,89 @@ def main():
     finally:
         au.gpu_stock, au.outputs_synced, au.stop_pod, au.terminate_pod = real
 
+    # --- LESSONS (2026-10-23, live 2xA40 smoke test): the watchdog decided correctly and
+    # then could not act. Its REST calls lacked a browser UA (Cloudflare 403), the failed
+    # terminate was swallowed, and main() EXITED, leaving the pod billing unguarded.
+    seen = []
+
+    class _Resp:
+        def read(self):
+            return json.dumps({"machine": {"gpuTypeId": "X"}, "data": {"gpuTypes": [
+                {"id": "X", "lowestPrice": {"stockStatus": "Low"}}]}}).encode()
+    real_open, real_sleep = au.urllib.request.urlopen, au.time.sleep
+    au.urllib.request.urlopen = lambda r, timeout=None: (seen.append(r), _Resp())[1]
+    au.time.sleep = lambda s: None
+    try:
+        au.stop_pod("p", "k", False); au.terminate_pod("p", "k", False)
+        stock = au.gpu_stock("p", "k")
+    finally:
+        au.urllib.request.urlopen, au.time.sleep = real_open, real_sleep
+    rp = [r for r in seen if "runpod.io" in r.full_url]
+    check(len(rp) >= 4 and all("Mozilla" in (r.get_header("User-agent") or "") for r in rp),
+          "EVERY RunPod call from the watchdog (stop, terminate, REST + GraphQL stock) sends a browser UA")
+    check(stock == "Low", "gpu_stock reads the pod's GPU type and its stock through _runpod")
+
+    def _fail(*a, **k):
+        raise au.urllib.error.HTTPError("u", 403, "Forbidden", {}, io.BytesIO(b"1010"))
+    au.urllib.request.urlopen, au.time.sleep = _fail, (lambda s: None)
+    try:
+        check(au.terminate_pod("p", "k", False) is False,
+              "a failed terminate returns False (it used to be swallowed)")
+    finally:
+        au.urllib.request.urlopen, au.time.sleep = real_open, real_sleep
+
+    tries = []
+
+    def _retire(*a, **k):
+        tries.append(1)
+        if len(tries) > 6:
+            raise RuntimeError("runaway")
+        return len(tries) >= 3                       # fail twice, then succeed
+    saved = (au.retire_pod, au.comfy_busy, au.lock_held, au.time.sleep, sys.argv[:])
+    au.retire_pod, au.comfy_busy = _retire, (lambda *a, **k: False)
+    au.lock_held, au.time.sleep = (lambda *a, **k: (False, None)), (lambda s: None)
+    os.environ["RUNPOD_API_KEY"] = os.environ.get("RUNPOD_API_KEY") or "test-key"
+    sys.argv = ["autostop.py", "--pod-id", "p", "--idle-min", "0", "--poll-sec", "0"]
+    try:
+        au.main()
+    except (RuntimeError, SystemExit):
+        pass
+    finally:
+        au.retire_pod, au.comfy_busy, au.lock_held, au.time.sleep, sys.argv = saved
+        if env is None:
+            os.environ.pop("RUNPOD_API_KEY", None)
+    check(len(tries) == 3, "watchdog RETRIES a failed retire every poll instead of exiting "
+          "(it exited after one failure and left the pod billing)")
+
+    # Flat outputs: the harness writes files straight into the root.
+    froot = tempfile.mkdtemp(); fsd = os.path.join(froot, "sd"); os.makedirs(fsd)
+    fout = os.path.join(froot, "out"); os.makedirs(fout)
+    open(os.path.join(fout, "a.png"), "w").close()
+    real_sd = au.SYNCED_D
+    try:
+        au.SYNCED_D = fsd
+        check(au.unsynced_dirs([fout]) == [fout],
+              "files directly in --outputs-root are checked (a flat dir used to read as synced)")
+        open(os.path.join(fsd, au._slug(fout)), "w").close()
+        check(au.unsynced_dirs([fout + "/"]) == [], "a fresh sentinel for the flat root clears it")
+    finally:
+        au.SYNCED_D = real_sd
+
+    # The sync loop and the watchdog must derive the SAME sentinel name: run the script's
+    # own lines through bash and compare with _slug().
+    sy_lines = [l for l in io.open(P("sync-outputs.sh"), encoding="utf-8").read().splitlines()
+                if l.startswith(("REMOTE=\"${REMOTE%/}\"", "SLUG="))]
+    try:
+        import subprocess
+        got = subprocess.run(["bash", "-c", "REMOTE=/workspace/out/\n" + "\n".join(sy_lines)
+                              + "\nprintf '%s' \"$SLUG\""], capture_output=True, text=True,
+                             timeout=30).stdout
+    except Exception as e:
+        got = str(e)
+    check(len(sy_lines) == 2 and got == au._slug("/workspace/out"),
+          "sync-outputs.sh and autostop agree on the sentinel name (%r vs %r)"
+          % (got, au._slug("/workspace/out")))
+
     # --- LESSON (2026-07-27): the sync sentinel was GLOBAL, so
     # any running loop asserted that ALL outputs were safe. The terminate-rather-than-
     # strand branch trusts that signal, so it could have destroyed a pod still holding
@@ -425,13 +508,31 @@ def main():
           "check-gpu-load.sh exists (detects partially-loaded per-GPU instances)")
     if os.path.exists(gpuload_p):
         gl = io.open(gpuload_p, encoding="utf-8").read()
-        check("loaded partially" in gl,
-              "check-gpu-load.sh matches the ONLY signal of a degraded instance")
-        # A missing signal must not read as a pass — the model may simply not be loaded yet.
-        check("NO LOAD LINES FOUND" in gl and gl.count("exit 1") >= 2,
-              "check-gpu-load.sh fails (not passes) when no load line is present yet")
         check("nvidia-smi" in gl,
               "check-gpu-load.sh tells you how to confirm no process still holds VRAM")
+        # LESSON (2026-10-23, live 2xA40 on ComfyUI 0.42.0): ComfyUI stopped printing
+        # "loaded completely/partially", so the old check could never pass and blamed CPU
+        # streaming that was not happening. Speed parity is the signal now; run the real
+        # script over canned "<log>|<loadline>|<rate>" input.
+        import subprocess
+
+        def gpuload(lines):
+            f = os.path.join(tempfile.mkdtemp(), "in.txt")
+            io.open(f, "w", newline="\n").write("\n".join(lines) + "\n")
+            env = dict(os.environ, CHECK_GPU_LOAD_INPUT=f.replace("\\", "/"))
+            try:
+                return subprocess.run(["bash", gpuload_p.replace("\\", "/"), "-", "-"], env=env,
+                                      capture_output=True, text=True, timeout=30).returncode
+            except Exception:
+                return None
+        check(gpuload(["g0||1.18it/s", "g1||1.25it/s"]) == 0,
+              "matched speeds on new-style logs (no 'loaded completely' line) PASS")
+        check(gpuload(["g0||23.8s/it", "g1||7.8s/it"]) == 1,
+              "the 2026-07-26 incident (23.8 vs 7.8 s/it) is flagged SLOW")
+        check(gpuload(["g0||7.8s/it", "g1|loaded partially; 11781 MB offloaded|8.0s/it"]) == 1,
+              "an old-style 'loaded partially' line still fails")
+        check(gpuload(["g0||", "g1||1.2it/s"]) == 1,
+              "an instance with no sampling rate yet is NOT a pass")
     check("loaded partially" in readme,
           "docs warns that a VRAM squatter silently halves throughput")
 
@@ -506,8 +607,8 @@ def main():
     m_req = re.search(r"def req\(.*?\n(?=def )", ctl, re.S)
     check(m_req is not None and "User-Agent" in m_req.group(0),
           "pod_ctl REST req() sends a browser User-Agent (Cloudflare 1010s urllib's default)")
-    check("LACKS TOOLS YOU ASSUME" in readme,
-          "docs warns curl/tmux/ffmpeg are absent from the pod image")
+    check("LACK TOOLS YOU ASSUME" in readme,
+          "docs warns curl/tmux/ffmpeg may be absent from the pod image")
     check("SSH Public Keys" in readme,
           "docs records SSH keys are injected at boot from ACCOUNT settings")
     check("host-lottery" in readme,
@@ -586,6 +687,88 @@ def main():
     hsrc = io.open(os.path.join(ex, "batch_harness.py"), encoding="utf-8").read()
     check(all(f in hsrc for f in ('"--comfy"', '"--shard"', '"--of"')),
           "harness accepts the --comfy/--shard/--of contract launch-sharded.sh passes")
+
+    # --- CATALOGUE: model lists rot fastest, so the catalogue is data with checks, not prose.
+    ct = load("catalog", os.path.join(ROOT, "remote_comfy", "catalog.py"))
+    good = {"checked_on": "2026-10-01", "workflows": [{"name": "w", "url": "https://x"}],
+            "models": [{"id": "m1", "name": "M1", "task": "t2i", "hf_repo": "org/m1",
+                        "license": "apache-2.0", "comfy_support": "native", "pick_when": "p",
+                        "files": [{"repo": "org/m1", "path": "split_files/vae/a.safetensors",
+                                   "comfy_dir": "vae", "size_gb": 1.0}]}]}
+    import datetime as _dt
+    today = _dt.date(2026, 10, 23)
+    check(ct.validate(good, today) == [], "catalogue validator accepts a well-formed entry")
+    import copy as _cp
+    def bad(mut):
+        c = _cp.deepcopy(good); mut(c); return ct.validate(c, today)
+    check(bad(lambda c: c["models"][0].update(task="video")) != [], "validator rejects an unknown task")
+    check(bad(lambda c: c["models"].append(dict(c["models"][0]))) != [], "validator rejects duplicate ids")
+    check(bad(lambda c: c["models"][0]["files"][0].update(comfy_dir="../../etc")) != [],
+          "validator rejects a file destination that escapes models/")
+    check(bad(lambda c: c["models"][0].update(comfy_support="custom-node")) != [],
+          "custom-node support must name its node repo")
+    check(bad(lambda c: c.update(checked_on="2026-05-01")) != [],
+          "a catalogue older than %d days fails validation (it has rotted)" % ct.STALE_DAYS)
+    fake = {"org/m1": {"siblings": [{"rfilename": "split_files/vae/a.safetensors"}]}}
+    check(ct.verify(good, fetch=fake.get) == [], "verify passes when repo and file resolve")
+    moved = {"org/m1": {"siblings": [{"rfilename": "vae/a.safetensors"}]}}
+    check(any("moved" in p for p in ct.verify(good, fetch=moved.get)),
+          "verify catches a file that moved between repo root and split_files/")
+    check(any("not found" in p for p in ct.verify(good, fetch={}.get)), "verify catches a vanished repo")
+    check(ct.dl_lines(good, ["m1"]) == ["org/m1 split_files/vae/a.safetensors models/vae"],
+          "--dl emits the '<repo> <path> <dest>' lines provision reads")
+    # --dl selection: exclusion keeps shared files. A keep-filter ("--only int8") dropped
+    # FLUX 3's VAE because its filename carries no precision tag (2026-10-23).
+    multi = _cp.deepcopy(good)
+    multi["models"][0]["files"] = [
+        {"repo": "o/m", "path": "dm/m-int8.st", "comfy_dir": "diffusion_models"},
+        {"repo": "o/m", "path": "dm/m-bf16.st", "comfy_dir": "diffusion_models"},
+        {"repo": "o/m", "path": "vae/ae.st", "comfy_dir": "vae"}]
+    got = ct.dl_lines(multi, ["m1"], skip=["bf16"])
+    check(len(got) == 2 and any("vae/ae.st" in g for g in got) and not any("bf16" in g for g in got),
+          "--dl --skip drops the unwanted precision but keeps shared files like the VAE")
+    node = _cp.deepcopy(good)
+    node["models"][0].update(comfy_support="custom-node", custom_node_repo="https://github.com/x/y",
+                             files=[{"repo": "o/m", "path": "w.pt", "comfy_dir": None}])
+    check(ct.validate(node, today) == [], "custom-node entries may list node-fetched files (comfy_dir null)")
+    try:
+        ct.dl_lines(node, ["m1"]); refused = False
+    except KeyError:
+        refused = True
+    check(refused, "--dl refuses weights a custom node fetches itself (nowhere correct to put them)")
+    nohf = _cp.deepcopy(good); del nohf["models"][0]["hf_repo"]
+    check(ct.validate(nohf, today) != [], "an entry needs hf_repo or comfy_repo")
+    nohf["models"][0]["comfy_repo"] = "Comfy-Org/x"
+    check(ct.validate(nohf, today) == [], "a Comfy-only repackage (no upstream HF repo) is valid")
+
+    # The real catalogue ships valid, and its rendered doc matches it (docs cannot drift).
+    real = ct.load()
+    errs = ct.validate(real)
+    check(not errs, "catalog/catalog.json validates %s" % (errs[:3] or ""))
+    check(set(ct.TASKS) <= {m["task"] for m in real["models"]},
+          "catalogue covers every core task")
+    md = io.open(os.path.join(ROOT, "docs", "models.md"), encoding="utf-8").read()
+    check(md == ct.markdown(real),
+          "docs/models.md is regenerated from the JSON (run catalog.py --write-docs)")
+    # provision reads the catalogue's extra-models.txt, and a download that reads stdin must
+    # not swallow the rest of the list (the dl stub below deliberately drains stdin).
+    blk = prov[prov.find("EXTRA=/workspace/extra-models.txt"):prov.find('rm -rf "$STAGE"')]
+    check("while read -r repo path dest" in blk and "</dev/null" in blk,
+          "provision installs catalogue extras, with dl's stdin detached")
+    if blk:
+        import subprocess
+        tx = tempfile.mkdtemp()
+        lst = os.path.join(tx, "x.txt")
+        io.open(lst, "w", newline="\n").write("# comment\norg/a p/a.st models/vae\n\norg/b b.st models/loras\n")
+        script = ('dl(){ cat >/dev/null; echo "DL $1 $2 $3"; }\n'
+                  + blk.replace("/workspace/extra-models.txt", lst.replace("\\", "/")))
+        try:
+            r = subprocess.run(["bash", "-c", script], capture_output=True, text=True, timeout=30)
+            got = r.stdout.split("\n")
+        except Exception as e:
+            got = [str(e)]
+        check([g for g in got if g] == ["DL org/a p/a.st models/vae", "DL org/b b.st models/loras"],
+              "provision extras loop downloads every line even when dl reads stdin")
 
     # --- Console output must be ASCII: a Windows console (cp1252) printed the em dash in
     # pod_ctl's missing-key message as a garbage glyph (2026-10-23, fresh-clone test).

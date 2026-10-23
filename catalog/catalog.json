@@ -1,0 +1,2278 @@
+{
+ "checked_on": "2026-10-23",
+ "about": "Curated current open-weight models by task. Edit this file, then run catalog.py --validate, --verify, and --write-docs. vram_gb values are estimates from file sizes, not measurements.",
+ "models": [
+  {
+   "id": "flux3-klein",
+   "name": "FLUX 3 Image Klein (base + distilled)",
+   "task": "t2i",
+   "released": "2026-10",
+   "hf_repo": "black-forest-labs/flux-3-image-klein",
+   "comfy_repo": "black-forest-labs/flux-3-image-klein-comfy",
+   "files": [
+    {
+     "repo": "black-forest-labs/flux-3-image-klein-comfy",
+     "path": "diffusion_models/flux3-image-klein-int8-convrot.safetensors",
+     "size_gb": 5.83,
+     "comfy_dir": "diffusion_models"
+    },
+    {
+     "repo": "black-forest-labs/flux-3-image-klein-comfy",
+     "path": "diffusion_models/flux3-image-klein-bf16.safetensors",
+     "size_gb": 11.1,
+     "comfy_dir": "diffusion_models"
+    },
+    {
+     "repo": "black-forest-labs/flux-3-image-klein-comfy",
+     "path": "diffusion_models/flux3-image-klein-base-int8-convrot.safetensors",
+     "size_gb": 5.81,
+     "comfy_dir": "diffusion_models"
+    },
+    {
+     "repo": "black-forest-labs/flux-3-image-klein-comfy",
+     "path": "text_encoders/qwen3vl_4b_int8_convrot.safetensors",
+     "size_gb": 4.86,
+     "comfy_dir": "text_encoders"
+    },
+    {
+     "repo": "black-forest-labs/flux-3-image-klein-comfy",
+     "path": "text_encoders/qwen3.5_9b_flux3_prompt_upsampler_w4a8.safetensors",
+     "size_gb": 6.72,
+     "comfy_dir": "text_encoders"
+    },
+    {
+     "repo": "black-forest-labs/flux-3-image-klein-comfy",
+     "path": "vae/flux2-vae.safetensors",
+     "size_gb": 0.34,
+     "comfy_dir": "vae"
+    }
+   ],
+   "license": "FLUX Kommunity License v1.0 (flux-kommunity-license)",
+   "commercial_ok": "conditional",
+   "comfy_support": "native",
+   "custom_node_repo": null,
+   "vram_gb": 16,
+   "min_arch": "int8_convrot: loads on any recent NVIDIA GPU; fast INT8 path reportedly needs sm>=7.5 (Turing+) - secondary sources only",
+   "turbo": "distilled checkpoint in same comfy repo (flux3-image-klein-*.safetensors, 4-16 steps, cfg 1); base needs ~50 steps",
+   "workflow_url": "https://github.com/Comfy-Org/workflow_templates/blob/main/templates/image_flux3_klein_distilled_t2i.json",
+   "pick_when": "Top open-weights T2I on Artificial Analysis (Elo 1043, 2026-10) and #3 for editing; same weights do multi-ref edit. Not if revenue >= $5M or you need clean commercial terms.",
+   "notes": "Commercial terms: conditional: outputs may be used commercially only by a \"Qualifying User\" (affiliated gross annualized revenue < US$5M) with content filtering + AI disclosure; otherwise non-commercial Comfy repo is gated (auto-approve): harness needs an HF token that has accepted the licence. Needs ComfyUI >= 0.41.0 per docs. Docs: https://docs.comfy.org/tutorials/flux/flux-3-klein . VRAM is an estimate from file sizes (int8 DiT 5.8GB + TE 4.9GB + optional 6.7GB upsampler); docs say switch to bf16 with >24GB. Param count not stated in docs."
+  },
+  {
+   "id": "qwen-image-2.1",
+   "name": "Qwen-Image 2.1 (+Turbo)",
+   "task": "t2i",
+   "released": "2026-09",
+   "hf_repo": "Qwen/Qwen-Image-2.1",
+   "comfy_repo": "Comfy-Org/Qwen-Image-2.1",
+   "files": [
+    {
+     "repo": "Comfy-Org/Qwen-Image-2.1",
+     "path": "diffusion_models/qwen_image_2.1_int8_convrot.safetensors",
+     "size_gb": 7.26,
+     "comfy_dir": "diffusion_models"
+    },
+    {
+     "repo": "Comfy-Org/Qwen-Image-2.1",
+     "path": "diffusion_models/qwen_image_2.1_turbo_int8_convrot.safetensors",
+     "size_gb": 7.26,
+     "comfy_dir": "diffusion_models"
+    },
+    {
+     "repo": "Comfy-Org/Qwen-Image-2.1",
+     "path": "text_encoders/qwen3vl_8b_int8_convrot.safetensors",
+     "size_gb": 9.35,
+     "comfy_dir": "text_encoders"
+    },
+    {
+     "repo": "Comfy-Org/Qwen-Image-2.1",
+     "path": "text_encoders/qwen3.5_9b_qwen_image_2.1_pe_t2i.int8_convrot.safetensors",
+     "size_gb": 9.47,
+     "comfy_dir": "text_encoders"
+    },
+    {
+     "repo": "Comfy-Org/Qwen-Image-2.1",
+     "path": "vae/qwen_image_2.1_vae_bf16.safetensors",
+     "size_gb": 0.68,
+     "comfy_dir": "vae"
+    }
+   ],
+   "license": "Qwen Research License (qwen-research)",
+   "commercial_ok": false,
+   "comfy_support": "native",
+   "custom_node_repo": null,
+   "vram_gb": 20,
+   "min_arch": "int8_convrot: loads on any recent NVIDIA GPU; fast INT8 path reportedly needs sm>=7.5 (Turing+) - secondary sources only",
+   "turbo": "Turbo checkpoint (qwen_image_2.1_turbo_*, 8 steps vs 25) and loras/qwen_image_2.1_turbo_lora_avg_rank_178_bf16.safetensors in Comfy-Org/Qwen-Image-2.1",
+   "workflow_url": "https://github.com/Comfy-Org/workflow_templates/blob/main/templates/image_qwen_image_2_1_turbo_t2i.json",
+   "pick_when": "Best text rendering / 2K native / RGBA output; #2 open T2I and #2 open edit on AA. Not for any commercial job: licence is research-only (unlike Apache-2.0 Qwen-Image-2512).",
+   "notes": "Docs: https://docs.comfy.org/tutorials/image/qwen/qwen-image-2-1 . Same weights handle edit with up to 16 reference slots. Template index lists ~27GB total download for int8 t2i. VRAM estimated."
+  },
+  {
+   "id": "krea-2-turbo",
+   "name": "Krea 2 (Turbo / Raw)",
+   "task": "t2i",
+   "released": "2026-06",
+   "hf_repo": "krea/Krea-2-Turbo",
+   "comfy_repo": "Comfy-Org/Krea-2",
+   "files": [
+    {
+     "repo": "Comfy-Org/Krea-2",
+     "path": "diffusion_models/krea2_turbo_fp8_scaled.safetensors",
+     "size_gb": 13.14,
+     "comfy_dir": "diffusion_models"
+    },
+    {
+     "repo": "Comfy-Org/Krea-2",
+     "path": "diffusion_models/krea2_turbo_int8_convrot.safetensors",
+     "size_gb": 13.49,
+     "comfy_dir": "diffusion_models"
+    },
+    {
+     "repo": "Comfy-Org/Krea-2",
+     "path": "text_encoders/qwen3vl_4b_fp8_scaled.safetensors",
+     "size_gb": 5.24,
+     "comfy_dir": "text_encoders"
+    },
+    {
+     "repo": "Comfy-Org/Krea-2",
+     "path": "vae/qwen_image_vae.safetensors",
+     "size_gb": 0.25,
+     "comfy_dir": "vae"
+    }
+   ],
+   "license": "Krea 2 Community License",
+   "commercial_ok": "conditional",
+   "comfy_support": "native",
+   "custom_node_repo": null,
+   "vram_gb": 20,
+   "min_arch": "fp8 matmul needs cc>=8.9 (Ada/Hopper/Blackwell); on Ampere fp8 weights load but run via dequant (slower); int8 file for Ampere",
+   "turbo": "Turbo checkpoint + loras/krea2_turbo_lora_rank_64_bf16.safetensors; also nvfp4/mxfp8 Turbo builds",
+   "workflow_url": "https://github.com/Comfy-Org/workflow_templates/blob/main/templates/image_krea2_turbo_t2i.json",
+   "pick_when": "Aesthetic/photographic look with style LoRAs and a 1-2 image style-reference workflow. Not if revenue > $1M.",
+   "notes": "Commercial terms: conditional: company-wide revenue < US$1M (per krea.ai licence page; a 50-seat condition reported by secondary sources is unverified) Upstream krea/Krea-2-Turbo is gated (auto). Docs: https://docs.comfy.org/tutorials/image/krea/krea-2 . Not on AA open leaderboard snapshot fetched 2026-10-23."
+  },
+  {
+   "id": "z-image-turbo",
+   "name": "Z-Image Turbo (6B)",
+   "task": "t2i",
+   "released": "2025-11",
+   "hf_repo": "Tongyi-MAI/Z-Image-Turbo",
+   "comfy_repo": "Comfy-Org/Z-Image-Turbo",
+   "files": [
+    {
+     "repo": "Comfy-Org/Z-Image-Turbo",
+     "path": "split_files/diffusion_models/z_image_turbo_bf16.safetensors",
+     "size_gb": 12.31,
+     "comfy_dir": "diffusion_models"
+    },
+    {
+     "repo": "Comfy-Org/Z-Image-Turbo",
+     "path": "split_files/diffusion_models/z_image_turbo_int8_convrot.safetensors",
+     "size_gb": 6.2,
+     "comfy_dir": "diffusion_models"
+    },
+    {
+     "repo": "Comfy-Org/Z-Image-Turbo",
+     "path": "split_files/text_encoders/qwen_3_4b.safetensors",
+     "size_gb": 8.04,
+     "comfy_dir": "text_encoders"
+    },
+    {
+     "repo": "Comfy-Org/Z-Image-Turbo",
+     "path": "split_files/vae/ae.safetensors",
+     "size_gb": 0.34,
+     "comfy_dir": "vae"
+    }
+   ],
+   "license": "apache-2.0",
+   "commercial_ok": true,
+   "comfy_support": "native",
+   "custom_node_repo": null,
+   "vram_gb": 16,
+   "min_arch": "bf16: any CUDA GPU; int8_convrot: loads on any recent NVIDIA GPU; fast INT8 path reportedly needs sm>=7.5 (Turing+) - secondary sources only",
+   "turbo": "is the distilled model (8 steps); base Z-Image in Comfy-Org/Z-Image for fine-tuning",
+   "workflow_url": "https://github.com/Comfy-Org/workflow_templates/blob/main/templates/image_z_image_turbo.json",
+   "pick_when": "Cheapest high-volume photoreal batches with a clean Apache licence; huge LoRA ecosystem. Not when you need top prompt adherence/text (AA Elo 936 vs ~1040 for leaders).",
+   "notes": "Docs: https://docs.comfy.org/tutorials/image/z-image/z-image-turbo"
+  },
+  {
+   "id": "moss-image",
+   "name": "MOSS-Image (SFT / Base)",
+   "task": "t2i",
+   "released": "2026-10",
+   "hf_repo": "OpenMOSS-Team/MOSS-Image-SFT",
+   "comfy_repo": "Comfy-Org/MOSS-Image",
+   "files": [
+    {
+     "repo": "Comfy-Org/MOSS-Image",
+     "path": "diffusion_models/moss_image_sft_int8_convrot.safetensors",
+     "size_gb": 5.41,
+     "comfy_dir": "diffusion_models"
+    },
+    {
+     "repo": "Comfy-Org/MOSS-Image",
+     "path": "diffusion_models/moss_image_sft_bf16.safetensors",
+     "size_gb": 10.16,
+     "comfy_dir": "diffusion_models"
+    },
+    {
+     "repo": "Comfy-Org/MOSS-Image",
+     "path": "text_encoders/qwen3.5_9b_w4a8_gptq.safetensors",
+     "size_gb": 7.34,
+     "comfy_dir": "text_encoders"
+    },
+    {
+     "repo": "Comfy-Org/MOSS-Image",
+     "path": "vae/flux2-vae_small.safetensors",
+     "size_gb": 0.25,
+     "comfy_dir": "vae"
+    }
+   ],
+   "license": "apache-2.0",
+   "commercial_ok": true,
+   "comfy_support": "native",
+   "custom_node_repo": null,
+   "vram_gb": 16,
+   "min_arch": "int8_convrot: loads on any recent NVIDIA GPU; fast INT8 path reportedly needs sm>=7.5 (Turing+) - secondary sources only",
+   "turbo": "community DMD distills: lodestones/MOSS-Image-SFT-8-steps-dmd (not verified for ComfyUI loading)",
+   "workflow_url": "https://github.com/Comfy-Org/workflow_templates/blob/main/templates/image_moss_image_t2i.json",
+   "pick_when": "Newest Apache-2.0 T2I with bounding-box layout control (image_moss_image_t2i_bboxes). Not yet ranked on public arenas - test before committing.",
+   "notes": "Released ~1 week ago; quality vs FLUX3/Qwen 2.1 unverified. Docs: https://docs.comfy.org/tutorials/image/moss-image/moss-image"
+  },
+  {
+   "id": "fibo-2.0-edit",
+   "name": "Bria Fibo 2.0 (Dev + Edit Turbo, 8B)",
+   "task": "image-edit",
+   "released": "2026-10",
+   "hf_repo": "briaai/Fibo-2.0-dev",
+   "comfy_repo": "Comfy-Org/Fibo-2.0",
+   "files": [
+    {
+     "repo": "Comfy-Org/Fibo-2.0",
+     "path": "diffusion_models/fibo2_edit_turbo_int8_convrot.safetensors",
+     "size_gb": 8.41,
+     "comfy_dir": "diffusion_models"
+    },
+    {
+     "repo": "Comfy-Org/Fibo-2.0",
+     "path": "diffusion_models/fibo2_dev_int8_convrot.safetensors",
+     "size_gb": 8.41,
+     "comfy_dir": "diffusion_models"
+    },
+    {
+     "repo": "Comfy-Org/Fibo-2.0",
+     "path": "loras/fibo_2.0_turbo_lora_avg_rank_270_bf16.safetensors",
+     "size_gb": 1.99,
+     "comfy_dir": "loras"
+    },
+    {
+     "repo": "Comfy-Org/Fibo-2.0",
+     "path": "text_encoders/qwen3vl_4b_int8_convrot.safetensors",
+     "size_gb": 4.86,
+     "comfy_dir": "text_encoders"
+    },
+    {
+     "repo": "Comfy-Org/Fibo-2.0",
+     "path": "vae/flux2-vae.safetensors",
+     "size_gb": 0.34,
+     "comfy_dir": "vae"
+    }
+   ],
+   "license": "bria-fibo (upstream) / tagged cc-by-nc-4.0 on Comfy-Org repo",
+   "commercial_ok": false,
+   "comfy_support": "native",
+   "custom_node_repo": null,
+   "vram_gb": 16,
+   "min_arch": "int8_convrot: loads on any recent NVIDIA GPU; fast INT8 path reportedly needs sm>=7.5 (Turing+) - secondary sources only",
+   "turbo": "fibo2_edit_turbo checkpoint + loras/fibo_2.0_turbo_lora_avg_rank_270_bf16.safetensors",
+   "workflow_url": null,
+   "pick_when": "#1 open-weights image editing on AA (Elo 1088) and #3 T2I; JSON structured prompts; trained on licensed data. Not for commercial use without a Bria agreement.",
+   "notes": "Released 2026-10-20; ComfyUI core has nodes_fibo2 but no Fibo template was in workflow_templates as of 2026-10-23 (workflow_url null). Upstream gated (auto)."
+  },
+  {
+   "id": "qwen-image-2.1-edit",
+   "name": "Qwen-Image 2.1 (edit mode, up to 16 refs)",
+   "task": "image-edit",
+   "released": "2026-09",
+   "hf_repo": "Qwen/Qwen-Image-2.1",
+   "comfy_repo": "Comfy-Org/Qwen-Image-2.1",
+   "files": [
+    {
+     "repo": "Comfy-Org/Qwen-Image-2.1",
+     "path": "diffusion_models/qwen_image_2.1_turbo_int8_convrot.safetensors",
+     "size_gb": 7.26,
+     "comfy_dir": "diffusion_models"
+    },
+    {
+     "repo": "Comfy-Org/Qwen-Image-2.1",
+     "path": "text_encoders/qwen3vl_8b_int8_convrot.safetensors",
+     "size_gb": 9.35,
+     "comfy_dir": "text_encoders"
+    },
+    {
+     "repo": "Comfy-Org/Qwen-Image-2.1",
+     "path": "text_encoders/qwen3.5_9b_qwen_image_2.1_pe_i2i.int8_convrot.safetensors",
+     "size_gb": 9.47,
+     "comfy_dir": "text_encoders"
+    },
+    {
+     "repo": "Comfy-Org/Qwen-Image-2.1",
+     "path": "model_patches/qwen_image_2.1_fun_controlnet_union_int8_convrot.safetensors",
+     "size_gb": 3.78,
+     "comfy_dir": "model_patches"
+    },
+    {
+     "repo": "Comfy-Org/Qwen-Image-2.1",
+     "path": "vae/qwen_image_2.1_vae_bf16.safetensors",
+     "size_gb": 0.68,
+     "comfy_dir": "vae"
+    }
+   ],
+   "license": "Qwen Research License (qwen-research)",
+   "commercial_ok": false,
+   "comfy_support": "native",
+   "custom_node_repo": null,
+   "vram_gb": 20,
+   "min_arch": "int8_convrot: loads on any recent NVIDIA GPU; fast INT8 path reportedly needs sm>=7.5 (Turing+) - secondary sources only",
+   "turbo": "Turbo checkpoint (8 steps)",
+   "workflow_url": "https://github.com/Comfy-Org/workflow_templates/blob/main/templates/image_qwen_image_2_1_turbo_image_edit.json",
+   "pick_when": "Multi-reference compositing (10 wired, 16 max), RGBA edits, background removal template. Research-only licence.",
+   "notes": "Same weights as qwen-image-2.1 entry. Also image_qwen_image_2_1_background_removal template."
+  },
+  {
+   "id": "qwen-image-edit-2511",
+   "name": "Qwen-Image-Edit 2511",
+   "task": "image-edit",
+   "released": "2025-12",
+   "hf_repo": "Qwen/Qwen-Image-Edit-2511",
+   "comfy_repo": "Comfy-Org/Qwen-Image-Edit",
+   "files": [
+    {
+     "repo": "Comfy-Org/Qwen-Image-Edit",
+     "path": "split_files/diffusion_models/qwen_image_edit_2511_fp8mixed.safetensors",
+     "size_gb": 20.53,
+     "comfy_dir": "diffusion_models"
+    },
+    {
+     "repo": "Comfy-Org/Qwen-Image-Edit",
+     "path": "split_files/diffusion_models/qwen_image_edit_2511_int8_convrot.safetensors",
+     "size_gb": 20.5,
+     "comfy_dir": "diffusion_models"
+    },
+    {
+     "repo": "Comfy-Org/Qwen-Image",
+     "path": "split_files/text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors",
+     "size_gb": 9.38,
+     "comfy_dir": "text_encoders"
+    },
+    {
+     "repo": "Comfy-Org/Qwen-Image",
+     "path": "split_files/vae/qwen_image_vae.safetensors",
+     "size_gb": 0.25,
+     "comfy_dir": "vae"
+    },
+    {
+     "repo": "lightx2v/Qwen-Image-Edit-2511-Lightning",
+     "path": "Qwen-Image-Edit-2511-Lightning-4steps-V1.0-bf16.safetensors",
+     "size_gb": 0.85,
+     "comfy_dir": "loras"
+    }
+   ],
+   "license": "apache-2.0",
+   "commercial_ok": true,
+   "comfy_support": "native",
+   "custom_node_repo": null,
+   "vram_gb": 24,
+   "min_arch": "fp8 matmul needs cc>=8.9 (Ada/Hopper/Blackwell); on Ampere fp8 weights load but run via dequant (slower); int8 file for Ampere",
+   "turbo": "lightx2v/Qwen-Image-Edit-2511-Lightning (4-step LoRA)",
+   "workflow_url": "https://github.com/Comfy-Org/workflow_templates/blob/main/templates/image_qwen_image_edit_2511_int8.json",
+   "pick_when": "Best commercially clean (Apache) editor with a big LoRA ecosystem (multi-angle, relight, fusion). Lower quality than Fibo 2.0/Qwen 2.1 (AA Elo 991).",
+   "notes": "20B MMDiT. Docs: https://docs.comfy.org/tutorials/image/qwen/qwen-image-edit-2511"
+  },
+  {
+   "id": "flux2-klein-4b",
+   "name": "FLUX.2 [klein] 4B (distilled + base)",
+   "task": "image-edit",
+   "released": "2026-01",
+   "hf_repo": "black-forest-labs/FLUX.2-klein-4B",
+   "comfy_repo": "Comfy-Org/Flux-2-Klein-4B",
+   "files": [
+    {
+     "repo": "Comfy-Org/Flux-2-Klein-4B",
+     "path": "split_files/diffusion_models/flux-2-klein-4b.safetensors",
+     "size_gb": 7.75,
+     "comfy_dir": "diffusion_models"
+    },
+    {
+     "repo": "Comfy-Org/Flux-2-Klein-4B",
+     "path": "split_files/text_encoders/qwen_3_4b.safetensors",
+     "size_gb": 8.04,
+     "comfy_dir": "text_encoders"
+    },
+    {
+     "repo": "Comfy-Org/Flux-2-Klein-4B",
+     "path": "split_files/vae/flux2-vae.safetensors",
+     "size_gb": 0.34,
+     "comfy_dir": "vae"
+    }
+   ],
+   "license": "apache-2.0",
+   "commercial_ok": true,
+   "comfy_support": "native",
+   "custom_node_repo": null,
+   "vram_gb": 12,
+   "min_arch": "any CUDA GPU (bf16)",
+   "turbo": "flux-2-klein-4b is the distilled variant; flux-2-klein-base-4b for full-step/fine-tune",
+   "workflow_url": "https://github.com/Comfy-Org/workflow_templates/blob/main/templates/image_flux2_klein_image_edit_4b_distilled.json",
+   "pick_when": "Fast, small, Apache-licensed multi-reference edit + T2I in one model. Quality well below FLUX 3 Klein (AA edit Elo 938).",
+   "notes": "The 9B klein is non-commercial (flux-non-commercial-license) and its diffusion weights are not in Comfy-Org/Flux-2-Klein-9B (only text encoders/vae there)."
+  },
+  {
+   "id": "minimax-h3",
+   "name": "MiniMax H3 (T2V / I2V / R2V with native stereo audio)",
+   "task": "t2v",
+   "released": "2026-08",
+   "hf_repo": "MiniMaxAI/MiniMax-H3",
+   "comfy_repo": "Comfy-Org/MiniMax-H3",
+   "files": [
+    {
+     "repo": "Comfy-Org/MiniMax-H3",
+     "path": "diffusion_models/minimax_h3_fl2va_pruned_int8_convrot.safetensors",
+     "size_gb": 20.97,
+     "comfy_dir": "diffusion_models"
+    },
+    {
+     "repo": "Comfy-Org/MiniMax-H3",
+     "path": "diffusion_models/minimax_h3_fl2va_pruned_fp8_scaled.safetensors",
+     "size_gb": 20.96,
+     "comfy_dir": "diffusion_models"
+    },
+    {
+     "repo": "Comfy-Org/MiniMax-H3",
+     "path": "text_encoders/qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors",
+     "size_gb": 15.69,
+     "comfy_dir": "text_encoders"
+    },
+    {
+     "repo": "Comfy-Org/MiniMax-H3",
+     "path": "vae/minimax_h3_video_vae_int8_convrot.safetensors",
+     "size_gb": 2.81,
+     "comfy_dir": "vae"
+    },
+    {
+     "repo": "Comfy-Org/MiniMax-H3",
+     "path": "vae/minimax_h3_audio_vae_fp32.safetensors",
+     "size_gb": 0.61,
+     "comfy_dir": "vae"
+    },
+    {
+     "repo": "Comfy-Org/MiniMax-H3",
+     "path": "loras/minimax_h3_fl2v_turbo_8step_v1.0_comfyui_bf16.safetensors",
+     "size_gb": 1.96,
+     "comfy_dir": "loras"
+    }
+   ],
+   "license": "MiniMax H3 Community License Agreement (other)",
+   "commercial_ok": "conditional",
+   "comfy_support": "native",
+   "custom_node_repo": null,
+   "vram_gb": 48,
+   "min_arch": "int8_convrot: loads on any recent NVIDIA GPU; fast INT8 path reportedly needs sm>=7.5 (Turing+) - secondary sources only; nvfp4/mxfp8 are Blackwell (sm100/sm120) formats; older GPUs dequantize (memory saving, no speedup) (text encoder ships nvfp4_awq)",
+   "turbo": "lightx2v/Minimax-h3-Turbo (4/8-step LoRAs, v1.3 latest; copies in Comfy-Org loras/); FastVideo/FastVideo-FastH3-Comfy (8-step distilled DiT); FastVideo/FastH3-OmniRef-Comfy (R2V)",
+   "workflow_url": "https://github.com/Comfy-Org/workflow_templates/blob/main/templates/video_minimax_h3_t2v.json",
+   "pick_when": "Clearly the strongest open-weights video model (AA T2V Elo 1158, I2V 1140 - only model near closed frontier); audio+video, multi-reference R2V, continuation, ControlNet-union. Do NOT use if the operator, the RunPod region or the output audience is in the US/EU/UK/KR.",
+   "notes": "Commercial terms: conditional: ONLY outside the Excluded Territories (EU, UK, South Korea, USA) - use or outputs inside them are not licensed; >US$20M revenue needs written authorization; must display \"MiniMax H3\" in commercial UIs 33B dense per secondary sources (not in docs). Full upstream repo ~498GB; pruned int8 DiT 20.97GB + 32B VL text encoder 15.69GB (nvfp4). VRAM figure is an estimate (template index lists ~45-57GB total download). 1344x768 native, 24fps, frames snap to 17k+5. Docs: https://docs.comfy.org/tutorials/video/minimax/minimax-h3-native and https://docs.comfy.org/tutorials/video/minimax/minimax-h3-fastvideo"
+  },
+  {
+   "id": "ltx-2.5",
+   "name": "LTX-2.5 (22B, audio+video, up to 4K/50fps)",
+   "task": "t2v",
+   "released": "2026-07",
+   "hf_repo": "Lightricks/LTX-2.5",
+   "comfy_repo": null,
+   "files": [
+    {
+     "repo": "Lightricks/LTX-2.5",
+     "path": "diffusion_models/ltx-2.5-22b-distilled-transformer-comfy-int8-convrot.safetensors",
+     "size_gb": 21.5,
+     "comfy_dir": "diffusion_models"
+    },
+    {
+     "repo": "Lightricks/LTX-2.5",
+     "path": "diffusion_models/ltx-2.5-22b-dev-transformer-comfy-int8-convrot.safetensors",
+     "size_gb": 21.5,
+     "comfy_dir": "diffusion_models"
+    },
+    {
+     "repo": "Lightricks/LTX-2.5",
+     "path": "text_encoders/gemma4-12b-with-proj-ltx-2.5-comfy-int8-convrot.safetensors",
+     "size_gb": 15.37,
+     "comfy_dir": "text_encoders"
+    },
+    {
+     "repo": "Comfy-Org/gemma-4",
+     "path": "text_encoders/gemma4_e2b_it_int8_convrot.safetensors",
+     "size_gb": 5.2,
+     "comfy_dir": "text_encoders"
+    },
+    {
+     "repo": "Lightricks/LTX-2.5",
+     "path": "vae/ltx-2.5-video-vae-bf16.safetensors",
+     "size_gb": 1.47,
+     "comfy_dir": "vae"
+    },
+    {
+     "repo": "Lightricks/LTX-2.5",
+     "path": "vae/ltx-2.5-audio-vae-bf16.safetensors",
+     "size_gb": 0.36,
+     "comfy_dir": "vae"
+    },
+    {
+     "repo": "Lightricks/LTX-2.5",
+     "path": "latent_upscale_models/ltx-2.5-latent-spatial-upscaler-x2-bf16-1.0.safetensors",
+     "size_gb": 1.0,
+     "comfy_dir": "latent_upscale_models"
+    },
+    {
+     "repo": "Lightricks/LTX-2.5",
+     "path": "loras/ltx-2.5-22b-distilled-lora-450-bf16.safetensors",
+     "size_gb": 8.9,
+     "comfy_dir": "loras"
+    }
+   ],
+   "license": "LTX-2.x Community License Agreement (other)",
+   "commercial_ok": "conditional",
+   "comfy_support": "native",
+   "custom_node_repo": null,
+   "vram_gb": 32,
+   "min_arch": "int8_convrot: loads on any recent NVIDIA GPU; fast INT8 path reportedly needs sm>=7.5 (Turing+) - secondary sources only; distilled nvfp4 build also available (nvfp4/mxfp8 are Blackwell (sm100/sm120) formats; older GPUs dequantize (memory saving, no speedup))",
+   "turbo": "distilled transformer (same repo) and loras/ltx-2.5-22b-distilled-lora-450-bf16.safetensors; IC-LoRA family (Lightricks/LTX-2.5-22b-IC-LoRA-*)",
+   "workflow_url": "https://github.com/Comfy-Org/workflow_templates/blob/main/templates/video_ltx2_5_t2v.json",
+   "pick_when": "Second-best open video (AA T2V 949) with synced audio, the best ecosystem of IC-LoRAs (upscale, HDR, alpha, refine) and territory-unrestricted terms under $10M. Weaker motion/quality than MiniMax H3.",
+   "notes": "Commercial terms: conditional: free below US$10M annual revenue (entity + affiliates); above needs paid Lightricks licence Lightricks ships ComfyUI-ready files itself (no Comfy-Org repo). Repo gated (auto) - needs HF token. Templates use comfy-core plus Lightricks/ComfyUI-LTXVideo for DFR. Docs: https://docs.comfy.org/tutorials/video/ltx/ltx-2-5 . Supersedes LTX-2.3."
+  },
+  {
+   "id": "wan2.2-t2v-a14b",
+   "name": "Wan 2.2 T2V A14B (MoE high/low noise)",
+   "task": "t2v",
+   "released": "2025-07",
+   "hf_repo": "Wan-AI/Wan2.2-T2V-A14B",
+   "comfy_repo": "Comfy-Org/Wan-2.2",
+   "files": [
+    {
+     "repo": "Comfy-Org/Wan-2.2",
+     "path": "split_files/diffusion_models/wan2.2_t2v_high_noise_14B_fp8_scaled.safetensors",
+     "size_gb": 14.29,
+     "comfy_dir": "diffusion_models"
+    },
+    {
+     "repo": "Comfy-Org/Wan-2.2",
+     "path": "split_files/diffusion_models/wan2.2_t2v_low_noise_14B_fp8_scaled.safetensors",
+     "size_gb": 14.29,
+     "comfy_dir": "diffusion_models"
+    },
+    {
+     "repo": "Comfy-Org/Wan-2.2",
+     "path": "split_files/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+     "size_gb": 6.74,
+     "comfy_dir": "text_encoders"
+    },
+    {
+     "repo": "Comfy-Org/Wan-2.2",
+     "path": "split_files/vae/wan_2.1_vae.safetensors",
+     "size_gb": 0.25,
+     "comfy_dir": "vae"
+    },
+    {
+     "repo": "Comfy-Org/Wan-2.2",
+     "path": "split_files/loras/wan2.2_t2v_lightx2v_4steps_lora_v1.1_high_noise.safetensors",
+     "size_gb": 1.23,
+     "comfy_dir": "loras"
+    },
+    {
+     "repo": "Comfy-Org/Wan-2.2",
+     "path": "split_files/loras/wan2.2_t2v_lightx2v_4steps_lora_v1.1_low_noise.safetensors",
+     "size_gb": 1.23,
+     "comfy_dir": "loras"
+    }
+   ],
+   "license": "apache-2.0",
+   "commercial_ok": true,
+   "comfy_support": "native",
+   "custom_node_repo": null,
+   "vram_gb": 24,
+   "min_arch": "fp8 matmul needs cc>=8.9 (Ada/Hopper/Blackwell); on Ampere fp8 weights load but run via dequant (slower)",
+   "turbo": "lightx2v 4-step LoRAs (in Comfy-Org/Wan-2.2 split_files/loras)",
+   "workflow_url": "https://github.com/Comfy-Org/workflow_templates/blob/main/templates/video_wan2_2_14B_t2v.json",
+   "pick_when": "The only top-tier video family with a plain Apache licence and the deepest LoRA/control ecosystem (VACE, Fun, Animate, S2V). Silent, 480-720p, older (2025-07) and not on AA open boards.",
+   "notes": "Docs: https://docs.comfy.org/tutorials/video/wan/wan2_2 . No newer open Wan text-to-video weights (2.5/2.6/2.7 are API-only as far as verified). 5B TI2V variant (wan2.2_ti2v_5B_fp16) for 24GB cards."
+  },
+  {
+   "id": "hunyuanvideo-1.5",
+   "name": "HunyuanVideo 1.5 (8.3B)",
+   "task": "t2v",
+   "released": "2025-11",
+   "hf_repo": "tencent/HunyuanVideo-1.5",
+   "comfy_repo": "Comfy-Org/Hunyuan-Video-1.5",
+   "files": [
+    {
+     "repo": "Comfy-Org/Hunyuan-Video-1.5",
+     "path": "split_files/diffusion_models/hunyuanvideo1.5_720p_t2v_fp16.safetensors",
+     "size_gb": 16.65,
+     "comfy_dir": "diffusion_models"
+    },
+    {
+     "repo": "Comfy-Org/Hunyuan-Video-1.5",
+     "path": "split_files/text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors",
+     "size_gb": 9.38,
+     "comfy_dir": "text_encoders"
+    },
+    {
+     "repo": "Comfy-Org/Hunyuan-Video-1.5",
+     "path": "split_files/text_encoders/byt5_small_glyphxl_fp16.safetensors",
+     "size_gb": 0.44,
+     "comfy_dir": "text_encoders"
+    },
+    {
+     "repo": "Comfy-Org/Hunyuan-Video-1.5",
+     "path": "split_files/vae/hunyuanvideo15_vae_fp16.safetensors",
+     "size_gb": 2.52,
+     "comfy_dir": "vae"
+    },
+    {
+     "repo": "Comfy-Org/Hunyuan-Video-1.5",
+     "path": "split_files/loras/hunyuanvideo1.5_t2v_480p_lightx2v_4step_lora_rank_32_bf16.safetensors",
+     "size_gb": 0.34,
+     "comfy_dir": "loras"
+    },
+    {
+     "repo": "Comfy-Org/Hunyuan-Video-1.5",
+     "path": "split_files/diffusion_models/hunyuanvideo1.5_1080p_sr_distilled_fp8_scaled.safetensors",
+     "size_gb": 8.34,
+     "comfy_dir": "diffusion_models"
+    }
+   ],
+   "license": "tencent-hunyuan-community",
+   "commercial_ok": "conditional",
+   "comfy_support": "native",
+   "custom_node_repo": null,
+   "vram_gb": 16,
+   "min_arch": "fp16 any; fp8_scaled variants fp8 matmul needs cc>=8.9 (Ada/Hopper/Blackwell); on Ampere fp8 weights load but run via dequant (slower)",
+   "turbo": "cfg-distilled and step-distilled checkpoints + 480p lightx2v 4-step LoRA; 720p/1080p SR distilled models",
+   "workflow_url": "https://github.com/Comfy-Org/workflow_templates/blob/main/templates/video_hunyuan_video_1.5_720p_t2v.json",
+   "pick_when": "Small and fast for 24GB cards with built-in 1080p super-resolution stage. Silent, below LTX-2.5/H3 quality.",
+   "notes": "Commercial terms: conditional: Tencent Hunyuan Community licence (territory excludes EU/UK/South Korea per Tencent licence family - not re-read here; MAU cap) Territory clause not verified in this session (LICENSE not opened). Docs: https://docs.comfy.org/tutorials/video/hunyuan/hunyuan-video-1-5"
+  },
+  {
+   "id": "minimax-h3-i2v",
+   "name": "MiniMax H3 I2V / FLF2V / continuation",
+   "task": "i2v",
+   "released": "2026-08",
+   "hf_repo": "MiniMaxAI/MiniMax-H3",
+   "comfy_repo": "Comfy-Org/MiniMax-H3",
+   "files": [
+    {
+     "repo": "Comfy-Org/MiniMax-H3",
+     "path": "diffusion_models/minimax_h3_fl2va_pruned_int8_convrot.safetensors",
+     "size_gb": 20.97,
+     "comfy_dir": "diffusion_models"
+    },
+    {
+     "repo": "Comfy-Org/MiniMax-H3",
+     "path": "diffusion_models/minimax_h3_ref2va_pruned_int8_convrot.safetensors",
+     "size_gb": 20.97,
+     "comfy_dir": "diffusion_models"
+    },
+    {
+     "repo": "Comfy-Org/MiniMax-H3",
+     "path": "loras/minimax_h3_fl2v_turbo_4step_v1.0_768p_comfyui_bf16.safetensors",
+     "size_gb": 1.96,
+     "comfy_dir": "loras"
+    },
+    {
+     "repo": "Comfy-Org/MiniMax-H3",
+     "path": "loras/minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors",
+     "size_gb": 1.96,
+     "comfy_dir": "loras"
+    }
+   ],
+   "license": "MiniMax H3 Community License Agreement (other)",
+   "commercial_ok": "conditional",
+   "comfy_support": "native",
+   "custom_node_repo": null,
+   "vram_gb": 48,
+   "min_arch": "int8_convrot: loads on any recent NVIDIA GPU; fast INT8 path reportedly needs sm>=7.5 (Turing+) - secondary sources only",
+   "turbo": "see minimax-h3",
+   "workflow_url": "https://github.com/Comfy-Org/workflow_templates/blob/main/templates/video_minimax_h3_i2v.json",
+   "pick_when": "Best open I2V (AA 1140). Shares text encoder/VAEs with minimax-h3 entry. Same territory caveat.",
+   "notes": "Commercial terms: conditional: see minimax-h3 (EU/UK/KR/US excluded) Also templates video_minimax_h3_i2v_continuation, video_minimax_h3_multiframe_reference, video_minimax_h3_r2v, video_fastvideo_fasth3_i2v."
+  },
+  {
+   "id": "ltx-2.5-i2v",
+   "name": "LTX-2.5 I2V / FLF2V / DFR",
+   "task": "i2v",
+   "released": "2026-07",
+   "hf_repo": "Lightricks/LTX-2.5",
+   "comfy_repo": null,
+   "files": [
+    {
+     "repo": "Lightricks/LTX-2.5",
+     "path": "diffusion_models/ltx-2.5-22b-distilled-transformer-comfy-int8-convrot.safetensors",
+     "size_gb": 21.5,
+     "comfy_dir": "diffusion_models"
+    },
+    {
+     "repo": "Lightricks/LTX-2.5",
+     "path": "latent_upscale_models/ltx-2.5-latent-temporal-upscaler-x2-bf16-1.0.safetensors",
+     "size_gb": 0.26,
+     "comfy_dir": "latent_upscale_models"
+    },
+    {
+     "repo": "Lightricks/LTX-2.5-22b-IC-LoRA-Pixel-Spatial-Upscaler",
+     "path": "ltx-2.5-22b-ic-lora-pixel-spatial-upscaler-x2-1.0.safetensors",
+     "size_gb": 0.33,
+     "comfy_dir": "loras"
+    }
+   ],
+   "license": "LTX-2.x Community License Agreement (other)",
+   "commercial_ok": "conditional",
+   "comfy_support": "native",
+   "custom_node_repo": "https://github.com/Lightricks/ComfyUI-LTXVideo",
+   "vram_gb": 32,
+   "min_arch": "int8_convrot: loads on any recent NVIDIA GPU; fast INT8 path reportedly needs sm>=7.5 (Turing+) - secondary sources only",
+   "turbo": "distilled transformer",
+   "workflow_url": "https://github.com/Comfy-Org/workflow_templates/blob/main/templates/video_ltx2_5_i2v.json",
+   "pick_when": "Territory-unrestricted I2V with audio; first/last-frame and DFR (diffusion fidelity) modes. Plus text encoders/VAEs listed under ltx-2.5.",
+   "notes": "Commercial terms: conditional: < US$10M revenue ComfyUI support: native (DFR template also uses custom-node Lightricks/ComfyUI-LTXVideo) Docs: https://docs.comfy.org/tutorials/video/ltx/ltx-2-5-dfr ; DFR template: https://github.com/Comfy-Org/workflow_templates/blob/main/templates/video_ltx2_5_dfr_i2v.json"
+  },
+  {
+   "id": "wan2.2-i2v-a14b",
+   "name": "Wan 2.2 I2V A14B",
+   "task": "i2v",
+   "released": "2025-07",
+   "hf_repo": "Wan-AI/Wan2.2-I2V-A14B",
+   "comfy_repo": "Comfy-Org/Wan-2.2",
+   "files": [
+    {
+     "repo": "Comfy-Org/Wan-2.2",
+     "path": "split_files/diffusion_models/wan2.2_i2v_high_noise_14B_fp8_scaled.safetensors",
+     "size_gb": 14.29,
+     "comfy_dir": "diffusion_models"
+    },
+    {
+     "repo": "Comfy-Org/Wan-2.2",
+     "path": "split_files/diffusion_models/wan2.2_i2v_low_noise_14B_fp8_scaled.safetensors",
+     "size_gb": 14.29,
+     "comfy_dir": "diffusion_models"
+    },
+    {
+     "repo": "Comfy-Org/Wan-2.2",
+     "path": "split_files/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+     "size_gb": 6.74,
+     "comfy_dir": "text_encoders"
+    },
+    {
+     "repo": "Comfy-Org/Wan-2.2",
+     "path": "split_files/vae/wan_2.1_vae.safetensors",
+     "size_gb": 0.25,
+     "comfy_dir": "vae"
+    },
+    {
+     "repo": "Comfy-Org/Wan-2.2",
+     "path": "split_files/loras/wan2.2_i2v_lightx2v_4steps_lora_v1_high_noise.safetensors",
+     "size_gb": 1.23,
+     "comfy_dir": "loras"
+    },
+    {
+     "repo": "Comfy-Org/Wan-2.2",
+     "path": "split_files/loras/wan2.2_i2v_lightx2v_4steps_lora_v1_low_noise.safetensors",
+     "size_gb": 1.23,
+     "comfy_dir": "loras"
+    }
+   ],
+   "license": "apache-2.0",
+   "commercial_ok": true,
+   "comfy_support": "native",
+   "custom_node_repo": null,
+   "vram_gb": 24,
+   "min_arch": "fp8 matmul needs cc>=8.9 (Ada/Hopper/Blackwell); on Ampere fp8 weights load but run via dequant (slower)",
+   "turbo": "lightx2v 4-step LoRAs",
+   "workflow_url": "https://github.com/Comfy-Org/workflow_templates/blob/main/templates/video_wan2_2_14B_i2v.json",
+   "pick_when": "Apache-licensed I2V workhorse with mature 4-step LoRAs and FLF2V; best when licence cleanliness or LoRA availability matters more than peak quality.",
+   "notes": "Silent output; pair with a foley model. Docs: https://docs.comfy.org/tutorials/video/wan/wan2_2"
+  },
+  {
+   "id": "wan-animate-2",
+   "name": "Wan Animate 2 (character animate / replace)",
+   "task": "v2v",
+   "released": "2026-08",
+   "hf_repo": "Wan-AI/Wan2.2-Animate-2-14B-Diffusers",
+   "comfy_repo": "Comfy-Org/Wan-Animate-2",
+   "files": [
+    {
+     "repo": "Comfy-Org/Wan-Animate-2",
+     "path": "diffusion_models/wan_animate_2_distill_int8_convrot.safetensors",
+     "size_gb": 16.65,
+     "comfy_dir": "diffusion_models"
+    },
+    {
+     "repo": "Comfy-Org/Wan-Animate-2",
+     "path": "diffusion_models/wan_animate_2_int8_convrot.safetensors",
+     "size_gb": 16.65,
+     "comfy_dir": "diffusion_models"
+    },
+    {
+     "repo": "Comfy-Org/Wan-Animate-2",
+     "path": "clip_vision/clip_vision_h.safetensors",
+     "size_gb": 1.26,
+     "comfy_dir": "clip_vision"
+    },
+    {
+     "repo": "Comfy-Org/Wan-Animate-2",
+     "path": "text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+     "size_gb": 6.74,
+     "comfy_dir": "text_encoders"
+    },
+    {
+     "repo": "Comfy-Org/Wan-Animate-2",
+     "path": "vae/Wan2_1_VAE_bf16.safetensors",
+     "size_gb": 0.25,
+     "comfy_dir": "vae"
+    }
+   ],
+   "license": "apache-2.0",
+   "commercial_ok": true,
+   "comfy_support": "native",
+   "custom_node_repo": null,
+   "vram_gb": 24,
+   "min_arch": "int8_convrot: loads on any recent NVIDIA GPU; fast INT8 path reportedly needs sm>=7.5 (Turing+) - secondary sources only",
+   "turbo": "distilled checkpoint (wan_animate_2_distill_*) + loras/lightx2v_I2V_14B_480p_cfg_step_distill_rank64_bf16.safetensors",
+   "workflow_url": "https://github.com/Comfy-Org/workflow_templates/blob/main/templates/video_wan_animate2_distilled.json",
+   "pick_when": "Drive a still character with a reference performance video, or swap a character into footage; Apache licence.",
+   "notes": "Comfy-Org repo has no base_model metadata; upstream mapped to Wan-AI/Wan2.2-Animate-2-14B-Diffusers by name. Docs: https://docs.comfy.org/tutorials/video/wan/wan-animate-2"
+  },
+  {
+   "id": "scail-2",
+   "name": "SCAIL-2 (Wan2.1-14B character replacement)",
+   "task": "v2v",
+   "released": "2026-06",
+   "hf_repo": "zai-org/SCAIL-2",
+   "comfy_repo": "Comfy-Org/SCAIL-2",
+   "files": [
+    {
+     "repo": "Comfy-Org/SCAIL-2",
+     "path": "diffusion_models/wan2.1_14B_SCAIL_2_int8_convrot.safetensors",
+     "size_gb": 16.65,
+     "comfy_dir": "diffusion_models"
+    },
+    {
+     "repo": "Comfy-Org/SCAIL-2",
+     "path": "diffusion_models/wan2.1_14B_SCAIL_2_fp8_scaled.safetensors",
+     "size_gb": 17.69,
+     "comfy_dir": "diffusion_models"
+    },
+    {
+     "repo": "Comfy-Org/SCAIL-2",
+     "path": "loras/wan2.1_SCAIL_2_DPO_lora_bf16.safetensors",
+     "size_gb": 1.23,
+     "comfy_dir": "loras"
+    },
+    {
+     "repo": "Comfy-Org/sam3.1",
+     "path": "checkpoints/sam3.1_multiplex_fp16.safetensors",
+     "size_gb": 1.75,
+     "comfy_dir": "checkpoints"
+    }
+   ],
+   "license": "mit",
+   "commercial_ok": true,
+   "comfy_support": "native",
+   "custom_node_repo": null,
+   "vram_gb": 24,
+   "min_arch": "int8_convrot: loads on any recent NVIDIA GPU; fast INT8 path reportedly needs sm>=7.5 (Turing+) - secondary sources only",
+   "turbo": "Kijai/WanVideo_comfy Lightx2v/lightx2v_I2V_14B_480p_cfg_step_distill_rank64_bf16.safetensors (used by template)",
+   "workflow_url": "https://github.com/Comfy-Org/workflow_templates/blob/main/templates/video_wan21_scail2_character_replacement_int8.json",
+   "pick_when": "MIT-licensed full-body character replacement with SAM 3.1 masking and a relight LoRA. Also needs Wan 2.1 clip_vision_h/umt5/VAE (Comfy-Org/Wan-2.1).",
+   "notes": "Docs: https://docs.comfy.org/tutorials/video/zai/scail2"
+  },
+  {
+   "id": "ltx-2.3-ic-loras",
+   "name": "LTX-2.3 22B + IC-LoRAs (in/outpaint, clean-plate, ingredients, restore, style transition)",
+   "task": "v2v",
+   "released": "2026-03",
+   "hf_repo": "Lightricks/LTX-2.3",
+   "comfy_repo": "Comfy-Org/ltx-2.3",
+   "files": [
+    {
+     "repo": "Lightricks/LTX-2.3-fp8",
+     "path": "ltx-2.3-22b-dev-fp8.safetensors",
+     "size_gb": 29.15,
+     "comfy_dir": "checkpoints"
+    },
+    {
+     "repo": "Lightricks/LTX-2.3",
+     "path": "ltx-2.3-spatial-upscaler-x2-1.1.safetensors",
+     "size_gb": 1.0,
+     "comfy_dir": "latent_upscale_models"
+    },
+    {
+     "repo": "Comfy-Org/ltx-2.3",
+     "path": "split_files/loras/ltx_2.3_22b_distilled_1.1_lora_dynamic_fro09_avg_rank_111_bf16.safetensors",
+     "size_gb": 2.74,
+     "comfy_dir": "loras"
+    },
+    {
+     "repo": "Comfy-Org/ltx-2.3",
+     "path": "split_files/loras/ltx-2.3-22b-ic-lora-ingredients-0.9.safetensors",
+     "size_gb": 1.31,
+     "comfy_dir": "loras"
+    },
+    {
+     "repo": "Comfy-Org/ltx-2",
+     "path": "split_files/text_encoders/gemma_3_12B_it_fp4_mixed.safetensors",
+     "size_gb": 9.45,
+     "comfy_dir": "text_encoders"
+    }
+   ],
+   "license": "LTX-2 Community License Agreement (other)",
+   "commercial_ok": "conditional",
+   "comfy_support": "native",
+   "custom_node_repo": null,
+   "vram_gb": 32,
+   "min_arch": "fp8 matmul needs cc>=8.9 (Ada/Hopper/Blackwell); on Ampere fp8 weights load but run via dequant (slower)",
+   "turbo": "distilled 1.1 LoRA (Comfy-Org/ltx-2.3) / ltx-2.3-22b-distilled-1.1 checkpoint",
+   "workflow_url": "https://github.com/Comfy-Org/workflow_templates/blob/main/templates/video_ltx2_3_ic_lora.json",
+   "pick_when": "Largest catalogue of ready-made video-to-video templates: object/watermark/subtitle removal, outpainting, archival restore, depth/pose/canny control. LTX-2.5 IC-LoRAs are newer but fewer templates.",
+   "notes": "Commercial terms: conditional: < US$10M revenue Other templates: template_ltx2_3_lora_video_outpainting, template_ltx2_3_obscura_remova_lora_remove_object_from_video, template_ltx2_3_remove_watermark_from_video, template_ltx2_3_lora_restore_archival_footage. Docs: https://docs.comfy.org/tutorials/video/ltx/ltx-2-3"
+  },
+  {
+   "id": "wan2.2-vace-fun",
+   "name": "Wan 2.2 VACE-Fun A14B (v2v, ref2v, inpaint, outpaint, extension)",
+   "task": "v2v",
+   "released": "2025-09",
+   "hf_repo": "Wan-AI/Wan2.2-T2V-A14B",
+   "comfy_repo": "Comfy-Org/Wan-2.2",
+   "files": [
+    {
+     "repo": "Comfy-Org/Wan-2.2",
+     "path": "split_files/diffusion_models/wan2.2_fun_vace_high_noise_14B_fp8_scaled.safetensors",
+     "size_gb": 17.35,
+     "comfy_dir": "diffusion_models"
+    },
+    {
+     "repo": "Comfy-Org/Wan-2.2",
+     "path": "split_files/diffusion_models/wan2.2_fun_vace_low_noise_14B_fp8_scaled.safetensors",
+     "size_gb": 17.35,
+     "comfy_dir": "diffusion_models"
+    }
+   ],
+   "license": "apache-2.0",
+   "commercial_ok": true,
+   "comfy_support": "native",
+   "custom_node_repo": null,
+   "vram_gb": 24,
+   "min_arch": "fp8 matmul needs cc>=8.9 (Ada/Hopper/Blackwell); on Ampere fp8 weights load but run via dequant (slower)",
+   "turbo": "wan2.2 t2v lightx2v 4-step LoRAs",
+   "workflow_url": "https://github.com/Comfy-Org/workflow_templates/blob/main/templates/video_wan_vace_14B_v2v.json",
+   "pick_when": "Apache-licensed all-in-one control/edit/extend for video; works with every Wan LoRA. Needs umt5/VAE from Comfy-Org/Wan-2.2.",
+   "notes": "Upstream is alibaba-pai/Wan2.2-VACE-Fun-A14B (named in Comfy-Org base_model; not queried) - hf_repo set to Wan-AI base. released month = estimate. Docs: https://docs.comfy.org/tutorials/video/wan/vace"
+  },
+  {
+   "id": "void-video-inpaint",
+   "name": "Netflix VOID (video object removal)",
+   "task": "v2v",
+   "released": "2026-03",
+   "hf_repo": "netflix/void-model",
+   "comfy_repo": "Comfy-Org/void-model",
+   "files": [
+    {
+     "repo": "Comfy-Org/void-model",
+     "path": "diffusion_models/void_pass1.safetensors",
+     "size_gb": 11.14,
+     "comfy_dir": "diffusion_models"
+    },
+    {
+     "repo": "Comfy-Org/void-model",
+     "path": "diffusion_models/void_pass2.safetensors",
+     "size_gb": 11.14,
+     "comfy_dir": "diffusion_models"
+    },
+    {
+     "repo": "Comfy-Org/void-model",
+     "path": "vae/cogvideox_vae.safetensors",
+     "size_gb": 0.43,
+     "comfy_dir": "vae"
+    },
+    {
+     "repo": "Comfy-Org/void-model",
+     "path": "text_encoders/t5xxl_fp16.safetensors",
+     "size_gb": 9.79,
+     "comfy_dir": "text_encoders"
+    }
+   ],
+   "license": "apache-2.0",
+   "commercial_ok": true,
+   "comfy_support": "native",
+   "custom_node_repo": null,
+   "vram_gb": 32,
+   "min_arch": "fp16/bf16: any CUDA GPU",
+   "turbo": null,
+   "workflow_url": "https://github.com/Comfy-Org/workflow_templates/blob/main/templates/utility_void_video_inpainting.json",
+   "pick_when": "Remove an object (incl. its shadows/interactions) from footage with a SAM 3.1 mask; Apache.",
+   "notes": "Template also pulls optical_flow/raft_large_C_T_SKHT_V2-ff5fadd5.safetensors from Comfy-Org/void-model (not size-checked). Docs: https://docs.comfy.org/tutorials/utility/void-video-inpainting"
+  },
+  {
+   "id": "infinitetalk",
+   "name": "InfiniteTalk (Wan 2.1 14B audio-driven, unlimited length)",
+   "task": "lipsync",
+   "released": "2025-08",
+   "hf_repo": "MeiGen-AI/InfiniteTalk",
+   "comfy_repo": "Comfy-Org/Wan-2.1",
+   "files": [
+    {
+     "repo": "Comfy-Org/Wan-2.1",
+     "path": "split_files/model_patches/wan2.1_infiniteTalk_single_fp16.safetensors",
+     "size_gb": 5.13,
+     "comfy_dir": "model_patches"
+    },
+    {
+     "repo": "Comfy-Org/Wan-2.1",
+     "path": "split_files/model_patches/wan2.1_infiniteTalk_multi_fp16.safetensors",
+     "size_gb": 5.12,
+     "comfy_dir": "model_patches"
+    },
+    {
+     "repo": "Comfy-Org/Wan-2.1",
+     "path": "split_files/diffusion_models/wan2.1_i2v_480p_14B_fp8_scaled.safetensors",
+     "size_gb": 16.4,
+     "comfy_dir": "diffusion_models"
+    },
+    {
+     "repo": "Comfy-Org/Wan-2.1",
+     "path": "split_files/clip_vision/clip_vision_h.safetensors",
+     "size_gb": 1.26,
+     "comfy_dir": "clip_vision"
+    },
+    {
+     "repo": "Comfy-Org/Wan-2.1",
+     "path": "split_files/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+     "size_gb": 6.74,
+     "comfy_dir": "text_encoders"
+    },
+    {
+     "repo": "Comfy-Org/Wan-2.1",
+     "path": "split_files/vae/wan_2.1_vae.safetensors",
+     "size_gb": 0.25,
+     "comfy_dir": "vae"
+    },
+    {
+     "repo": "Kijai/wav2vec2_safetensors",
+     "path": "wav2vec2-chinese-base_fp16.safetensors",
+     "size_gb": 0.19,
+     "comfy_dir": "audio_encoders"
+    },
+    {
+     "repo": "Kijai/WanVideo_comfy",
+     "path": "Lightx2v/lightx2v_I2V_14B_480p_cfg_step_distill_rank64_bf16.safetensors",
+     "size_gb": 0.74,
+     "comfy_dir": "loras"
+    }
+   ],
+   "license": "apache-2.0",
+   "commercial_ok": true,
+   "comfy_support": "native",
+   "custom_node_repo": null,
+   "vram_gb": 24,
+   "min_arch": "fp8 matmul needs cc>=8.9 (Ada/Hopper/Blackwell); on Ampere fp8 weights load but run via dequant (slower)",
+   "turbo": "lightx2v I2V 480p cfg/step-distill LoRA (Kijai/WanVideo_comfy)",
+   "workflow_url": "https://github.com/Comfy-Org/workflow_templates/blob/main/templates/video_wan2_1_infinitetalk.json",
+   "pick_when": "Long-form talking head / dubbing from image or video + audio, single or multi-speaker, Apache. 480p base; upscale after.",
+   "notes": "Official template uses Kijai/WanVideo_comfy_fp8_scaled I2V/Wan2_1-I2V-14B-480p_fp8_e4m3fn_scaled_KJ.safetensors (16.64GB) as base; Comfy-Org equivalent listed here. comfy_dir for wav2vec2 assumed audio_encoders. Docs: https://docs.comfy.org/tutorials/video/wan/wan-infinitetalk"
+  },
+  {
+   "id": "ltx-2.3-talkvid",
+   "name": "LTX-2.3 ID-LoRA TalkVid (image + speech -> talking video)",
+   "task": "lipsync",
+   "released": "2026-03",
+   "hf_repo": "Lightricks/LTX-2.3",
+   "comfy_repo": "Comfy-Org/ltx-2.3",
+   "files": [
+    {
+     "repo": "Comfy-Org/ltx-2.3",
+     "path": "split_files/loras/ltx-2.3-id-lora-talkvid-3k.safetensors",
+     "size_gb": 1.16,
+     "comfy_dir": "loras"
+    },
+    {
+     "repo": "Lightricks/LTX-2.3-fp8",
+     "path": "ltx-2.3-22b-dev-fp8.safetensors",
+     "size_gb": 29.15,
+     "comfy_dir": "checkpoints"
+    },
+    {
+     "repo": "Lightricks/LTX-2.3",
+     "path": "ltx-2.3-22b-distilled-lora-384.safetensors",
+     "size_gb": 7.61,
+     "comfy_dir": "loras"
+    },
+    {
+     "repo": "Lightricks/LTX-2.3-22b-IC-LoRA-DubIt",
+     "path": "ltx-2.3-22b-ic-lora-dubit-0.9.safetensors",
+     "size_gb": 2.47,
+     "comfy_dir": "loras"
+    }
+   ],
+   "license": "LTX-2 Community License Agreement (other)",
+   "commercial_ok": "conditional",
+   "comfy_support": "native",
+   "custom_node_repo": null,
+   "vram_gb": 32,
+   "min_arch": "fp8 matmul needs cc>=8.9 (Ada/Hopper/Blackwell); on Ampere fp8 weights load but run via dequant (slower)",
+   "turbo": "ltx-2.3-22b-distilled-lora-384",
+   "workflow_url": "https://github.com/Comfy-Org/workflow_templates/blob/main/templates/template_image_speech_to_video.json",
+   "pick_when": "Talking head with natural body/camera motion from one image + speech; DubIt IC-LoRA re-syncs lips on existing video. Licence capped at $10M.",
+   "notes": "Commercial terms: conditional: < US$10M revenue DubIt IC-LoRA has no official template (file verified only). ID-LoRAs are third-party (AviadDahan) repackaged by Comfy-Org."
+  },
+  {
+   "id": "wan2.2-s2v",
+   "name": "Wan 2.2 S2V 14B (speech-to-video)",
+   "task": "lipsync",
+   "released": "2025-08",
+   "hf_repo": "Wan-AI/Wan2.2-S2V-14B",
+   "comfy_repo": "Comfy-Org/Wan-2.2",
+   "files": [
+    {
+     "repo": "Comfy-Org/Wan-2.2",
+     "path": "split_files/diffusion_models/wan2.2_s2v_14B_fp8_scaled.safetensors",
+     "size_gb": 16.39,
+     "comfy_dir": "diffusion_models"
+    },
+    {
+     "repo": "Comfy-Org/Wan-2.2",
+     "path": "split_files/audio_encoders/wav2vec2_large_english_fp16.safetensors",
+     "size_gb": 0.63,
+     "comfy_dir": "audio_encoders"
+    }
+   ],
+   "license": "apache-2.0",
+   "commercial_ok": true,
+   "comfy_support": "native",
+   "custom_node_repo": null,
+   "vram_gb": 24,
+   "min_arch": "fp8 matmul needs cc>=8.9 (Ada/Hopper/Blackwell); on Ampere fp8 weights load but run via dequant (slower)",
+   "turbo": null,
+   "workflow_url": "https://github.com/Comfy-Org/workflow_templates/blob/main/templates/video_wan2_2_14B_s2v.json",
+   "pick_when": "Audio-driven full-scene/body animation with Apache licence; alternative to InfiniteTalk for cinematic shots.",
+   "notes": "Needs umt5 + wan_2.1_vae from Comfy-Org/Wan-2.2. Docs: https://docs.comfy.org/tutorials/video/wan/wan2-2-s2v"
+  },
+  {
+   "id": "humo-17b",
+   "name": "HuMo 17B (text+image+audio human video)",
+   "task": "lipsync",
+   "released": "2025-09",
+   "hf_repo": "bytedance-research/HuMo",
+   "comfy_repo": "Comfy-Org/HuMo",
+   "files": [
+    {
+     "repo": "Comfy-Org/HuMo",
+     "path": "split_files/diffusion_models/humo_17B_fp8_e4m3fn.safetensors",
+     "size_gb": 17.06,
+     "comfy_dir": "diffusion_models"
+    },
+    {
+     "repo": "Comfy-Org/HuMo",
+     "path": "split_files/audio_encoders/whisper_large_v3_fp16.safetensors",
+     "size_gb": 3.09,
+     "comfy_dir": "audio_encoders"
+    }
+   ],
+   "license": "apache-2.0",
+   "commercial_ok": true,
+   "comfy_support": "native",
+   "custom_node_repo": null,
+   "vram_gb": 24,
+   "min_arch": "fp8 matmul needs cc>=8.9 (Ada/Hopper/Blackwell); on Ampere fp8 weights load but run via dequant (slower)",
+   "turbo": "Kijai/WanVideo_comfy Lightx2v I2V 480p distill LoRA (used by template)",
+   "workflow_url": "https://github.com/Comfy-Org/workflow_templates/blob/main/templates/video_humo.json",
+   "pick_when": "Subject-consistent talking/singing humans from reference image + audio + prompt. Older; InfiniteTalk usually preferred for long clips.",
+   "notes": "Template references old repo name Comfy-Org/HuMo_ComfyUI which 307-redirects to Comfy-Org/HuMo. 1.7B variant also available."
+  },
+  {
+   "id": "latentsync-1.6",
+   "name": "LatentSync 1.6 (lip-sync onto existing video)",
+   "task": "lipsync",
+   "released": "2025-06",
+   "hf_repo": "ByteDance/LatentSync-1.6",
+   "comfy_repo": null,
+   "files": [
+    {
+     "repo": "ByteDance/LatentSync-1.6",
+     "path": "latentsync_unet.pt",
+     "size_gb": 5.07,
+     "comfy_dir": null
+    },
+    {
+     "repo": "ByteDance/LatentSync-1.6",
+     "path": "whisper/tiny.pt",
+     "size_gb": 0.08,
+     "comfy_dir": null
+    }
+   ],
+   "license": "openrail++",
+   "commercial_ok": "conditional",
+   "comfy_support": "custom-node",
+   "custom_node_repo": "https://github.com/ShmuelRonen/ComfyUI-LatentSyncWrapper",
+   "vram_gb": 12,
+   "min_arch": "any CUDA GPU",
+   "turbo": null,
+   "workflow_url": null,
+   "pick_when": "Cheap mouth-only re-sync of existing footage (dubbing) when you do not want to regenerate the shot.",
+   "notes": "Commercial terms: yes with OpenRAIL++ use restrictions Custom node last pushed 2025-09-04; comfy_dir handled by node auto-download (null). Example workflow URL not verified. Aging - consider LTX DubIt IC-LoRA instead."
+  },
+  {
+   "id": "seedvr2",
+   "name": "SeedVR2 3B/7B (one-step image + video restoration/upscale)",
+   "task": "upscale",
+   "released": "2025-06",
+   "hf_repo": "ByteDance-Seed/SeedVR2-7B",
+   "comfy_repo": "Comfy-Org/SeedVR2",
+   "files": [
+    {
+     "repo": "Comfy-Org/SeedVR2",
+     "path": "diffusion_models/seedvr2_7b_int8_convrot.safetensors",
+     "size_gb": 8.33,
+     "comfy_dir": "diffusion_models"
+    },
+    {
+     "repo": "Comfy-Org/SeedVR2",
+     "path": "diffusion_models/seedvr2_7b_sharp_fp8_e4m3fn.safetensors",
+     "size_gb": 8.24,
+     "comfy_dir": "diffusion_models"
+    },
+    {
+     "repo": "Comfy-Org/SeedVR2",
+     "path": "diffusion_models/seedvr2_3b_int8_convrot.safetensors",
+     "size_gb": 3.46,
+     "comfy_dir": "diffusion_models"
+    },
+    {
+     "repo": "Comfy-Org/SeedVR2",
+     "path": "vae/seedvr2_ema_vae_fp16.safetensors",
+     "size_gb": 0.5,
+     "comfy_dir": "vae"
+    }
+   ],
+   "license": "apache-2.0",
+   "commercial_ok": true,
+   "comfy_support": "native",
+   "custom_node_repo": "https://github.com/numz/ComfyUI-SeedVR2_VideoUpscaler",
+   "vram_gb": 16,
+   "min_arch": "int8_convrot: loads on any recent NVIDIA GPU; fast INT8 path reportedly needs sm>=7.5 (Turing+) - secondary sources only",
+   "turbo": "already one-step",
+   "workflow_url": "https://github.com/Comfy-Org/workflow_templates/blob/main/templates/utility_seedvr2_3b_int8_upscale_video.json",
+   "pick_when": "Default generative upscaler for both stills and video, Apache; 3B for video throughput, 7B/7B-sharp for stills.",
+   "notes": "ComfyUI support: native (int8 templates); older templates use custom-node numz/ComfyUI-SeedVR2_VideoUpscaler Image template: https://github.com/Comfy-Org/workflow_templates/blob/main/templates/utility_seedvr2_7b_int8_upscale_image.json . Docs: https://docs.comfy.org/tutorials/utility/seedvr2 . VRAM rises steeply with output resolution/batch; tiled VAE in template."
+  },
+  {
+   "id": "pid-latent-upscale",
+   "name": "NVIDIA PiD (PixelDiT latent-to-4K upscaler, 4-step)",
+   "task": "upscale",
+   "released": "2026-05",
+   "hf_repo": null,
+   "comfy_repo": "Comfy-Org/PixelDiT",
+   "files": [
+    {
+     "repo": "Comfy-Org/PixelDiT",
+     "path": "diffusion_models/pid_1.5_flux2_1024_to_4096_4step_int8_convrot.safetensors",
+     "size_gb": 1.59,
+     "comfy_dir": "diffusion_models"
+    },
+    {
+     "repo": "Comfy-Org/PixelDiT",
+     "path": "diffusion_models/pid_1.5_qwenimage_1024_to_4096_4step_int8_convrot.safetensors",
+     "size_gb": 1.58,
+     "comfy_dir": "diffusion_models"
+    },
+    {
+     "repo": "Comfy-Org/PixelDiT",
+     "path": "text_encoders/gemma_2_2b_it_elm_fp8_scaled.safetensors",
+     "size_gb": 2.62,
+     "comfy_dir": "text_encoders"
+    }
+   ],
+   "license": "nsclv1 (NVIDIA Source Code License - non-commercial)",
+   "commercial_ok": false,
+   "comfy_support": "native",
+   "custom_node_repo": null,
+   "vram_gb": 16,
+   "min_arch": "int8_convrot: loads on any recent NVIDIA GPU; fast INT8 path reportedly needs sm>=7.5 (Turing+) - secondary sources only",
+   "turbo": "4-step variants",
+   "workflow_url": "https://github.com/Comfy-Org/workflow_templates/blob/main/templates/utility_pid_latent_upscale_dit.json",
+   "pick_when": "Upscale a FLUX.2/FLUX3-VAE, Qwen-Image, SD3 or SDXL latent straight to 4096px in 4 steps. Non-commercial.",
+   "notes": "Upstream nvidia/PiD and nvidia/PixelDiT-1300M-1024px named in Comfy-Org base_model but not queried (hf_repo null). Docs: https://docs.comfy.org/tutorials/image/nvidia/pid-latent-upscale"
+  },
+  {
+   "id": "real-esrgan-x4plus",
+   "name": "Real-ESRGAN x4plus (GAN)",
+   "task": "upscale",
+   "released": "2021-07",
+   "hf_repo": null,
+   "comfy_repo": "Comfy-Org/Real-ESRGAN",
+   "files": [
+    {
+     "repo": "Comfy-Org/Real-ESRGAN",
+     "path": "RealESRGAN_x4plus.safetensors",
+     "size_gb": 0.07,
+     "comfy_dir": "upscale_models"
+    }
+   ],
+   "license": "bsd-3-clause",
+   "commercial_ok": true,
+   "comfy_support": "native",
+   "custom_node_repo": null,
+   "vram_gb": 4,
+   "min_arch": "any",
+   "turbo": null,
+   "workflow_url": "https://github.com/Comfy-Org/workflow_templates/blob/main/templates/utility-gan_upscaler.json",
+   "pick_when": "Near-free deterministic upscale for previews or before a generative pass. Not for restoring detail.",
+   "notes": "Released month is the original paper/repo era, not the Comfy repackage. Docs: https://docs.comfy.org/tutorials/utility/image-upscale"
+  },
+  {
+   "id": "rife-film-interp",
+   "name": "RIFE v4.25 heavy / FILM frame interpolation",
+   "task": "upscale",
+   "released": "2026-04",
+   "hf_repo": null,
+   "comfy_repo": "Comfy-Org/Frame-Interpolation",
+   "files": [
+    {
+     "repo": "Comfy-Org/Frame-Interpolation",
+     "path": "frame_interpolation/rife_v4.25_heavy.safetensors",
+     "size_gb": 0.09,
+     "comfy_dir": "frame_interpolation"
+    },
+    {
+     "repo": "Comfy-Org/Frame-Interpolation",
+     "path": "frame_interpolation/film_net_fp16.safetensors",
+     "size_gb": 0.07,
+     "comfy_dir": "frame_interpolation"
+    }
+   ],
+   "license": "mit-and-apache-2.0",
+   "commercial_ok": true,
+   "comfy_support": "native",
+   "custom_node_repo": null,
+   "vram_gb": 4,
+   "min_arch": "any",
+   "turbo": null,
+   "workflow_url": "https://github.com/Comfy-Org/workflow_templates/blob/main/templates/utility_video_frame_interpolation.json",
+   "pick_when": "Temporal upscaling (16/24fps -> 48/60fps) after video generation; native nodes, no custom pack needed.",
+   "notes": "released = Comfy-Org repo creation month. Docs: https://docs.comfy.org/tutorials/utility/frame-interpolation"
+  },
+  {
+   "id": "pixal3d",
+   "name": "Pixal3D (image / multiview -> PBR mesh)",
+   "task": "3d",
+   "released": "2026-04",
+   "hf_repo": "TencentARC/Pixal3D",
+   "comfy_repo": "Comfy-Org/Pixal3D",
+   "files": [
+    {
+     "repo": "Comfy-Org/Pixal3D",
+     "path": "diffusion_models/pixal3d_int8_convrot.safetensors",
+     "size_gb": 5.58,
+     "comfy_dir": "diffusion_models"
+    },
+    {
+     "repo": "Comfy-Org/Pixal3D",
+     "path": "diffusion_models/pixal3d_multiview_int8_convrot.safetensors",
+     "size_gb": 5.58,
+     "comfy_dir": "diffusion_models"
+    },
+    {
+     "repo": "Comfy-Org/Pixal3D",
+     "path": "clip_vision/dino_v3_L_naf_fp32.safetensors",
+     "size_gb": 1.22,
+     "comfy_dir": "clip_vision"
+    },
+    {
+     "repo": "Comfy-Org/Pixal3D",
+     "path": "vae/trellis_2_shape_vae_bf16.safetensors",
+     "size_gb": 1.1,
+     "comfy_dir": "vae"
+    },
+    {
+     "repo": "Comfy-Org/Pixal3D",
+     "path": "vae/trellis_2_texture_vae_bf16.safetensors",
+     "size_gb": 0.95,
+     "comfy_dir": "vae"
+    },
+    {
+     "repo": "Comfy-Org/MoGe",
+     "path": "geometry_estimation/moge_2_vitl_normal_fp16.safetensors",
+     "size_gb": 0.66,
+     "comfy_dir": "geometry_estimation"
+    },
+    {
+     "repo": "Comfy-Org/BiRefNet",
+     "path": "background_removal/birefnet.safetensors",
+     "size_gb": 0.44,
+     "comfy_dir": "background_removal"
+    }
+   ],
+   "license": "mit",
+   "commercial_ok": true,
+   "comfy_support": "native",
+   "custom_node_repo": null,
+   "vram_gb": 16,
+   "min_arch": "int8_convrot: loads on any recent NVIDIA GPU; fast INT8 path reportedly needs sm>=7.5 (Turing+) - secondary sources only",
+   "turbo": null,
+   "workflow_url": "https://github.com/Comfy-Org/workflow_templates/blob/main/templates/3d_pixal3d_trellis2_image_to_model.json",
+   "pick_when": "Highest-fidelity open image-to-3D with PBR textures in native ComfyUI (built on TRELLIS.2 VAEs); multiview input supported. MIT.",
+   "notes": "Docs: https://docs.comfy.org/tutorials/3d/pixal3d . Multiview template: https://github.com/Comfy-Org/workflow_templates/blob/main/templates/3d_pixal3d_multi_views.json"
+  },
+  {
+   "id": "trellis2",
+   "name": "TRELLIS.2 4B",
+   "task": "3d",
+   "released": "2025-12",
+   "hf_repo": "microsoft/TRELLIS.2-4B",
+   "comfy_repo": "Comfy-Org/TRELLIS.2",
+   "files": [
+    {
+     "repo": "Comfy-Org/TRELLIS.2",
+     "path": "diffusion_models/trellis_2_int8_convrot.safetensors",
+     "size_gb": 5.25,
+     "comfy_dir": "diffusion_models"
+    },
+    {
+     "repo": "Comfy-Org/TRELLIS.2",
+     "path": "clip_vision/dino_v3_vit_l.safetensors",
+     "size_gb": 1.21,
+     "comfy_dir": "clip_vision"
+    },
+    {
+     "repo": "Comfy-Org/TRELLIS.2",
+     "path": "vae/trellis_2_shape_vae_bf16.safetensors",
+     "size_gb": 1.1,
+     "comfy_dir": "vae"
+    },
+    {
+     "repo": "Comfy-Org/TRELLIS.2",
+     "path": "vae/trellis_2_texture_vae_bf16.safetensors",
+     "size_gb": 0.95,
+     "comfy_dir": "vae"
+    }
+   ],
+   "license": "mit",
+   "commercial_ok": true,
+   "comfy_support": "native",
+   "custom_node_repo": null,
+   "vram_gb": 16,
+   "min_arch": "int8_convrot: loads on any recent NVIDIA GPU; fast INT8 path reportedly needs sm>=7.5 (Turing+) - secondary sources only",
+   "turbo": null,
+   "workflow_url": "https://github.com/Comfy-Org/workflow_templates/blob/main/templates/3d_pixal3d_trellis2_image_to_model.json",
+   "pick_when": "Proven MIT image-to-3D baseline; same template as Pixal3D lets you A/B them.",
+   "notes": "Docs: https://docs.comfy.org/tutorials/3d/trellis2 . Text-to-3D: no credible open end-to-end model verified - chain a T2I model into Pixal3D/TRELLIS.2."
+  },
+  {
+   "id": "triposplat",
+   "name": "TripoSplat (image -> 3D Gaussian splat)",
+   "task": "3d",
+   "released": "2026-05",
+   "hf_repo": "VAST-AI/TripoSplat",
+   "comfy_repo": "VAST-AI/TripoSplat",
+   "files": [
+    {
+     "repo": "VAST-AI/TripoSplat",
+     "path": "diffusion_models/triposplat_fp16.safetensors",
+     "size_gb": 0.74,
+     "comfy_dir": "diffusion_models"
+    },
+    {
+     "repo": "VAST-AI/TripoSplat",
+     "path": "clip_vision/dino_v3_vit_h.safetensors",
+     "size_gb": 1.68,
+     "comfy_dir": "clip_vision"
+    },
+    {
+     "repo": "VAST-AI/TripoSplat",
+     "path": "vae/triposplat_vae_decoder_fp16.safetensors",
+     "size_gb": 0.58,
+     "comfy_dir": "vae"
+    },
+    {
+     "repo": "VAST-AI/TripoSplat",
+     "path": "vae/flux2-vae.safetensors",
+     "size_gb": 0.34,
+     "comfy_dir": "vae"
+    }
+   ],
+   "license": "mit",
+   "commercial_ok": true,
+   "comfy_support": "native",
+   "custom_node_repo": null,
+   "vram_gb": 8,
+   "min_arch": "any CUDA GPU (fp16)",
+   "turbo": null,
+   "workflow_url": "https://github.com/Comfy-Org/workflow_templates/blob/main/templates/3d_triposplat_image_to_gaussian_splat.json",
+   "pick_when": "Fast, small Gaussian-splat output (for viewers/relighting previs) instead of meshes.",
+   "notes": "Vendor repo is itself laid out in ComfyUI folders. Docs: https://docs.comfy.org/tutorials/3d/triposplat"
+  },
+  {
+   "id": "hunyuan3d-2.1",
+   "name": "Hunyuan3D 2.1",
+   "task": "3d",
+   "released": "2025-06",
+   "hf_repo": "tencent/Hunyuan3D-2.1",
+   "comfy_repo": "Comfy-Org/Hunyuan-3D-2.1",
+   "files": [
+    {
+     "repo": "Comfy-Org/Hunyuan-3D-2.1",
+     "path": "hunyuan_3d_v2.1.safetensors",
+     "size_gb": 7.37,
+     "comfy_dir": "checkpoints"
+    }
+   ],
+   "license": "tencent-hunyuan-community",
+   "commercial_ok": "conditional",
+   "comfy_support": "native",
+   "custom_node_repo": null,
+   "vram_gb": 12,
+   "min_arch": "any CUDA GPU",
+   "turbo": null,
+   "workflow_url": "https://github.com/Comfy-Org/workflow_templates/blob/main/templates/3d_hunyuan3d-v2.1.json",
+   "pick_when": "Mature shape generator with big community; superseded on quality by Pixal3D/TRELLIS.2 in native ComfyUI.",
+   "notes": "Commercial terms: conditional: Tencent Hunyuan Community licence (territory/MAU terms; not re-read here) ComfyUI support: native (shape only; PBR paint stage needs custom nodes) Hunyuan3D 3.x appears API-only (no open repo found in HF search)."
+  },
+  {
+   "id": "qwen3-tts",
+   "name": "Qwen3-TTS 12Hz 1.7B (Base / CustomVoice / VoiceDesign)",
+   "task": "tts",
+   "released": "2026-01",
+   "hf_repo": "Qwen/Qwen3-TTS-12Hz-1.7B-Base",
+   "comfy_repo": null,
+   "files": [
+    {
+     "repo": "Qwen/Qwen3-TTS-12Hz-1.7B-Base",
+     "path": "model.safetensors",
+     "size_gb": 3.86,
+     "comfy_dir": null
+    },
+    {
+     "repo": "Qwen/Qwen3-TTS-12Hz-1.7B-Base",
+     "path": "speech_tokenizer/model.safetensors",
+     "size_gb": 0.68,
+     "comfy_dir": null
+    }
+   ],
+   "license": "apache-2.0",
+   "commercial_ok": true,
+   "comfy_support": "custom-node",
+   "custom_node_repo": "https://github.com/flybirdxx/ComfyUI-Qwen-TTS",
+   "vram_gb": 8,
+   "min_arch": "any CUDA GPU",
+   "turbo": null,
+   "workflow_url": null,
+   "pick_when": "Best all-round Apache TTS: 3s voice cloning, natural-language voice design, multilingual. Most-starred ComfyUI TTS node (1955 stars, pushed 2026-10-23).",
+   "notes": "Node downloads full repo; comfy_dir decided by node. ComfyUI core has no TTS node as of v0.42.1. Example workflow URL not verified."
+  },
+  {
+   "id": "voxcpm2",
+   "name": "VoxCPM2",
+   "task": "tts",
+   "released": "2026-04",
+   "hf_repo": "openbmb/VoxCPM2",
+   "comfy_repo": null,
+   "files": [
+    {
+     "repo": "openbmb/VoxCPM2",
+     "path": "model.safetensors",
+     "size_gb": 4.58,
+     "comfy_dir": null
+    },
+    {
+     "repo": "openbmb/VoxCPM2",
+     "path": "audiovae.pth",
+     "size_gb": 0.38,
+     "comfy_dir": null
+    }
+   ],
+   "license": "apache-2.0",
+   "commercial_ok": true,
+   "comfy_support": "custom-node",
+   "custom_node_repo": "https://github.com/wildminder/ComfyUI-VoxCPM",
+   "vram_gb": 8,
+   "min_arch": "any CUDA GPU",
+   "turbo": null,
+   "workflow_url": null,
+   "pick_when": "Tokenizer-free, very natural prosody voice cloning, Apache; ~925k monthly HF downloads.",
+   "notes": "Quality ranking vs Qwen3-TTS not independently verified."
+  },
+  {
+   "id": "chatterbox",
+   "name": "Resemble Chatterbox (multilingual v3 / Turbo)",
+   "task": "tts",
+   "released": "2025-04",
+   "hf_repo": "ResembleAI/chatterbox",
+   "comfy_repo": null,
+   "files": [
+    {
+     "repo": "ResembleAI/chatterbox",
+     "path": "t3_mtl23ls_v3.safetensors",
+     "size_gb": 2.14,
+     "comfy_dir": null
+    },
+    {
+     "repo": "ResembleAI/chatterbox",
+     "path": "s3gen_v3.safetensors",
+     "size_gb": 1.06,
+     "comfy_dir": null
+    }
+   ],
+   "license": "mit",
+   "commercial_ok": true,
+   "comfy_support": "custom-node",
+   "custom_node_repo": "https://github.com/filliptm/ComfyUI_Fill-ChatterBox",
+   "vram_gb": 6,
+   "min_arch": "any CUDA GPU",
+   "turbo": "Chatterbox-Turbo (ONNX/MLX community builds)",
+   "workflow_url": "https://github.com/Comfy-Org/workflow_templates/blob/main/templates/audio-chatterbox_tts.json",
+   "pick_when": "MIT voice cloning with emotion control and 23 languages; official Comfy template exists (TTS, dialog, multilingual, voice conversion).",
+   "notes": "Template uses FL_ChatterboxTTS node from filliptm pack; alt pack diodiogod/TTS-Audio-Suite bundles many engines. Upstream repo updated 2026-06."
+  },
+  {
+   "id": "ming-3.0-tts",
+   "name": "Ming 3.0 TTS (tiny)",
+   "task": "tts",
+   "released": "2026-09",
+   "hf_repo": "inclusionAI/Ming-3.0-tts-tiny",
+   "comfy_repo": "Comfy-Org/Ming-3.0-TTS",
+   "files": [
+    {
+     "repo": "Comfy-Org/Ming-3.0-TTS",
+     "path": "checkpoints/ming_tts_tiny_int8_convrot.safetensors",
+     "size_gb": 9.07,
+     "comfy_dir": "checkpoints"
+    }
+   ],
+   "license": "mit",
+   "commercial_ok": true,
+   "comfy_support": "none",
+   "custom_node_repo": null,
+   "vram_gb": null,
+   "min_arch": "int8_convrot: loads on any recent NVIDIA GPU; fast INT8 path reportedly needs sm>=7.5 (Turing+) - secondary sources only",
+   "turbo": null,
+   "workflow_url": null,
+   "pick_when": "Watch item: Comfy-Org repackaged it on 2026-10-23, signalling imminent native TTS in ComfyUI core.",
+   "notes": "ComfyUI support: native support pending/unverified No nodes_ming TTS class in ComfyUI master (nodes_ming.py only has TextEncodeMingImageEdit) and no template as of 2026-10-23 - unusable natively today. VRAM unknown."
+  },
+  {
+   "id": "minimax-music-3",
+   "name": "MiniMax Music 3 (full songs up to ~5 min)",
+   "task": "music",
+   "released": "2026-08",
+   "hf_repo": "MiniMaxAI/MiniMax-Music3",
+   "comfy_repo": "Comfy-Org/MiniMax-Music-3",
+   "files": [
+    {
+     "repo": "Comfy-Org/MiniMax-Music-3",
+     "path": "diffusion_models/minimax_music3_dit_fp16.safetensors",
+     "size_gb": 4.91,
+     "comfy_dir": "diffusion_models"
+    },
+    {
+     "repo": "Comfy-Org/MiniMax-Music-3",
+     "path": "text_encoders/minimax_music3_text_encoder_pruned_int8_convrot.safetensors",
+     "size_gb": 9.2,
+     "comfy_dir": "text_encoders"
+    },
+    {
+     "repo": "Comfy-Org/MiniMax-Music-3",
+     "path": "vae/minimax_music3_dav.safetensors",
+     "size_gb": 0.22,
+     "comfy_dir": "vae"
+    }
+   ],
+   "license": "MiniMax-Music3 Community License (other)",
+   "commercial_ok": "conditional",
+   "comfy_support": "native",
+   "custom_node_repo": null,
+   "vram_gb": 16,
+   "min_arch": "int8_convrot: loads on any recent NVIDIA GPU; fast INT8 path reportedly needs sm>=7.5 (Turing+) - secondary sources only",
+   "turbo": null,
+   "workflow_url": "https://github.com/Comfy-Org/workflow_templates/blob/main/templates/audio_minimax_music_3.json",
+   "pick_when": "Strongest open full-song generator (vocals + lyrics, long form). Check attribution clause.",
+   "notes": "Commercial terms: conditional: must display \"MiniMax-Music3\" in commercial UIs; >US$20M revenue needs authorization (no territory exclusion found in licence text) Comfy-Org repo tagged apache-2.0 but upstream LICENSE is a custom community licence - trust upstream. Docs: https://docs.comfy.org/tutorials/audio/minimax/minimax-music-3"
+  },
+  {
+   "id": "ace-step-1.5-xl",
+   "name": "ACE-Step 1.5 XL (4B base / SFT / turbo)",
+   "task": "music",
+   "released": "2026-01",
+   "hf_repo": "ACE-Step/Ace-Step1.5",
+   "comfy_repo": "Comfy-Org/ACE-Step-1.5",
+   "files": [
+    {
+     "repo": "Comfy-Org/ACE-Step-1.5",
+     "path": "split_files/diffusion_models/acestep_v1.5_xl_turbo_bf16.safetensors",
+     "size_gb": 9.97,
+     "comfy_dir": "diffusion_models"
+    },
+    {
+     "repo": "Comfy-Org/ACE-Step-1.5",
+     "path": "split_files/diffusion_models/acestep_v1.5_xl_sft_bf16.safetensors",
+     "size_gb": 9.97,
+     "comfy_dir": "diffusion_models"
+    },
+    {
+     "repo": "Comfy-Org/ACE-Step-1.5",
+     "path": "split_files/text_encoders/qwen_4b_ace15.safetensors",
+     "size_gb": 8.38,
+     "comfy_dir": "text_encoders"
+    },
+    {
+     "repo": "Comfy-Org/ACE-Step-1.5",
+     "path": "split_files/vae/ace_1.5_vae.safetensors",
+     "size_gb": 0.34,
+     "comfy_dir": "vae"
+    }
+   ],
+   "license": "mit",
+   "commercial_ok": true,
+   "comfy_support": "native",
+   "custom_node_repo": null,
+   "vram_gb": 16,
+   "min_arch": "bf16: any CUDA GPU",
+   "turbo": "acestep_v1.5_xl_turbo_bf16 / acestep_v1.5_turbo (distilled)",
+   "workflow_url": "https://github.com/Comfy-Org/workflow_templates/blob/main/templates/audio_ace_step1_5_xl_turbo.json",
+   "pick_when": "MIT-licensed, fast song generation with editing/repaint; the safe commercial default.",
+   "notes": "Comfy-Org repo tagged apache-2.0, upstream MIT. Docs: https://docs.comfy.org/tutorials/audio/ace-step/ace-step-v1-5"
+  },
+  {
+   "id": "stable-audio-3",
+   "name": "Stable Audio 3 (medium / small-music / small-sfx)",
+   "task": "music",
+   "released": "2026-05",
+   "hf_repo": "stabilityai/stable-audio-3-medium",
+   "comfy_repo": "Comfy-Org/stable-audio-3",
+   "files": [
+    {
+     "repo": "Comfy-Org/stable-audio-3",
+     "path": "checkpoints/stable_audio_3_medium.safetensors",
+     "size_gb": 9.22,
+     "comfy_dir": "checkpoints"
+    },
+    {
+     "repo": "Comfy-Org/stable-audio-3",
+     "path": "text_encoders/t5gemma_b_b_ul2.safetensors",
+     "size_gb": 1.19,
+     "comfy_dir": "text_encoders"
+    },
+    {
+     "repo": "Comfy-Org/Qwen3.5",
+     "path": "text_encoders/qwen3.5_2b_bf16.safetensors",
+     "size_gb": 4.55,
+     "comfy_dir": "text_encoders"
+    }
+   ],
+   "license": "Stability AI Community License (stable-audio-community)",
+   "commercial_ok": "conditional",
+   "comfy_support": "native",
+   "custom_node_repo": null,
+   "vram_gb": 12,
+   "min_arch": "any CUDA GPU",
+   "turbo": null,
+   "workflow_url": "https://github.com/Comfy-Org/workflow_templates/blob/main/templates/audio_stable_audio_3_medium.json",
+   "pick_when": "Instrumentals, stems, loops and SFX from one model family; trained on licensed data. Large model is API-only.",
+   "notes": "Commercial terms: conditional: free under US$1M annual revenue; Enterprise licence above Qwen3.5-2B is the template prompt expander. Docs: https://docs.comfy.org/tutorials/audio/stable-audio/stable-audio-3"
+  },
+  {
+   "id": "yue2",
+   "name": "YuE2 3B (lyrics-to-song, covers)",
+   "task": "music",
+   "released": "2026-09",
+   "hf_repo": "m-a-p/YuE2-3B",
+   "comfy_repo": "Comfy-Org/YuE2",
+   "files": [
+    {
+     "repo": "Comfy-Org/YuE2",
+     "path": "checkpoints/yue2_3b_int8_convrot.safetensors",
+     "size_gb": 3.96,
+     "comfy_dir": "checkpoints"
+    },
+    {
+     "repo": "Comfy-Org/YuE2",
+     "path": "audio_encoders/sheetsage2_bf16.safetensors",
+     "size_gb": 1.39,
+     "comfy_dir": "audio_encoders"
+    }
+   ],
+   "license": "cc-by-nc-4.0",
+   "commercial_ok": false,
+   "comfy_support": "native",
+   "custom_node_repo": null,
+   "vram_gb": 8,
+   "min_arch": "int8_convrot: loads on any recent NVIDIA GPU; fast INT8 path reportedly needs sm>=7.5 (Turing+) - secondary sources only",
+   "turbo": null,
+   "workflow_url": "https://github.com/Comfy-Org/workflow_templates/blob/main/templates/audio_yue2_text2music.json",
+   "pick_when": "Cover versions that keep melody from reference audio; symbolic (ABC) planning. Non-commercial.",
+   "notes": "Docs: https://docs.comfy.org/tutorials/audio/yue2/yue2"
+  },
+  {
+   "id": "ltx-2.3-foley",
+   "name": "LTX-2.3 Foley V2A LoRA",
+   "task": "sfx",
+   "released": "2026-07",
+   "hf_repo": "Lightricks/LTX-2.3-22b-LoRA-Foley-V2A",
+   "comfy_repo": null,
+   "files": [
+    {
+     "repo": "Lightricks/LTX-2.3-22b-LoRA-Foley-V2A",
+     "path": "ltx-2.3-22b-lora-foley-v2a-1.0.safetensors",
+     "size_gb": 0.23,
+     "comfy_dir": "loras"
+    }
+   ],
+   "license": "LTX-2 Community License Agreement (other)",
+   "commercial_ok": "conditional",
+   "comfy_support": "custom-node",
+   "custom_node_repo": "https://github.com/Lightricks/ComfyUI-LTXVideo",
+   "vram_gb": 32,
+   "min_arch": "fp8 matmul needs cc>=8.9 (Ada/Hopper/Blackwell); on Ampere fp8 weights load but run via dequant (slower)",
+   "turbo": null,
+   "workflow_url": null,
+   "pick_when": "Foley for silent clips (e.g. Wan output) using the LTX-2.3 base you may already have loaded. Trained at ~3.7s windows - long clips need windowing.",
+   "notes": "Commercial terms: conditional: < US$10M revenue Needs full LTX-2.3 base + Gemma TE (see ltx-2.3-ic-loras). Gated repo. Workflow from LTX docs (docs.ltx.io), not Comfy templates. Note MiniMax H3 / LTX-2.5 generate audio jointly, removing the foley step."
+  },
+  {
+   "id": "hunyuanvideo-foley",
+   "name": "HunyuanVideo-Foley (XL)",
+   "task": "sfx",
+   "released": "2025-08",
+   "hf_repo": "tencent/HunyuanVideo-Foley",
+   "comfy_repo": null,
+   "files": [
+    {
+     "repo": "tencent/HunyuanVideo-Foley",
+     "path": "hunyuanvideo_foley.pth",
+     "size_gb": 10.3,
+     "comfy_dir": null
+    },
+    {
+     "repo": "tencent/HunyuanVideo-Foley",
+     "path": "hunyuanvideo_foley_xl.pth",
+     "size_gb": 5.85,
+     "comfy_dir": null
+    },
+    {
+     "repo": "tencent/HunyuanVideo-Foley",
+     "path": "synchformer_state_dict.pth",
+     "size_gb": 0.95,
+     "comfy_dir": null
+    },
+    {
+     "repo": "tencent/HunyuanVideo-Foley",
+     "path": "vae_128d_48k.pth",
+     "size_gb": 1.49,
+     "comfy_dir": null
+    }
+   ],
+   "license": "tencent-hunyuan-community",
+   "commercial_ok": "conditional",
+   "comfy_support": "custom-node",
+   "custom_node_repo": "https://github.com/aistudynow/Comfyui-HunyuanFoley",
+   "vram_gb": 12,
+   "min_arch": "any CUDA GPU",
+   "turbo": null,
+   "workflow_url": null,
+   "pick_when": "Standalone video+text -> 48kHz foley with good sync; works on any model's silent output.",
+   "notes": "Commercial terms: conditional: Tencent Hunyuan Community licence (not re-read here) .pth pickles (not safetensors) - load with care. Custom nodes are small community projects (64 stars max); none official."
+  },
+  {
+   "id": "mmaudio",
+   "name": "MMAudio large 44k v2",
+   "task": "sfx",
+   "released": "2024-12",
+   "hf_repo": "hkchengrex/MMAudio",
+   "comfy_repo": "Kijai/MMAudio_safetensors",
+   "files": [
+    {
+     "repo": "Kijai/MMAudio_safetensors",
+     "path": "mmaudio_large_44k_v2_fp16.safetensors",
+     "size_gb": 2.06,
+     "comfy_dir": "mmaudio"
+    },
+    {
+     "repo": "Kijai/MMAudio_safetensors",
+     "path": "mmaudio_vae_44k_fp16.safetensors",
+     "size_gb": 0.61,
+     "comfy_dir": "mmaudio"
+    },
+    {
+     "repo": "Kijai/MMAudio_safetensors",
+     "path": "mmaudio_synchformer_fp16.safetensors",
+     "size_gb": 0.47,
+     "comfy_dir": "mmaudio"
+    },
+    {
+     "repo": "Kijai/MMAudio_safetensors",
+     "path": "apple_DFN5B-CLIP-ViT-H-14-384_fp16.safetensors",
+     "size_gb": 1.97,
+     "comfy_dir": "mmaudio"
+    }
+   ],
+   "license": "cc-by-nc-4.0 (upstream weights; Kijai repackage tagged mit)",
+   "commercial_ok": false,
+   "comfy_support": "custom-node",
+   "custom_node_repo": "https://github.com/kijai/ComfyUI-MMAudio",
+   "vram_gb": 6,
+   "min_arch": "any CUDA GPU",
+   "turbo": null,
+   "workflow_url": null,
+   "pick_when": "Fast, light, well-synced V2A for prototyping. Non-commercial weights; old (2024-12).",
+   "notes": "comfy_dir models/mmaudio per kijai node convention (not re-verified from node README)."
+  },
+  {
+   "id": "stable-audio-3-small-sfx",
+   "name": "Stable Audio 3 small-sfx (text-to-SFX)",
+   "task": "sfx",
+   "released": "2026-05",
+   "hf_repo": "stabilityai/stable-audio-3-small-sfx",
+   "comfy_repo": "Comfy-Org/stable-audio-3",
+   "files": [
+    {
+     "repo": "Comfy-Org/stable-audio-3",
+     "path": "checkpoints/stable_audio_3_small_sfx.safetensors",
+     "size_gb": 2.27,
+     "comfy_dir": "checkpoints"
+    },
+    {
+     "repo": "Comfy-Org/stable-audio-3",
+     "path": "text_encoders/t5gemma_b_b_ul2.safetensors",
+     "size_gb": 1.19,
+     "comfy_dir": "text_encoders"
+    }
+   ],
+   "license": "Stability AI Community License (stable-audio-community)",
+   "commercial_ok": "conditional",
+   "comfy_support": "native",
+   "custom_node_repo": null,
+   "vram_gb": 6,
+   "min_arch": "any CUDA GPU",
+   "turbo": null,
+   "workflow_url": "https://github.com/Comfy-Org/workflow_templates/blob/main/templates/audio_stable_audio_3_medium.json",
+   "pick_when": "Text-prompted SFX library generation (not synced to video).",
+   "notes": "Commercial terms: conditional: < US$1M revenue No dedicated small-sfx template verified; medium template uses the same loader - swap checkpoint. Inference behaviour of small-sfx in that template not verified."
+  },
+  {
+   "id": "controlfoley",
+   "name": "Xiaomi ControlFoley (V2A, text/audio-conditioned)",
+   "task": "sfx",
+   "released": "2026-04",
+   "hf_repo": "YJX-Xiaomi/ControlFoley",
+   "comfy_repo": null,
+   "files": [
+    {
+     "repo": "YJX-Xiaomi/ControlFoley",
+     "path": "weights/controlfoley.pth",
+     "size_gb": 11.29,
+     "comfy_dir": null
+    }
+   ],
+   "license": "cc-by-nc-4.0",
+   "commercial_ok": false,
+   "comfy_support": "custom-node",
+   "custom_node_repo": "https://github.com/YJX-Research/comfyui-controlfoley-official",
+   "vram_gb": null,
+   "min_arch": null,
+   "turbo": null,
+   "workflow_url": null,
+   "pick_when": "Newest research V2A with timbre/audio-reference control (ACM MM 2026). Non-commercial; tiny user base (8 stars).",
+   "notes": "VRAM unverified. Also needs ext_weights/* from same repo."
+  },
+  {
+   "id": "sam3.1",
+   "name": "SAM 3.1 (text-prompted image/video segmentation)",
+   "task": "utility",
+   "released": "2026-03",
+   "hf_repo": "facebook/sam3.1",
+   "comfy_repo": "Comfy-Org/sam3.1",
+   "files": [
+    {
+     "repo": "Comfy-Org/sam3.1",
+     "path": "checkpoints/sam3.1_multiplex_fp16.safetensors",
+     "size_gb": 1.75,
+     "comfy_dir": "checkpoints"
+    }
+   ],
+   "license": "SAM License (sam-license)",
+   "commercial_ok": "conditional",
+   "comfy_support": "native",
+   "custom_node_repo": null,
+   "vram_gb": 4,
+   "min_arch": "any CUDA GPU",
+   "turbo": null,
+   "workflow_url": "https://github.com/Comfy-Org/workflow_templates/blob/main/templates/utility_video_segment_sam3.json",
+   "pick_when": "Masks for inpaint/character replacement/VOID from a text prompt, tracked through video. Upstream is manually gated - use the Comfy-Org mirror.",
+   "notes": "Commercial terms: yes per SAM licence (not re-read here); upstream gated manual Docs: https://docs.comfy.org/tutorials/utility/video-segment-sam3"
+  },
+  {
+   "id": "depth-anything-3",
+   "name": "Depth Anything 3 (mono/metric large)",
+   "task": "utility",
+   "released": "2025-11",
+   "hf_repo": "depth-anything/DA3MONO-LARGE",
+   "comfy_repo": "Comfy-Org/Depth-Anything-3",
+   "files": [
+    {
+     "repo": "Comfy-Org/Depth-Anything-3",
+     "path": "geometry_estimation/depth_anything_3_mono_large.safetensors",
+     "size_gb": 1.34,
+     "comfy_dir": "geometry_estimation"
+    },
+    {
+     "repo": "Comfy-Org/Depth-Anything-3",
+     "path": "geometry_estimation/depth_anything_3_metric_large.safetensors",
+     "size_gb": 1.34,
+     "comfy_dir": "geometry_estimation"
+    }
+   ],
+   "license": "apache-2.0",
+   "commercial_ok": true,
+   "comfy_support": "native",
+   "custom_node_repo": null,
+   "vram_gb": 4,
+   "min_arch": "any",
+   "turbo": null,
+   "workflow_url": "https://github.com/Comfy-Org/workflow_templates/blob/main/templates/utility_depth_anything3_video_depth_estimation.json",
+   "pick_when": "Default depth for ControlNet/IC-LoRA conditioning, image and video.",
+   "notes": "Only mono-large/metric-large confirmed Apache via DA3MONO-LARGE card; DA3 giant variants may differ. Docs: https://docs.comfy.org/tutorials/utility/depth-anything-3"
+  },
+  {
+   "id": "birefnet",
+   "name": "BiRefNet (+ lucida) background removal",
+   "task": "utility",
+   "released": "2024-07",
+   "hf_repo": "ZhengPeng7/BiRefNet",
+   "comfy_repo": "Comfy-Org/BiRefNet",
+   "files": [
+    {
+     "repo": "Comfy-Org/BiRefNet",
+     "path": "background_removal/birefnet.safetensors",
+     "size_gb": 0.44,
+     "comfy_dir": "background_removal"
+    },
+    {
+     "repo": "Comfy-Org/BiRefNet",
+     "path": "background_removal/lucida.safetensors",
+     "size_gb": 0.88,
+     "comfy_dir": "background_removal"
+    }
+   ],
+   "license": "mit",
+   "commercial_ok": true,
+   "comfy_support": "native",
+   "custom_node_repo": null,
+   "vram_gb": 4,
+   "min_arch": "any",
+   "turbo": null,
+   "workflow_url": "https://github.com/Comfy-Org/workflow_templates/blob/main/templates/utility_birefnet_remove_background.json",
+   "pick_when": "Native cut-outs for product shots and 3D input prep; Qwen-Image 2.1 RGBA is the generative alternative.",
+   "notes": "lucida.safetensors is from egeorcun/lucida (licence not checked). Docs: https://docs.comfy.org/tutorials/utility/remove-background-birefnet"
+  },
+  {
+   "id": "sdpose",
+   "name": "SDPose wholebody + RT-DETR v4 detector",
+   "task": "utility",
+   "released": "2025-10",
+   "hf_repo": "teemosliang/SDPose-Wholebody",
+   "comfy_repo": "Comfy-Org/SDPose",
+   "files": [
+    {
+     "repo": "Comfy-Org/SDPose",
+     "path": "checkpoints/sdpose_wholebody_fp16.safetensors",
+     "size_gb": 1.92,
+     "comfy_dir": "checkpoints"
+    },
+    {
+     "repo": "Comfy-Org/SDPose",
+     "path": "diffusion_models/rt_detr_v4-x-hgnet_fp16.safetensors",
+     "size_gb": 0.12,
+     "comfy_dir": "diffusion_models"
+    }
+   ],
+   "license": "mit",
+   "commercial_ok": true,
+   "comfy_support": "native",
+   "custom_node_repo": null,
+   "vram_gb": 4,
+   "min_arch": "any",
+   "turbo": null,
+   "workflow_url": "https://github.com/Comfy-Org/workflow_templates/blob/main/templates/utility_sdpose_multi_person_video.json",
+   "pick_when": "Multi-person pose maps (image/video) for pose ControlNets and Animate pipelines, natively - replaces DWPose from controlnet_aux.",
+   "notes": "Docs: https://docs.comfy.org/tutorials/utility/pose-detection-sdpose"
+  },
+  {
+   "id": "moge-3",
+   "name": "MoGe 3 (monocular geometry: depth, normals, point maps)",
+   "task": "utility",
+   "released": "2026-08",
+   "hf_repo": "Ruicheng/moge-3-vitl",
+   "comfy_repo": "Comfy-Org/MoGe",
+   "files": [
+    {
+     "repo": "Comfy-Org/MoGe",
+     "path": "geometry_estimation/moge_3_vitl_fp16.safetensors",
+     "size_gb": 0.74,
+     "comfy_dir": "geometry_estimation"
+    },
+    {
+     "repo": "Comfy-Org/MoGe",
+     "path": "geometry_estimation/moge_3_vitg_fp16.safetensors",
+     "size_gb": 2.5,
+     "comfy_dir": "geometry_estimation"
+    }
+   ],
+   "license": "mit",
+   "commercial_ok": true,
+   "comfy_support": "native",
+   "custom_node_repo": null,
+   "vram_gb": 4,
+   "min_arch": "any",
+   "turbo": null,
+   "workflow_url": "https://github.com/Comfy-Org/workflow_templates/blob/main/templates/utility_moge3_geometry_estimation.json",
+   "pick_when": "Normals/metric geometry and image/panorama-to-mesh; used inside the Pixal3D template.",
+   "notes": "Docs: https://docs.comfy.org/tutorials/utility/moge"
+  }
+ ],
+ "workflows": [
+  {
+   "name": "Comfy-Org/workflow_templates",
+   "url": "https://github.com/Comfy-Org/workflow_templates",
+   "kind": "official-templates",
+   "note": "Source of the in-app template browser; ~719 JSONs incl. api_* (closed-model) ones. templates/index.json carries date, total download size and model URLs per template - machine-readable for a harness."
+  },
+  {
+   "name": "ComfyUI docs tutorials (index)",
+   "url": "https://docs.comfy.org/_llms/en/tutorials.txt",
+   "kind": "docs",
+   "note": "LLM-friendly index of all ~256 tutorial pages; every model in this catalogue with native support has a page here."
+  },
+  {
+   "name": "ComfyUI releases",
+   "url": "https://github.com/Comfy-Org/ComfyUI/releases",
+   "kind": "changelog",
+   "note": "Core repo moved from comfyanonymous/ComfyUI to Comfy-Org/ComfyUI; v0.42.1 (2026-10-19) current; FLUX 3 Klein needs >=0.41.0. Release cadence ~weekly - pin versions in pod images."
+  },
+  {
+   "name": "ComfyUI docs changelog",
+   "url": "https://docs.comfy.org/changelog",
+   "kind": "changelog",
+   "note": "Per-release notes on new native model support."
+  },
+  {
+   "name": "ComfyUI_examples (legacy)",
+   "url": "https://github.com/comfyanonymous/ComfyUI_examples",
+   "kind": "examples",
+   "note": "Last pushed 2025-11-26 - effectively superseded by workflow_templates; do not use for 2026 models."
+  },
+  {
+   "name": "Trend: Comfy-Org-native everything + int8_convrot",
+   "url": "https://huggingface.co/Comfy-Org",
+   "kind": "trend",
+   "note": "Since mid-2026 nearly every new open model ships native core nodes (nodes_minimax_h3, trellis2, seedvr, sam3, yue2, ...) plus Comfy-Org repacks in int8_convrot / fp8_scaled / mxfp8 / nvfp4. int8_convrot is now the default precision in templates (Ampere-friendly). Kijai wrapper packs matter less."
+  },
+  {
+   "name": "Trend: Comfy-Org HF repo renames (2026-09-23)",
+   "url": "https://huggingface.co/api/models/Comfy-Org/Wan_2.1_ComfyUI_repackaged",
+   "kind": "trend",
+   "note": "Old names (Wan_2.1_ComfyUI_repackaged, Qwen-Image-Edit_ComfyUI, flux2-dev, HuMo_ComfyUI, hunyuan3D_2.1_repackaged) now 307-redirect to new names (Wan-2.1, Qwen-Image-Edit, Flux-2-Dev, HuMo, Hunyuan-3D-2.1). Templates still reference old names - downloader must follow redirects."
+  },
+  {
+   "name": "Trend: joint audio+video models",
+   "url": "https://docs.comfy.org/tutorials/video/minimax/minimax-h3",
+   "kind": "trend",
+   "note": "MiniMax H3 and LTX-2.5 generate synced audio natively; foley/V2A becomes a fallback step for Wan-family output."
+  },
+  {
+   "name": "Trend: in-graph LLM prompt expansion",
+   "url": "https://docs.comfy.org/tutorials/llm/qwen/qwen3_5",
+   "kind": "trend",
+   "note": "Templates now chain TextGenerate (Qwen3.5 / Gemma 4) prompt upsamplers before the diffusion model (FLUX3 Klein, Qwen-Image 2.1, Stable Audio 3, LTX-2.5) - budget 5-10GB extra VRAM or disable."
+  },
+  {
+   "name": "Lightricks/ComfyUI-LTXVideo",
+   "url": "https://github.com/Lightricks/ComfyUI-LTXVideo",
+   "kind": "custom-node",
+   "note": "Official LTX nodes (4210 stars, pushed 2026-10-20) - needed for DFR, foley and many IC-LoRA workflows."
+  },
+  {
+   "name": "kijai/ComfyUI-WanVideoWrapper",
+   "url": "https://github.com/kijai/ComfyUI-WanVideoWrapper",
+   "kind": "custom-node",
+   "note": "Historic Wan bleeding-edge wrapper (6743 stars) but last pushed 2026-05-24 - most Wan variants are now native; use only for features not in core."
+  },
+  {
+   "name": "kijai/ComfyUI-KJNodes",
+   "url": "https://github.com/kijai/ComfyUI-KJNodes",
+   "kind": "custom-node",
+   "note": "Utility pack still used by official templates (e.g. SUPIR upscale); pushed 2026-10-23. Includes Sage-attention patch / torch.compile helper nodes."
+  },
+  {
+   "name": "nunchux-ai/ComfyUI-nunchaku (SVDQuant 4-bit)",
+   "url": "https://github.com/nunchux-ai/ComfyUI-nunchaku",
+   "kind": "speed",
+   "note": "4-bit SVDQuant inference (2931 stars, pushed 2026-09-06); model coverage lags the newest models - check before relying on it. Org name changed from earlier nunchaku-tech."
+  },
+  {
+   "name": "SageAttention",
+   "url": "https://github.com/thu-ml/SageAttention",
+   "kind": "speed",
+   "note": "Quantized attention kernels (3973 stars); launch ComfyUI with --use-sage-attention; biggest win on long video sequences. Last push 2026-01-17."
+  },
+  {
+   "name": "ComfyUI-MagCache",
+   "url": "https://github.com/Zehong-Ma/ComfyUI-MagCache",
+   "kind": "speed",
+   "note": "Step-skipping cache (successor to TeaCache); last push 2025-11 - may not cover 2026 architectures. Core now ships EasyCache (comfy_extras/nodes_easycache) natively."
+  },
+  {
+   "name": "ComfyUI-TeaCache",
+   "url": "https://github.com/welltop-cn/ComfyUI-TeaCache",
+   "kind": "speed",
+   "note": "Older timestep-embedding cache; unmaintained since 2025-07 - prefer EasyCache/MagCache or distill LoRAs."
+  },
+  {
+   "name": "Distill LoRAs (lightx2v)",
+   "url": "https://huggingface.co/lightx2v/Minimax-h3-Turbo",
+   "kind": "speed",
+   "note": "4/8-step distillation LoRAs are the dominant batch-cost lever in 2026 (MiniMax H3, Wan 2.2, Qwen-Image-Edit, HunyuanVideo 1.5); bigger saving than caching."
+  },
+  {
+   "name": "FastVideo FastH3",
+   "url": "https://huggingface.co/FastVideo/FastVideo-FastH3-Comfy",
+   "kind": "speed",
+   "note": "8-step distilled MiniMax H3 DiTs (T2V/I2V and OmniRef R2V) packaged for ComfyUI with official templates video_fastvideo_fasth3_t2v / video_fasth3_ominiref_r2v."
+  },
+  {
+   "name": "torch.compile (core node)",
+   "url": "https://github.com/Comfy-Org/ComfyUI/blob/master/comfy_extras/nodes_torch_compile.py",
+   "kind": "speed",
+   "note": "Native TorchCompileModel node; worthwhile on long batch runs where compile time amortises."
+  },
+  {
+   "name": "Fannovel16/comfyui_controlnet_aux",
+   "url": "https://github.com/Fannovel16/comfyui_controlnet_aux",
+   "kind": "custom-node",
+   "note": "Classic preprocessors (lineart, softedge, etc.) still maintained (pushed 2026-10-11); depth/pose/seg now better done with native DA3/SDPose/SAM3."
+  },
+  {
+   "name": "diodiogod/TTS-Audio-Suite",
+   "url": "https://github.com/diodiogod/TTS-Audio-Suite",
+   "kind": "custom-node",
+   "note": "Multi-engine TTS pack (Chatterbox, Qwen, etc.); fills the gap left by no core TTS."
+  }
+ ]
+}

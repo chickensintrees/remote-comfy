@@ -22,6 +22,9 @@ live pod, and most are enforced by an executable test rather than prose.
 - **`sync-outputs.sh`**: continuously pulls results to your machine and tells the
   watchdog which directories are safe.
 - **`comfy_client.py`**: a tiny client that drives a local or remote ComfyUI the same way.
+- **A model catalogue** ([`docs/models.md`](docs/models.md)): current open models for
+  image, video, 3D, speech, music and utilities, with the exact files ComfyUI loads.
+  `catalog.py --verify` re-checks it against Hugging Face, and `--dl` feeds provisioning.
 - **`docs/traps.md`**: ~50 traps (SSH port remaps, network volumes DC-locking you, torch
   trio mismatches, VRAM squatters halving throughput…) each with the rule that avoids it.
 

@@ -12,10 +12,12 @@ file fully before you spend a GPU-minute.
    Skim it before your first pod; search it whenever something "looks like" a hardware
    fault or a hung boot.
 4. [`docs/architecture.md`](docs/architecture.md) — what runs where (laptop vs pod).
-5. [`docs/gpu-choice.md`](docs/gpu-choice.md) and
+5. [`docs/models.md`](docs/models.md): the model catalogue by task (generated; edit
+   `catalog/catalog.json`, never the .md).
+6. [`docs/gpu-choice.md`](docs/gpu-choice.md) and
    [`docs/open-questions.md`](docs/open-questions.md) when choosing hardware or quoting
    a number. Open questions are **not** settled facts.
-6. [`decisions/`](decisions/) — dated records of why X over Y. Check here before
+7. [`decisions/`](decisions/) — dated records of why X over Y. Check here before
    re-litigating a design choice.
 
 ## Layout
@@ -25,6 +27,7 @@ file fully before you spend a GPU-minute.
 | `remote_comfy/pod_ctl.py` | laptop | RunPod control: `list`, `status`, `balance`, `availability`, `create`, `conn`, `stop`, `start`, `terminate` |
 | `remote_comfy/comfy_client.py` | either | stdlib ComfyUI client: `Comfy(url).wait_ready() / upload() / run()` |
 | `remote_comfy/check_latest_models.py` | laptop | STEP ZERO: what models exist *now* (live HF API) |
+| `remote_comfy/catalog.py` + `catalog/catalog.json` | laptop | curated current open models by task, with ComfyUI file paths; `--verify` re-checks HF, `--dl` feeds provisioning |
 | `remote_comfy/autostop.py` | **pod** | idle watchdog that stops/terminates the pod itself |
 | `pod/provision-comfyui.sh` | **pod** | install ComfyUI + nodes + models in the only order that works |
 | `pod/launch-sharded.sh` | **pod** | one ComfyUI per GPU, shard a batch harness across them |
@@ -61,6 +64,9 @@ file fully before you spend a GPU-minute.
 ```bash
 python tests/test_runpod_ops.py           # run after touching ANYTHING; must print ALL PASS
 python remote_comfy/pod_ctl.py --help
+python remote_comfy/catalog.py --task i2v      # what to run for a task
+python remote_comfy/catalog.py --verify         # catalogue still matches Hugging Face?
+python remote_comfy/catalog.py --write-docs     # after editing the JSON
 bash scripts/install-skill.sh             # deploy the Claude Code skill to ~/.claude/skills
 ```
 
@@ -72,6 +78,9 @@ On Windows, `python3` may be the Microsoft Store stub (exits 49). Probe with
 - **test > hook > lint > doc > comment.** When you learn a lesson, add an assertion to
   `tests/test_runpod_ops.py` **first**, then the row in `docs/traps.md`. A lesson that
   lives only in prose rots into confident wrongness.
+- **Catalogue edits:** change `catalog/catalog.json`, run `--validate`, `--verify`, then
+  regenerate `docs/models.md` with `--write-docs`. Only add repos/paths you checked against the HF API
+  (`?blobs=true`); paths move between repo root and `split_files/`.
 - Doc assertions search `AGENTS.md`, the skill, and `docs/*.md` together, so a trap may
   move between files but cannot silently disappear.
 - A design choice with a real alternative gets a dated note in `decisions/`

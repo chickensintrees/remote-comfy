@@ -63,7 +63,13 @@ ssh -p <port> root@<ip> "RUNPOD_API_KEY=$RUNPOD_API_KEY nohup setsid python3 /wo
 
 Use **direct-TCP SSH** (the IP + port from `conn`), not RunPod's SSH proxy: the proxy is
 PTY-only, so `scp`, `-L` and non-interactive commands fail. Model sets: `wan`, `qwen`,
-`flux`, `flux2`, `kontext`, `3d`, `none` (space-separated for several).
+`flux`, `flux2`, `kontext`, `3d`, `none` (space-separated for several). For anything in
+the catalogue, also push its file list before provisioning:
+
+```bash
+python remote_comfy/catalog.py --dl <id> [<id>...] > extra-models.txt
+scp -P <port> extra-models.txt root@<ip>:/workspace/
+```
 
 Watch `prov.log` for `PROVISION_DONE` **and** grep for `PROVISION_FAILED` and `MISS`.
 Then confirm models on disk by size, not by the marker.

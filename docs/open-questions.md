@@ -21,5 +21,10 @@ When you settle one, move the result into a test plus `docs/traps.md` (or a
   `launch-sharded.sh` there is one instance per GPU on 8188+N, so the watchdog sees only
   GPU0's queue. The launcher compensates by refreshing `/workspace/.busy` while any shard
   runs (tripwired). Polling every port would be the real fix; not done yet.
-- **The 2026-10-23 launcher fixes are unexercised on a live pod.** The python
-  queue-clear/readiness helpers were verified against a fake ComfyUI only.
+- **The launcher's queue-clear has only run against a fresh pod.** The python helpers
+  ran live on 2026-10-23 (both instances reported READY, the batch completed), but no
+  stale queue existed to clear, so the clear-before-relaunch path is still unproven live.
+- **`int8_convrot` and the 2026-09 Comfy-Org repo renames are untested here.** The
+  catalogue points at renamed repos (old names 307-redirect) and int8_convrot files; the
+  built-in `flux`/`wan`/`qwen` provision sets still use the old repo names. `hf download`
+  is expected to follow the redirect but has not been watched doing it.

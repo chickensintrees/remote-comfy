@@ -25,7 +25,11 @@ HOST="${1:?host}"; PORT="${2:?port}"; REMOTE="${3:?remote dir}"; LOCAL="${4:?loc
 INTERVAL="${5:-60}"
 SSHOPT="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=20"
 # slug identifies WHICH remote dir this loop covers, for the per-directory sentinel
-SLUG="$(echo "$REMOTE" | tr -c "A-Za-z0-9" "_" )"
+# Must equal autostop._slug(): printf, NOT echo. echo's trailing newline was translated
+# to "_", so the loop wrote _workspace_out_ while the watchdog looked for _workspace_out
+# and could never see a directory as synced (live pod, 2026-10-23). Tripwired.
+REMOTE="${REMOTE%/}"
+SLUG="$(printf '%s' "$REMOTE" | tr -c "A-Za-z0-9" "_")"
 FAILS=0; FAIL_LIMIT="${SYNC_FAIL_LIMIT:-10}"   # ~10 polls of unreachable host -> exit
 mkdir -p "$LOCAL"
 echo "sync: $HOST:$REMOTE -> $LOCAL every ${INTERVAL}s (ctrl-c to stop)"
