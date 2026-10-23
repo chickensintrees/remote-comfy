@@ -28,7 +28,7 @@ live pod, and most are enforced by an executable test rather than prose.
 ## Quickstart
 
 ```bash
-git clone https://github.com/<you>/remote-comfy && cd remote-comfy
+git clone https://github.com/chickensintrees/remote-comfy && cd remote-comfy
 export RUNPOD_API_KEY=...                      # or: python -m keyring set remote-comfy runpod
 python tests/test_runpod_ops.py                # offline; should print ALL PASS
 python remote_comfy/pod_ctl.py balance
