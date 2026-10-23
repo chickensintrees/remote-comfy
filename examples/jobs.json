@@ -1,0 +1,8 @@
+[
+  {"id": "lighthouse-0", "workflow": "workflows/flux1_dev_txt2img.json",
+   "set": {"2.text": "a lighthouse at dusk, 35mm photo", "6.seed": 1}},
+  {"id": "lighthouse-1", "workflow": "workflows/flux1_dev_txt2img.json",
+   "set": {"2.text": "a lighthouse in fog, 35mm photo", "6.seed": 2}},
+  {"id": "harbour-0", "workflow": "workflows/flux1_dev_txt2img.json",
+   "set": {"2.text": "a small harbour at dawn, 35mm photo", "6.seed": 3}}
+]

@@ -1,0 +1,17 @@
+name: tripwires
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ["3.9", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: tripwires (offline, no key)
+        run: python tests/test_runpod_ops.py
+      - name: shell syntax
+        run: for f in pod/*.sh local/*.sh scripts/*.sh; do bash -n "$f" || exit 1; done

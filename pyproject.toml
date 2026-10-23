@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "remote-comfy"
+version = "0.1.0"
+description = "Rent a RunPod GPU, run ComfyUI on it, drive it from your laptop, and never leave it billing."
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.9"
+dependencies = []
+
+[project.optional-dependencies]
+keyring = ["keyring"]
+luma = ["pillow", "numpy"]
+
+[project.scripts]
+rc-pod = "remote_comfy.pod_ctl:main"
+rc-models = "remote_comfy.check_latest_models:main"
+
+[tool.setuptools]
+packages = ["remote_comfy"]

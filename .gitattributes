@@ -1,0 +1,3 @@
+# Pod scripts run on Linux; CRLF breaks bash ("$'\r': command not found").
+*.sh text eol=lf
+*.py text eol=lf
