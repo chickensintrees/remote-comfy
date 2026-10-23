@@ -196,7 +196,7 @@ def retire_pod(pod_id, key, dry, why, roots=()):
         (" (unsynced: %s)" % unsynced) if unsynced else
         ("" if roots else " [WEAK: no --outputs-root, global sentinel only]")))
     if stock == "High":
-        log("stock is High — a stop should be resumable; stopping")
+        log("stock is High - a stop should be resumable; stopping")
         stop_pod(pod_id, key, dry); return True
     if synced:
         log("stock=%s: a stop would likely STRAND this pod. Outputs are synced, so "
@@ -229,7 +229,7 @@ def main():
     a = ap.parse_args()
     key = os.environ.get("RUNPOD_API_KEY")
     if not key and not a.dry_run:
-        sys.exit("RUNPOD_API_KEY not in env — refusing to start (could never stop the pod)")
+        sys.exit("RUNPOD_API_KEY not in env - refusing to start (could never stop the pod)")
 
     start = time.time(); last_busy = time.time(); idle_s = a.idle_min * 60
     log("watchdog up: pod=%s idle-limit=%.0fmin poll=%.0fs max=%.1fh lock-ttl=%.0fmin" %
@@ -242,15 +242,15 @@ def main():
         held, age = lock_held(a.lock_ttl_min)
         if held:
             last_busy = time.time()
-            log("lock fresh (%s, %.0fs old) — holding" % (LOCK, age))
+            log("lock fresh (%s, %.0fs old) - holding" % (LOCK, age))
             continue
         if age is not None:
-            log("lock STALE (%.1f min > %.1f min ttl) — ignoring it; the job that took it "
+            log("lock STALE (%.1f min > %.1f min ttl) - ignoring it; the job that took it "
                 "did not release or refresh it" % (age / 60.0, a.lock_ttl_min))
         busy = comfy_busy(a.comfy)
         if busy is None:
             last_busy = time.time()          # unreachable != idle (may be booting)
-            log("comfy unreachable — holding")
+            log("comfy unreachable - holding")
             continue
         if busy:
             last_busy = time.time()

@@ -55,7 +55,7 @@ def main():
         return 0
 
     for org in (a.org or ORGS):
-        print("=== %s — newest ===" % org)
+        print("=== %s - newest ===" % org)
         show(api("models", author=org, sort="lastModified", direction=-1, limit=40), a.limit)
         print()
     print("REMINDER: newest != best. Check licence (open weights vs API-only), VRAM/file "

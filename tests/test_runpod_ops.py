@@ -587,6 +587,16 @@ def main():
     check(all(f in hsrc for f in ('"--comfy"', '"--shard"', '"--of"')),
           "harness accepts the --comfy/--shard/--of contract launch-sharded.sh passes")
 
+    # --- Console output must be ASCII: a Windows console (cp1252) printed the em dash in
+    # pod_ctl's missing-key message as a garbage glyph (2026-10-23, fresh-clone test).
+    bad_out = []
+    for f in sorted(os.listdir(os.path.join(ROOT, "remote_comfy"))):
+        if f.endswith(".py"):
+            for i, l in enumerate(io.open(os.path.join(ROOT, "remote_comfy", f), encoding="utf-8"), 1):
+                if re.search(r"\b(print|sys\.exit|log|input)\(", l) and any(ord(c) > 127 for c in l):
+                    bad_out.append("%s:%d" % (f, i))
+    check(not bad_out, "user-facing output strings are ASCII %s" % (bad_out[:5] or ""))
+
     # --- PUBLIC REPO HYGIENE: no keys, no absolute home paths in anything we ship.
     # Proven able to fail: a planted "rpa_" + 24 chars in a scratch file was caught.
     leak = re.compile(r"(rpa_[A-Za-z0-9]{20,}|hf_[A-Za-z0-9]{30,}|sk-[A-Za-z0-9]{20,}"

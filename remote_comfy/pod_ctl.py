@@ -30,7 +30,7 @@ def key():
             return k
     except Exception:
         pass
-    sys.exit("no RUNPOD_API_KEY — export it, or store it with "
+    sys.exit("no RUNPOD_API_KEY - export it, or store it with "
              "`python -m keyring set remote-comfy runpod`")
 
 
