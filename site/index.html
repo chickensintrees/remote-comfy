@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>remote-comfy: rent a GPU, run ComfyUI, never leave it billing</title>
+<meta name="description" content="An open-source toolkit for renting a GPU on RunPod, running ComfyUI on it and driving it from your laptop, with a watchdog on the pod that shuts it down when the work stops.">
+<link rel="canonical" href="https://billmoore.ai/remote-comfy">
+<meta property="og:title" content="remote-comfy: rent a GPU, run ComfyUI, never leave it billing">
+<meta property="og:description" content="An open-source toolkit for renting a GPU on RunPod, running ComfyUI on it and driving it from your laptop, with a watchdog on the pod that shuts it down when the work stops.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://billmoore.ai/remote-comfy">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<style>
+@font-face { font-family: "Inter"; src: url("fonts/Inter.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
+@font-face { font-family: "IBM Plex Mono"; src: url("fonts/IBMPlexMono-Regular.ttf") format("truetype"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "IBM Plex Mono"; src: url("fonts/IBMPlexMono-Medium.ttf") format("truetype"); font-weight: 500; font-display: swap; }
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --paper: #0b0b0c;
+  --paper-2: #1a1a1d;
+  --ink: #f5f5f5;
+  --ink-2: #9a9aa0;
+  --hair: rgba(245, 245, 245, .16);
+  --accent: #6e6e74;
+  --accent-d: #9a9aa0;
+  --display: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --serif: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --pad: clamp(16px, 4.4vw, 64px);
+  --bar: 44px;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]):not([data-theme="1997"]) {
+    --paper: #ffffff;
+    --paper-2: #f0f0f1;
+    --ink: #0b0b0c;
+    --ink-2: #6e6e74;
+    --hair: rgba(11, 11, 12, .16);
+    --accent: #9a9aa0;
+    --accent-d: #6e6e74;
+  }
+}
+:root[data-theme="light"] {
+  --paper: #ffffff;
+  --paper-2: #f0f0f1;
+  --ink: #0b0b0c;
+  --ink-2: #6e6e74;
+  --hair: rgba(11, 11, 12, .16);
+  --accent: #9a9aa0;
+  --accent-d: #6e6e74;
+}
+
+html { font-size: 16px; -webkit-font-smoothing: antialiased; -webkit-text-size-adjust: 100%; scroll-padding-top: calc(var(--bar) + 20px); }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+body { background: var(--paper); color: var(--ink); font-family: var(--serif); font-weight: 300; font-size: 18px; line-height: 1.5; }
+body::before { content: ""; display: block; height: 3px; background: var(--ink); }
+a { color: inherit; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+a:hover { color: var(--accent-d); }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.wrap { max-width: 1440px; margin: 0 auto; padding: 0 var(--pad); }
+.mono { font-family: var(--mono); font-size: 12px; line-height: 1.55; letter-spacing: .02em; }
+.caps { text-transform: uppercase; letter-spacing: .12em; }
+.skip { position: absolute; left: -9999px; }
+.skip:focus { left: 12px; top: 12px; z-index: 50; background: var(--ink); color: var(--paper); padding: 8px 12px; font-family: var(--mono); font-size: 13px; }
+code { font-family: var(--mono); font-size: .86em; background: var(--paper-2); padding: 2px 5px; overflow-wrap: anywhere; }
+
+/* running head */
+.bar { position: sticky; top: 0; z-index: 20; background: var(--paper); border-bottom: 1px solid var(--ink); }
+.bar .wrap { display: flex; align-items: center; gap: 24px; height: var(--bar); font-family: var(--mono); font-size: 12px; letter-spacing: .04em; }
+.bar a { text-decoration: none; white-space: nowrap; }
+.bar a:hover { text-decoration: underline; }
+.bar nav { display: flex; gap: 22px; margin-left: auto; text-transform: uppercase; letter-spacing: .1em; font-size: 11px; }
+.bar nav a span { color: var(--accent-d); margin-right: 5px; }
+.btn { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: .1em; border: 1px solid var(--ink); padding: 4px 9px 3px; white-space: nowrap; }
+.btn:hover { background: var(--ink); color: var(--paper); }
+@media (max-width: 1020px) { .bar nav { display: none; } .bar .btn { margin-left: auto; } }
+
+/* title page */
+.title { padding-top: clamp(28px, 5vw, 64px); }
+.title .over { display: flex; justify-content: space-between; gap: 16px; border-bottom: 1px solid var(--ink); padding-bottom: 8px; margin-bottom: clamp(18px, 2.6vw, 34px); }
+h1 { font-family: var(--display); font-weight: 200; font-size: min(9.4vw, 132px); line-height: .96; letter-spacing: -.045em; }
+h1 em { font-style: normal; color: var(--accent); }
+.front { display: grid; grid-template-columns: minmax(0, 8fr) minmax(0, 4fr); gap: clamp(20px, 3vw, 48px); margin-top: clamp(22px, 3vw, 44px); align-items: start; }
+.lede { font-size: clamp(25px, 2.3vw, 33px); line-height: 1.16; letter-spacing: -.005em; }
+.spec { margin-top: 26px; border-top: 1px solid var(--ink); font-family: var(--mono); font-size: 12.5px; line-height: 1.5; }
+.spec div { display: grid; grid-template-columns: 112px 1fr; gap: 12px; padding: 7px 0 6px; border-bottom: 1px solid var(--hair); }
+.spec dt { text-transform: uppercase; letter-spacing: .1em; font-size: 11px; color: var(--ink-2); padding-top: 1px; }
+.cta { display: inline-flex; align-items: center; gap: 12px; margin-top: 22px; font-family: var(--mono); font-size: 13px; font-weight: 500; background: var(--ink); color: var(--paper); padding: 12px 16px 11px; text-decoration: none; letter-spacing: .02em; overflow-wrap: anywhere; }
+.cta:hover { background: #cfcfcf; color: #0b0b0c; }
+.cta::after { content: "\2192"; }
+
+/* hero, strip, gallery */
+img { display: block; max-width: 100%; height: auto; }
+.hero-frame { border: 1px solid var(--ink); background: var(--ink); aspect-ratio: 1792 / 768; overflow: hidden; }
+.hero-frame img { width: 100%; height: 100%; object-fit: cover; }
+.strip { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; margin-top: clamp(22px, 3vw, 40px); padding-top: 12px; border-top: 1px solid var(--ink); }
+.strip a { text-decoration: none; display: block; }
+.strip img, .gallery img { width: 100%; aspect-ratio: 1792 / 768; object-fit: cover; background: #000; border: 1px solid var(--ink); }
+.strip a:hover img, .gallery a:hover img { outline: 2px solid var(--accent); outline-offset: 1px; }
+.strip span, .gallery span { display: block; padding-top: 5px; font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-2); }
+.strip span b, .gallery span b { font-weight: 500; color: var(--ink); }
+.subh { font-family: var(--mono); font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: .12em; color: var(--accent-d); margin-bottom: 10px; }
+.gallery { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px clamp(14px, 2vw, 28px); }
+.gallery a { text-decoration: none; }
+.objs { list-style: none; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: clamp(14px, 2vw, 28px); }
+.obj { border-top: 1px solid var(--ink); padding-top: 8px; }
+.obj-top { display: flex; gap: 10px; margin-bottom: 8px; }
+.obj-top b { font-weight: 500; color: var(--accent-d); white-space: nowrap; }
+.obj-in { width: 100%; aspect-ratio: 1; object-fit: cover; border: 1px solid var(--ink); }
+.obj-views { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; margin-top: 4px; }
+.obj-views img { width: 100%; aspect-ratio: 1; object-fit: cover; background: #9a9aa0; }
+
+/* terminal captures: always dark, like a screenshot */
+.terms { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: clamp(28px, 3vw, 44px); }
+.term { border: 1px solid var(--ink); background: #0b0b0c; color: #d6d6d9; min-width: 0; }
+.term-bar { display: flex; justify-content: space-between; gap: 12px; padding: 7px 12px 6px; border-bottom: 1px solid rgba(245, 245, 245, .22); font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: .1em; color: #9a9aa0; }
+.term-bar b { font-weight: 500; color: #f5f5f5; margin-right: 6px; }
+.term pre { margin: 0; padding: 12px; font-family: var(--mono); font-size: 11.5px; line-height: 1.55; overflow-x: auto; white-space: pre; }
+.term .k { color: #ffffff; font-weight: 500; }
+.term .c { color: #6e6e74; }
+
+/* diagram */
+.diagram-fig { margin-bottom: clamp(28px, 3.4vw, 48px); }
+.diagram { border: 1px solid var(--ink); background: var(--paper); overflow-x: auto; }
+.diagram svg { display: block; width: 100%; min-width: 660px; height: auto; }
+.dg .frame { fill: none; stroke: var(--ink); stroke-width: 1.5; }
+.dg .pod-frame { fill: var(--paper-2); stroke: var(--ink); stroke-width: 3; }
+.dg .b { fill: var(--paper); stroke: var(--ink); stroke-width: 1.5; }
+.dg .api { fill: var(--ink); stroke: var(--ink); stroke-width: 1.5; }
+.dg text { font-family: var(--mono); fill: var(--ink); }
+.dg .t { font-size: 22px; font-weight: 500; }
+.dg .api-t { font-size: 22px; font-weight: 500; fill: var(--paper); }
+.dg .h { font-size: 17px; letter-spacing: .14em; fill: var(--accent-d); font-weight: 500; }
+.dg .l { font-size: 19px; fill: var(--ink-2); }
+.dg .t2 { font-size: 19px; font-weight: 500; }
+.dg .l2 { font-size: 20px; fill: var(--ink-2); }
+.diagram svg.tall { display: none; min-width: 0; }
+@media (max-width: 560px) { .diagram svg { display: none; } .diagram svg.tall { display: block; } }
+.dg .a { fill: none; stroke: var(--ink); stroke-width: 1.5; }
+.dg .d { stroke-dasharray: 6 6; }
+.dg .tip { fill: var(--ink); }
+.cap { padding-top: 8px; color: var(--ink-2); }
+.cap b { font-weight: 500; color: var(--ink); }
+
+/* parts */
+.part { padding-top: clamp(64px, 8vw, 120px); }
+.part-head { border-top: 3px solid var(--ink); box-shadow: inset 0 4px 0 var(--paper), inset 0 5px 0 var(--ink); padding-top: 18px; display: grid; grid-template-columns: minmax(0, 8fr) minmax(0, 4fr); gap: clamp(20px, 3vw, 48px); align-items: end; margin-bottom: clamp(24px, 3vw, 40px); }
+.part-no { color: var(--accent-d); margin-bottom: 10px; font-weight: 500; }
+h2 { font-family: var(--display); font-weight: 200; font-size: clamp(34px, 5vw, 72px); line-height: 1; letter-spacing: -.04em; }
+.part-head .intro { font-size: 19px; line-height: 1.4; padding-bottom: 4px; }
+.cmd { display: flex; align-items: stretch; border: 1px solid var(--ink); margin-bottom: 12px; }
+.cmd code { flex: 1; min-width: 0; padding: clamp(16px, 2vw, 26px); font-size: clamp(13px, 1.5vw, 19px); line-height: 1.45; background: none; user-select: all; }
+.cmd button { flex: none; border: 0; border-left: 1px solid var(--ink); padding: 0 clamp(14px, 2vw, 28px); }
+.cmdnote { color: var(--ink-2); font-size: 12px; line-height: 1.6; max-width: 72em; }
+.cmdnote code { font-size: 1em; }
+.figcap { color: var(--ink-2); margin-top: 10px; margin-bottom: clamp(28px, 3.4vw, 48px); }
+.figcap b { font-weight: 500; }
+
+/* fig. 2 the run */
+.fig { border: 1px solid var(--ink); display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.fig li { list-style: none; position: relative; padding: 16px 18px 20px; border-left: 1px solid var(--ink); }
+.fig li:first-child { border-left: 0; }
+.fig li:last-child { background: var(--ink); color: var(--paper); }
+.fig .n { font-family: var(--mono); font-size: 11px; letter-spacing: .1em; color: var(--accent-d); font-weight: 500; }
+.fig li:last-child .n { color: var(--ink-2); }
+.fig strong { display: block; font-family: var(--display); font-weight: 500; text-transform: uppercase; font-size: clamp(20px, 2.2vw, 30px); line-height: 1; margin: 22px 0 10px; letter-spacing: -.01em; }
+.fig p { font-family: var(--mono); font-size: 12px; line-height: 1.55; }
+.fig li code { background: none; padding: 0; font-weight: 500; }
+.fig li + li::before { content: "\2192"; position: absolute; left: -14px; top: 38px; width: 27px; height: 27px; border-radius: 50%; border: 1px solid var(--ink); background: var(--paper); color: var(--ink); font-family: var(--mono); font-size: 14px; line-height: 25px; text-align: center; z-index: 1; }
+
+/* sub-sections, tables */
+.sub { margin-top: clamp(40px, 5vw, 72px); }
+.sub > h3, .two h3 { font-family: var(--mono); font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: .12em; color: var(--accent-d); margin-bottom: 10px; }
+.two { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(28px, 4vw, 72px); align-items: start; }
+.two.even { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.prose p { font-size: 21px; line-height: 1.3; }
+.prose p + p { margin-top: .7em; }
+table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 12.5px; line-height: 1.5; border-top: 1px solid var(--ink); }
+th, td { text-align: left; vertical-align: top; padding: 9px 12px 8px 0; border-bottom: 1px solid var(--hair); font-weight: 400; }
+thead th { font-size: 10.5px; text-transform: uppercase; letter-spacing: .1em; color: var(--ink-2); }
+td code { font-size: 1em; }
+.act { display: inline-block; font-size: 10.5px; font-weight: 500; text-transform: uppercase; letter-spacing: .1em; border: 1px solid var(--ink); padding: 2px 7px 1px; white-space: nowrap; }
+.act.on { background: var(--ink); color: var(--paper); }
+td .big { font-family: var(--display); font-size: 26px; line-height: 1; display: block; font-weight: 300; }
+.meter { display: block; height: 8px; border: 1px solid var(--ink); margin-top: 8px; max-width: 260px; }
+.meter i { display: block; height: 100%; background: var(--ink); }
+.scroll { overflow-x: auto; }
+.scroll table { min-width: 560px; }
+
+/* bar chart: managed services */
+.bars { list-style: none; border-top: 1px solid var(--ink); }
+.bars li { display: grid; grid-template-columns: 170px 1fr 64px; gap: 12px; align-items: center; padding: 10px 0 9px; border-bottom: 1px solid var(--hair); font-family: var(--mono); font-size: 12.5px; }
+.bars .track { position: relative; height: 18px; }
+.bars .fill { position: absolute; top: 0; bottom: 0; left: 0; background: var(--accent); }
+.bars li.best .fill { background: var(--ink); }
+.bars .range { position: absolute; top: 0; bottom: 0; border: 1px solid var(--ink); border-left: 0; }
+.bars b { font-weight: 500; text-align: right; }
+
+/* tools */
+.tools { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: clamp(20px, 3vw, 48px); row-gap: clamp(28px, 3vw, 44px); list-style: none; }
+.tool { border-top: 1px solid var(--ink); padding-top: 8px; }
+.tool-top { display: flex; gap: 14px; }
+.tool-top b { font-weight: 500; color: var(--accent-d); }
+.tool-top .where { margin-left: auto; color: var(--ink-2); }
+.tool-top .where.pod { color: var(--paper); background: var(--ink); padding: 0 6px; }
+.tool h3 { font-family: var(--mono); font-weight: 500; font-size: clamp(17px, 1.5vw, 21px); line-height: 1.1; margin: 14px 0 8px; overflow-wrap: anywhere; }
+.tool p { font-size: 19px; line-height: 1.3; }
+
+/* catalogue */
+.cat { columns: 4; column-gap: clamp(20px, 3vw, 48px); }
+.cat section { break-inside: avoid; border-top: 1px solid var(--ink); padding-top: 8px; margin-bottom: 26px; }
+.cat h3 { display: flex; justify-content: space-between; gap: 8px; font-family: var(--mono); font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: .12em; color: var(--accent-d); margin-bottom: 6px; }
+.cat ul { list-style: none; }
+.cat li { display: flex; align-items: baseline; gap: 8px; padding: 5px 0 4px; border-bottom: 1px solid var(--hair); font-size: 15px; line-height: 1.3; }
+.cat li span { flex: 1; min-width: 0; }
+.cat li i { font-style: normal; font-family: var(--mono); font-size: 10.5px; color: var(--ink-2); white-space: nowrap; }
+.lic { font-family: var(--mono); font-size: 9.5px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; border: 1px solid var(--ink); padding: 0 4px; white-space: nowrap; }
+.lic.open { background: var(--ink); color: var(--paper); }
+.lic.nc { border-style: dashed; color: var(--ink-2); border-color: var(--ink-2); }
+.key { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-bottom: clamp(20px, 2.4vw, 32px); color: var(--ink-2); }
+.key span { display: inline-flex; gap: 8px; align-items: baseline; }
+
+/* traps */
+.traps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: clamp(20px, 3vw, 48px); row-gap: clamp(32px, 3.6vw, 52px); list-style: none; }
+.trap { border-top: 1px solid var(--ink); padding-top: 8px; }
+.trap-top { display: flex; gap: 14px; }
+.trap-top b { font-weight: 500; color: var(--accent-d); }
+.trap-top .date { margin-left: auto; color: var(--ink-2); }
+.trap h3 { font-family: var(--display); font-weight: 500; font-size: clamp(23px, 2.2vw, 31px); line-height: 1.04; letter-spacing: -.015em; margin: 16px 0 8px; }
+.trap p { font-size: 19px; line-height: 1.3; }
+.more { margin-top: clamp(28px, 3vw, 44px); }
+
+.limits { list-style: none; border-top: 1px solid var(--ink); }
+.limits li { padding: 10px 0 9px; border-bottom: 1px solid var(--hair); font-size: 19.5px; line-height: 1.3; }
+.get { margin-top: clamp(40px, 5vw, 72px); border: 1px solid var(--ink); display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); }
+.get > div { padding: clamp(18px, 2.4vw, 32px); }
+.get > a { display: flex; flex-direction: column; justify-content: space-between; gap: 24px; background: var(--ink); color: var(--paper); text-decoration: none; padding: clamp(18px, 2.4vw, 32px); }
+.get > a:hover { background: #cfcfcf; color: #0b0b0c; }
+.get > a strong { font-family: var(--display); font-weight: 500; font-size: clamp(22px, 2.3vw, 32px); line-height: 1.05; text-transform: uppercase; overflow-wrap: anywhere; }
+.get > a strong::after { content: " \2192"; }
+.get h3 { font-family: var(--display); font-weight: 500; text-transform: uppercase; font-size: clamp(26px, 3vw, 44px); line-height: .95; letter-spacing: -.015em; }
+
+/* colophon */
+footer { margin-top: clamp(64px, 8vw, 120px); border-top: 3px solid var(--ink); padding: 20px 0 64px; }
+footer .wrap { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: clamp(20px, 3vw, 48px); font-family: var(--mono); font-size: 12.5px; line-height: 1.6; }
+footer ul { list-style: none; columns: 2; column-gap: 32px; }
+footer li { padding: 5px 0; border-bottom: 1px solid var(--hair); break-inside: avoid; }
+footer h2 { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .12em; color: var(--accent-d); margin-bottom: 8px; }
+
+@media (max-width: 1100px) { .cat { columns: 3; } }
+@media (max-width: 900px) {
+  body { font-size: 19.5px; }
+  .front, .part-head, .two, .two.even, .get, footer .wrap { grid-template-columns: minmax(0, 1fr); }
+  .part-head { gap: 14px; }
+  .fig { grid-template-columns: minmax(0, 1fr); }
+  .fig li { border-left: 0; border-top: 1px solid var(--ink); padding: 14px 16px 16px; display: grid; grid-template-columns: 26px 1fr; column-gap: 8px; }
+  .fig li:first-child { border-top: 0; }
+  .fig strong { margin: 0 0 6px; font-size: 22px; grid-column: 2; }
+  .fig p { grid-column: 2; }
+  .fig li + li::before { content: "\2193"; left: auto; right: 16px; top: -14px; }
+  .tools, .traps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cat { columns: 2; }
+  .strip { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .strip a:nth-child(n+4) { display: none; }
+  .terms { grid-template-columns: minmax(0, 1fr); }
+  .objs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 720px) {
+  .gallery { grid-template-columns: minmax(0, 1fr); }
+  .objs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 720px) {
+  .cmd { flex-direction: column; }
+  .cmd button { border-left: 0; border-top: 1px solid var(--ink); padding: 12px; }
+  .prose p, .tool p, .trap p { font-size: 19.5px; }
+  footer ul { columns: 1; }
+  .bars li { grid-template-columns: 116px 1fr 54px; font-size: 11.5px; }
+}
+@media (max-width: 560px) {
+  .tools, .traps { grid-template-columns: minmax(0, 1fr); }
+  .cat { columns: 1; }
+  .title .over span:last-child { display: none; }
+  .spec div { grid-template-columns: 96px 1fr; }
+  #gpus .scroll table { min-width: 0; }
+  #gpus .big { font-size: 20px; }
+  #gpus .stock { display: none; }
+}
+
+/* ---------- theme "1997": the same page, as a 1997 browser would draw it ---------- */
+.y97 { display: none; }
+:root[data-theme="1997"] {
+  --paper: #c0c0c0;
+  --paper-2: #dfdfdf;
+  --ink: #000000;
+  --ink-2: #404040;
+  --hair: #808080;
+  --accent: #ff0000;
+  --accent-d: #800000;
+  --display: "Times New Roman", Times, serif;
+  --serif: "Times New Roman", Times, serif;
+  --mono: "Courier New", Courier, monospace;
+}
+:root[data-theme="1997"] .y97 { display: block; }
+:root[data-theme="1997"] body { font-weight: 400; font-size: 17px; line-height: 1.35; }
+:root[data-theme="1997"] .wrap { max-width: 860px; }
+:root[data-theme="1997"] h1 { font-weight: 700; font-size: clamp(34px, 7vw, 60px); letter-spacing: 0; line-height: 1.05; color: #000080; text-align: center; }
+:root[data-theme="1997"] h1 em { color: #ff0000; }
+:root[data-theme="1997"] h2 { font-weight: 700; font-size: clamp(26px, 4.4vw, 38px); letter-spacing: 0; color: #800000; }
+:root[data-theme="1997"] .trap h3 { font-weight: 700; letter-spacing: 0; }
+:root[data-theme="1997"] a { color: #0000ee; }
+:root[data-theme="1997"] a:visited { color: #551a8b; }
+:root[data-theme="1997"] .bar { background: #c0c0c0; border-bottom: 2px groove #ffffff; }
+:root[data-theme="1997"] .part-head { border-top: 4px ridge #ffffff; box-shadow: none; }
+:root[data-theme="1997"] .title .over { border-bottom: 2px groove #ffffff; }
+:root[data-theme="1997"] .btn,
+:root[data-theme="1997"] .cmd button { background: #c0c0c0; color: #000000; border: 2px outset #ffffff; font-family: "MS Sans Serif", Arial, Helvetica, sans-serif; font-size: 12px; letter-spacing: 0; text-transform: none; padding: 3px 10px; }
+:root[data-theme="1997"] .cta,
+:root[data-theme="1997"] .get > a { background: #c0c0c0; color: #0000ee; border: 3px outset #ffffff; text-decoration: underline; }
+:root[data-theme="1997"] .diagram,
+:root[data-theme="1997"] .hero-frame,
+:root[data-theme="1997"] .term { border: 3px inset #ffffff; }
+:root[data-theme="1997"] .term { background: #000000; color: #00ff00; }
+:root[data-theme="1997"] .term .k { color: #ffff00; }
+:root[data-theme="1997"] .fig { border: 2px inset #ffffff; }
+:root[data-theme="1997"] .fig li:last-child { background: #000080; color: #ffffff; }
+:root[data-theme="1997"] .fig li:last-child .n { color: #ffff00; }
+:root[data-theme="1997"] .dg .api { fill: #000080; }
+:root[data-theme="1997"] .dg .api-t { fill: #ffff00; }
+:root[data-theme="1997"] code { background: #ffffff; border: 1px inset #ffffff; }
+:root[data-theme="1997"] #traps h2::after { content: " NEW!"; color: #ff0000; font-size: .5em; vertical-align: super; animation: y97blink 1s steps(2, start) infinite; }
+@keyframes y97blink { to { visibility: hidden; } }
+@keyframes y97scroll { from { transform: translateX(100%); } to { transform: translateX(-100%); } }
+.y97-banner { background: #000080; color: #ffff00; font-family: "Times New Roman", Times, serif; font-weight: 700; font-size: 18px; overflow: hidden; white-space: nowrap; border-top: 2px outset #ffffff; border-bottom: 2px inset #ffffff; padding: 4px 0; }
+.y97-banner span { display: inline-block; padding-left: 100%; animation: y97scroll 22s linear infinite; }
+.y97-works { margin: 14px auto 0; max-width: 860px; text-align: center; font-family: "Courier New", Courier, monospace; font-weight: 700; font-size: 14px; color: #000000; padding: 6px; border: 2px solid #000000; background: repeating-linear-gradient(-45deg, #ffcc00 0 14px, #000000 14px 28px); }
+.y97-works b { background: #ffcc00; padding: 2px 10px; }
+.y97-foot { text-align: center; padding: 18px 12px 30px; font-family: "Times New Roman", Times, serif; font-size: 15px; color: #000000; }
+.y97-foot hr { border: 0; border-top: 4px ridge #ffffff; margin: 0 auto 16px; max-width: 860px; }
+.y97-counter { display: inline-block; background: #000000; color: #00ff00; font-family: "Courier New", Courier, monospace; font-weight: 700; font-size: 20px; letter-spacing: 4px; padding: 2px 8px; border: 3px inset #c0c0c0; vertical-align: middle; }
+.y97-badge { display: inline-block; margin: 10px 6px 0; padding: 4px 10px; border: 3px outset #ffffff; background: #c0c0c0; font-family: Arial, Helvetica, sans-serif; font-size: 11px; font-weight: 700; line-height: 1.2; }
+.y97-badge i { display: block; font-style: normal; font-weight: 400; font-size: 10px; }
+@media (prefers-reduced-motion: reduce) {
+  .y97-banner span { animation: none; padding-left: 12px; }
+  :root[data-theme="1997"] #traps h2::after { animation: none; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#use">Skip to setup</a>
+
+<div class="bar">
+  <div class="wrap">
+    <a href="/">&#8592; billmoore.ai</a>
+    <nav aria-label="Sections">
+      <a href="#use"><span>1</span>Use it</a>
+      <a href="#how"><span>2</span>How it works</a>
+      <a href="#examples"><span>3</span>Examples</a>
+      <a href="#tools"><span>4</span>Tools</a>
+      <a href="#gpus"><span>5</span>GPUs</a>
+      <a href="#models"><span>6</span>Models</a>
+      <a href="#traps"><span>7</span>Traps</a>
+      <a href="#status"><span>8</span>Status</a>
+    </nav>
+    <button class="btn" id="theme" type="button">Theme</button>
+  </div>
+</div>
+
+<div class="y97 y97-banner" aria-hidden="true"><span>*** Welcome to the remote-comfy home page *** Rent a GPU, run ComfyUI on it, and never leave it billing *** scroll down for the traps ***</span></div>
+<div class="y97 y97-works" aria-hidden="true"><b>THIS SOFTWARE IS UNDER CONSTRUCTION (v0.1)</b></div>
+<main>
+<header class="title wrap" id="top">
+  <p class="over mono caps"><span>Open source &middot; MIT</span><span>RunPod + ComfyUI + Claude Code</span></p>
+  <h1>remote-<br>comfy<em>.</em></h1>
+
+  <div class="front">
+    <figure>
+      <div class="hero-frame"><img src="media/hero.jpg" alt="A woman in a silver dress stands among floating crystals in a crowded room" width="1792" height="768"></div>
+      <figcaption class="cap mono"><b class="caps">Pl. 1</b>&ensp;A frame rendered with FLUX.2 [dev] on two rented L40S GPUs.</figcaption>
+    </figure>
+    <div>
+      <p class="lede">A toolkit for renting a GPU on RunPod, running ComfyUI on it, and driving it from your laptop. A watchdog on the pod shuts it down when the work stops, so a forgotten pod does not bill overnight.</p>
+      <dl class="spec">
+        <div><dt>What</dt><dd>It is a set of small Python and shell tools, a step-by-step playbook, and a Claude Code skill.</dd></div>
+        <div><dt>Needs</dt><dd>It needs Python 3.9 or newer, ssh, bash, and a RunPod account with credit.</dd></div>
+        <div><dt>For</dt><dd>It is written for coding agents such as Claude Code, and every step also works by hand.</dd></div>
+        <div><dt>Status</dt><dd>This is version 0.1. It last ran on a live pod on 23 October 2026.</dd></div>
+      </dl>
+      <a class="cta" href="https://github.com/chickensintrees/remote-comfy" rel="noopener">github.com/chickensintrees/remote-comfy</a>
+    </div>
+  </div>
+
+  <div class="strip" aria-label="Frames rendered on rented GPUs">
+    <a href="#examples"><img src="media/f1-s.jpg" alt="" width="560" height="240" loading="lazy"><span><b>Pl. 2</b></span></a>
+    <a href="#examples"><img src="media/f2-s.jpg" alt="" width="560" height="240" loading="lazy"><span><b>Pl. 3</b></span></a>
+    <a href="#examples"><img src="media/f3-s.jpg" alt="" width="560" height="240" loading="lazy"><span><b>Pl. 4</b></span></a>
+    <a href="#examples"><img src="media/f4-s.jpg" alt="" width="560" height="240" loading="lazy"><span><b>Pl. 5</b></span></a>
+    <a href="#examples"><img src="media/f5-s.jpg" alt="" width="560" height="240" loading="lazy"><span><b>Pl. 6</b></span></a>
+    <a href="#examples"><img src="media/f6-s.jpg" alt="" width="560" height="240" loading="lazy"><span><b>Pl. 7</b></span></a>
+  </div>
+</header>
+
+<section class="part wrap" id="use">
+  <div class="part-head">
+    <div><p class="part-no mono caps">1</p><h2>Use it</h2></div>
+    <p class="intro">Paste this line into Claude Code. It clones the repository, runs the offline checks and installs the skill, and it asks before it changes anything outside that folder.</p>
+  </div>
+  <div class="cmd">
+    <code id="the-line">Set up remote-comfy with me by following https://billmoore.ai/remote-comfy/install.md</code>
+    <button class="btn" id="copy-line" type="button" hidden>Copy</button>
+  </div>
+  <p class="cmdnote mono">You type your RunPod API key into your own terminal, so it never passes through the chat. Nothing is rented until you ask for a pod. To set it up by hand, follow the quickstart in the <a href="https://github.com/chickensintrees/remote-comfy#quickstart" rel="noopener">README</a>.</p>
+</section>
+
+<section class="part wrap" id="how">
+  <div class="part-head">
+    <div><p class="part-no mono caps">2</p><h2>How it works</h2></div>
+    <p class="intro">A batch runs on the pod, next to the GPUs. Your machine only rents the pod, starts the work and pulls the results home.</p>
+  </div>
+  <figure class="diagram-fig">
+    <div class="diagram" role="img" aria-labelledby="fig1">
+      <svg class="dg" viewBox="0 0 1200 560" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+        <defs>
+          <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse"><path class="tip" d="M0 0 L10 5 L0 10 z"/></marker>
+        </defs>
+        <rect class="frame" x="20" y="20" width="360" height="520"/>
+        <text class="h" x="44" y="58">YOUR MACHINE</text>
+        <rect class="pod-frame" x="820" y="20" width="360" height="520"/>
+        <text class="h" x="844" y="58">POD ON RUNPOD</text>
+
+        <rect class="api" x="480" y="90" width="240" height="64"/>
+        <text class="api-t" x="600" y="129" text-anchor="middle">RunPod API</text>
+
+        <rect class="b" x="50" y="90" width="300" height="64"/><text class="t" x="70" y="129">pod_ctl.py</text>
+        <rect class="b" x="50" y="230" width="300" height="64"/><text class="t" x="70" y="269">comfy_client.py</text>
+        <rect class="b" x="50" y="370" width="300" height="150"/><text class="t" x="70" y="409">sync-outputs.sh</text>
+
+        <rect class="b" x="850" y="90" width="300" height="64"/><text class="t" x="870" y="129">autostop.py</text>
+        <rect class="b" x="850" y="230" width="300" height="64"/><text class="t" x="870" y="269">ComfyUI, one per GPU</text>
+        <rect class="b" x="850" y="370" width="300" height="64"/><text class="t" x="870" y="409">/workspace/out</text>
+        <rect class="b" x="850" y="456" width="300" height="64"/><text class="t" x="870" y="495">.synced.d/&lt;folder&gt;</text>
+
+        <path class="a" d="M350 122 H478" marker-end="url(#ah)"/>
+        <text class="l" x="415" y="110" text-anchor="middle">rent</text>
+        <path class="a" d="M850 122 H722" marker-end="url(#ah)"/>
+        <text class="l" x="785" y="110" text-anchor="middle">stop</text>
+
+        <path class="a" d="M350 262 H848" marker-end="url(#ah)"/>
+        <text class="l" x="600" y="250" text-anchor="middle">workflows over an SSH tunnel</text>
+
+        <path class="a" d="M850 402 H352" marker-end="url(#ah)"/>
+        <text class="l" x="600" y="390" text-anchor="middle">every result, streamed back</text>
+
+        <path class="a" d="M350 488 H848" marker-end="url(#ah)"/>
+        <text class="l" x="600" y="476" text-anchor="middle">marks each folder as home</text>
+
+        <path class="a" d="M1000 154 V228" marker-end="url(#ah)"/>
+        <text class="l" x="1012" y="198">polls queue</text>
+        <path class="a d" d="M1150 488 H1166 V122 H1152" marker-end="url(#ah)"/>
+        <text class="l" x="1000" y="342" text-anchor="middle">read before any terminate</text>
+      </svg>
+      <svg class="dg tall" viewBox="0 0 710 700" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+        <defs>
+          <marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse"><path class="tip" d="M0 0 L10 5 L0 10 z"/></marker>
+        </defs>
+        <rect class="frame" x="10" y="10" width="690" height="130"/>
+        <text class="h" x="26" y="40">YOUR MACHINE</text>
+        <rect class="pod-frame" x="10" y="340" width="690" height="350"/>
+        <text class="h" x="26" y="672">POD ON RUNPOD</text>
+
+        <rect class="b" x="20" y="58" width="190" height="64"/><text class="t2" x="30" y="97">pod_ctl.py</text>
+        <rect class="b" x="250" y="58" width="190" height="64"/><text class="t2" x="260" y="97">comfy_client.py</text>
+        <rect class="b" x="480" y="58" width="190" height="64"/><text class="t2" x="490" y="97">sync-outputs.sh</text>
+
+        <rect class="api" x="20" y="210" width="190" height="64"/>
+        <text class="api-t t2" x="115" y="249" text-anchor="middle">RunPod API</text>
+
+        <rect class="b" x="20" y="390" width="190" height="64"/><text class="t2" x="30" y="429">autostop.py</text>
+        <rect class="b" x="250" y="390" width="190" height="64"/><text class="t2" x="260" y="429">ComfyUI per GPU</text>
+        <rect class="b" x="480" y="390" width="190" height="64"/><text class="t2" x="490" y="429">/workspace/out</text>
+        <rect class="b" x="480" y="530" width="190" height="64"/><text class="t2" x="490" y="569">.synced.d/&lt;dir&gt;</text>
+
+        <path class="a" d="M115 122 V208" marker-end="url(#ah2)"/>
+        <text class="l2" x="125" y="172">rent</text>
+        <path class="a" d="M115 390 V276" marker-end="url(#ah2)"/>
+        <text class="l2" x="125" y="330">stop</text>
+        <path class="a" d="M345 122 V388" marker-end="url(#ah2)"/>
+        <text class="l2" x="355" y="196">workflows</text>
+        <text class="l2" x="355" y="220">over SSH</text>
+        <path class="a" d="M575 390 V124" marker-end="url(#ah2)"/>
+        <text class="l2" x="565" y="290" text-anchor="end">every result,</text>
+        <text class="l2" x="565" y="314" text-anchor="end">streamed back</text>
+        <path class="a" d="M670 90 H690 V562 H672" marker-end="url(#ah2)"/>
+        <text class="l2" x="560" y="505" text-anchor="middle">marks it as home</text>
+        <path class="a" d="M210 422 H248" marker-end="url(#ah2)"/>
+        <text class="l2" x="230" y="486" text-anchor="middle">polls</text>
+        <path class="a d" d="M480 562 H115 V456" marker-end="url(#ah2)"/>
+        <text class="l2" x="300" y="600" text-anchor="middle">read before any terminate</text>
+      </svg>
+    </div>
+    <figcaption class="cap mono" id="fig1"><b class="caps">Fig. 1</b>&ensp;Your machine rents the pod and pulls the results home. The watchdog on the pod stops it when the work stops, and it will not destroy a pod whose results have not come home.</figcaption>
+  </figure>
+  <ol class="fig" aria-label="A batch from start to finish: check, rent, provision, render, sync">
+    <li><span class="n">A</span><strong>Check</strong><p><code>pod_ctl.py</code> reads your balance and which GPUs are in stock before anything is rented.</p></li>
+    <li><span class="n">B</span><strong>Rent</strong><p>It creates a pod on the cheapest GPU that fits the job, and re-reads the SSH address after every restart.</p></li>
+    <li><span class="n">C</span><strong>Provision</strong><p>The pod installs ComfyUI, its custom nodes and the models, and stops with an error if any file is missing.</p></li>
+    <li><span class="n">D</span><strong>Render</strong><p>One ComfyUI runs on each GPU, and the batch is split across them.</p></li>
+    <li><span class="n">E</span><strong>Sync</strong><p>Each result is copied to your machine as soon as it lands.</p></li>
+  </ol>
+  <p class="figcap mono"><b class="caps">Fig. 2</b>&ensp;A batch from start to finish. The watchdog runs on the pod the whole time.</p>
+
+  <div class="terms">
+    <figure class="term"><figcaption class="term-bar"><span><b>A</b> Your machine</span><span>2026-11-14</span></figcaption><pre><span class="k">$ python remote_comfy/pod_ctl.py availability --min-vram 48</span>
+GPUs >= 48GB in-stock in network-volume DCs:
+  CA-MTL-3   A100 PCIe(80GB,Low,$2.09), H200 SXM(141GB,Low,$5.29)
+  EU-CZ-1    RTX PRO 6000 WK(96GB,Low,$2.79)
+  EU-RO-1    A100 PCIe(80GB,Low,$2.09), RTX PRO 6000(96GB,Low,$2.69), B200(180GB,Low,$7.99)
+  EU-SE-1    A40(48GB,Low,$0.59)
+  US-NC-1    RTX PRO 6000(96GB,Low,$2.69), H200 SXM(141GB,Low,$5.29)
+<span class="c">[9 more data centres]</span></pre></figure>
+    <figure class="term"><figcaption class="term-bar"><span><b>B</b> Pod: /workspace/prov.log</span><span>2026-10-23</span></figcaption><pre>elapsed=287s
+COMFY_READY
+<span class="k">PROVISION_DONE</span>
+<span class="c">[pip resolver warning]</span>
+== torch trio (pinned after custom nodes) ==
+torch 2.14.0+cu126 | vision 0.29.1+cu126 | audio 2.11.0+cu126
+  OK flux1-dev-fp8.safetensors 17G
+  OK flux1-redux-dev.safetensors 124M
+  OK sigclip_vision_patch14_384.safetensors 817M</pre></figure>
+    <figure class="term"><figcaption class="term-bar"><span><b>C</b> Pod: launch log and outputs</span><span>2026-10-23</span></figcaption><pre>comfy 8188 READY
+comfy 8189 READY
+<span class="k">SHARDED_RUN_DONE</span>
+
+/workspace/out:
+-rw-rw-rw- 1 root root 1572424 Oct 23 18:43 harbour-0_rc_00003_.png
+-rw-rw-rw- 1 root root 1058303 Oct 23 18:43 lighthouse-0_rc_00001_.png
+-rw-rw-rw- 1 root root  829508 Oct 23 18:43 lighthouse-1_rc_00002_.png
+
+/workspace/.synced.d:
+-rw-rw-rw- 1 root root       0 Oct 23 18:44 <span class="k">_workspace_out_</span></pre></figure>
+    <figure class="term"><figcaption class="term-bar"><span><b>D</b> Pod: /workspace/autostop.log</span><span>2026-10-23</span></figcaption><pre>18:36:20 watchdog up: pod=&lt;pod&gt; idle-limit=10min poll=30s max=1.5h lock-ttl=20min
+<span class="c">[busy-lock lines while the batch ran]</span>
+18:43:20 lock fresh (/workspace/.busy, 99s old) - holding
+18:43:50 idle 0.5min (limit 10.0)
+<span class="c">[17 more idle lines]</span>
+18:52:50 idle 9.5min (limit 10.0)
+18:53:20 stock check failed: HTTP Error 403: Forbidden
+<span class="k">18:53:20 idle 10.0min >= 10.0min | gpu stock=None | outputs synced=True</span>
+18:53:20 stock=None: a stop would likely STRAND this pod. Outputs are synced, so terminating instead — re-provisioning is cheaper than an unreachable volume.</pre></figure>
+  </div>
+  <p class="figcap mono"><b class="caps">Fig. 3</b>&ensp;Panel A is today's stock. Panels B to D are logs from the live test on two A40 GPUs, with the pod ID removed and repeated lines cut. Three images reached the laptop 153 seconds after launch. The refused API call in panel D is the last trap in section 7, and it is fixed.</p>
+
+
+  <div class="sub two">
+    <div class="prose">
+      <h3>The cost guard</h3>
+      <p>The watchdog runs on the pod, so it keeps working after your laptop sleeps or the agent session ends.</p>
+      <p>Before it retires an idle pod, it checks whether the GPU type is in stock and whether every output folder has reached your machine.</p>
+    </div>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>When</th><th>The watchdog</th></tr></thead>
+        <tbody>
+          <tr><td>ComfyUI has work queued, has not started yet, or a long job is holding the busy lock.</td><td><span class="act">Waits</span></td></tr>
+          <tr><td>ComfyUI has been idle for <code>--idle-min</code>, and the GPU type has high stock.</td><td><span class="act on">Stops</span><br>The pod can be started again later.</td></tr>
+          <tr><td>It is idle, stock is low, and every output folder has been synced.</td><td><span class="act on">Terminates</span></td></tr>
+          <tr><td>It is idle, stock is low, and an output folder has not been synced.</td><td><span class="act">Keeps billing</span><br>It does not destroy work that exists only on the pod.</td></tr>
+          <tr><td>The pod has run for <code>--max-hours</code>, 12 by default.</td><td><span class="act on">Retires it</span><br>The same rules apply.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="part wrap" id="examples">
+  <div class="part-head">
+    <div><p class="part-no mono caps">3</p><h2>Examples</h2></div>
+    <p class="intro">These were made on rented pods with this toolkit and its earlier versions.</p>
+  </div>
+  <div class="sub-first">
+    <h3 class="subh">Images</h3>
+    <div class="gallery">
+      <a class="shot" href="media/f1.jpg"><img src="media/f1-s.jpg" srcset="media/f1-s.jpg 560w, media/f1.jpg 1344w" sizes="(max-width: 720px) 100vw, 50vw" alt="An explosion of glass and gold around a dancing figure" width="560" height="240" loading="lazy"><span class="mono"><b>Pl. 2</b></span></a>
+      <a class="shot" href="media/f2.jpg"><img src="media/f2-s.jpg" srcset="media/f2-s.jpg 560w, media/f2.jpg 1344w" sizes="(max-width: 720px) 100vw, 50vw" alt="A portrait of a woman in a jewelled headdress" width="560" height="240" loading="lazy"><span class="mono"><b>Pl. 3</b></span></a>
+      <a class="shot" href="media/f3.jpg"><img src="media/f3-s.jpg" srcset="media/f3-s.jpg 560w, media/f3.jpg 1344w" sizes="(max-width: 720px) 100vw, 50vw" alt="An empty suit made of folded paper and foil" width="560" height="240" loading="lazy"><span class="mono"><b>Pl. 4</b></span></a>
+      <a class="shot" href="media/f4.jpg"><img src="media/f4-s.jpg" srcset="media/f4-s.jpg 560w, media/f4.jpg 1344w" sizes="(max-width: 720px) 100vw, 50vw" alt="A crowd dancing under falling confetti" width="560" height="240" loading="lazy"><span class="mono"><b>Pl. 5</b></span></a>
+      <a class="shot" href="media/f5.jpg"><img src="media/f5-s.jpg" srcset="media/f5-s.jpg 560w, media/f5.jpg 1344w" sizes="(max-width: 720px) 100vw, 50vw" alt="A woman beside a sculpture made of pearls" width="560" height="240" loading="lazy"><span class="mono"><b>Pl. 6</b></span></a>
+      <a class="shot" href="media/f6.jpg"><img src="media/f6-s.jpg" srcset="media/f6-s.jpg 560w, media/f6.jpg 1344w" sizes="(max-width: 720px) 100vw, 50vw" alt="A crowded shop floor under a red sign" width="560" height="240" loading="lazy"><span class="mono"><b>Pl. 7</b></span></a>
+      <a class="shot" href="media/f7.jpg"><img src="media/f7-s.jpg" srcset="media/f7-s.jpg 560w, media/f7.jpg 1344w" sizes="(max-width: 720px) 100vw, 50vw" alt="A hand holding a torn paper sign" width="560" height="240" loading="lazy"><span class="mono"><b>Pl. 8</b></span></a>
+      <a class="shot" href="media/f8.jpg"><img src="media/f8-s.jpg" srcset="media/f8-s.jpg 560w, media/f8.jpg 1344w" sizes="(max-width: 720px) 100vw, 50vw" alt="A portrait of a woman in front of gold lettering" width="560" height="240" loading="lazy"><span class="mono"><b>Pl. 9</b></span></a>
+    </div>
+    <p class="figcap mono"><b class="caps">Pl. 2&#8211;9</b>&ensp;These are frames from a music video, rendered with FLUX.2 [dev] and a turbo LoRA at 8 steps on two rented L40S GPUs. A frame at 1792&#215;768 took about 82 seconds, and a 90-second layer of 554 frames costs about $11 in GPU time.</p>
+  </div>
+  <div class="sub">
+    <h3 class="subh">3D</h3>
+    <ol class="objs">
+      <li class="obj"><div class="obj-top mono caps"><b>Pl. 10</b><span>Clipboard</span></div>
+        <img class="obj-in" src="media/3d-clipboard-in.jpg" alt="The input image: clipboard" width="512" height="512" loading="lazy">
+        <div class="obj-views"><img src="media/3d-clipboard-000.jpg" alt="The mesh, turned 0 degrees" width="384" height="384" loading="lazy"><img src="media/3d-clipboard-090.jpg" alt="The mesh, turned 90 degrees" width="384" height="384" loading="lazy"><img src="media/3d-clipboard-180.jpg" alt="The mesh, turned 180 degrees" width="384" height="384" loading="lazy"></div></li>
+      <li class="obj"><div class="obj-top mono caps"><b>Pl. 11</b><span>Gold mascot</span></div>
+        <img class="obj-in" src="media/3d-gold_mascot-in.jpg" alt="The input image: gold mascot" width="512" height="512" loading="lazy">
+        <div class="obj-views"><img src="media/3d-gold_mascot-000.jpg" alt="The mesh, turned 0 degrees" width="384" height="384" loading="lazy"><img src="media/3d-gold_mascot-090.jpg" alt="The mesh, turned 90 degrees" width="384" height="384" loading="lazy"><img src="media/3d-gold_mascot-180.jpg" alt="The mesh, turned 180 degrees" width="384" height="384" loading="lazy"></div></li>
+      <li class="obj"><div class="obj-top mono caps"><b>Pl. 12</b><span>Robot clerk</span></div>
+        <img class="obj-in" src="media/3d-robot_clerk-in.jpg" alt="The input image: robot clerk" width="512" height="512" loading="lazy">
+        <div class="obj-views"><img src="media/3d-robot_clerk-000.jpg" alt="The mesh, turned 0 degrees" width="384" height="384" loading="lazy"><img src="media/3d-robot_clerk-090.jpg" alt="The mesh, turned 90 degrees" width="384" height="384" loading="lazy"><img src="media/3d-robot_clerk-180.jpg" alt="The mesh, turned 180 degrees" width="384" height="384" loading="lazy"></div></li>
+      <li class="obj"><div class="obj-top mono caps"><b>Pl. 13</b><span>Shopping cart</span></div>
+        <img class="obj-in" src="media/3d-shopping_cart-in.jpg" alt="The input image: shopping cart" width="512" height="512" loading="lazy">
+        <div class="obj-views"><img src="media/3d-shopping_cart-000.jpg" alt="The mesh, turned 0 degrees" width="384" height="384" loading="lazy"><img src="media/3d-shopping_cart-090.jpg" alt="The mesh, turned 90 degrees" width="384" height="384" loading="lazy"><img src="media/3d-shopping_cart-180.jpg" alt="The mesh, turned 180 degrees" width="384" height="384" loading="lazy"></div></li>
+      <li class="obj"><div class="obj-top mono caps"><b>Pl. 14</b><span>Top hat</span></div>
+        <img class="obj-in" src="media/3d-top_hat-in.jpg" alt="The input image: top hat" width="512" height="512" loading="lazy">
+        <div class="obj-views"><img src="media/3d-top_hat-000.jpg" alt="The mesh, turned 0 degrees" width="384" height="384" loading="lazy"><img src="media/3d-top_hat-090.jpg" alt="The mesh, turned 90 degrees" width="384" height="384" loading="lazy"><img src="media/3d-top_hat-180.jpg" alt="The mesh, turned 180 degrees" width="384" height="384" loading="lazy"></div></li>
+    </ol>
+    <p class="figcap mono"><b class="caps">Pl. 10&#8211;14</b>&ensp;Each object is a TRELLIS.2 mesh made from the one image above it, on a rented RTX 4090 in about 51 seconds. That is about one cent of GPU time per object. The hosted 3D APIs in the same test cost $0.40 to $0.53 per object.</p>
+  </div>
+</section>
+
+<section class="part wrap" id="tools">
+  <div class="part-head">
+    <div><p class="part-no mono caps">4</p><h2>Tools</h2></div>
+    <p class="intro">The tools use only the Python standard library, because a fresh pod has a bare Python.</p>
+  </div>
+  <ol class="tools">
+    <li class="tool"><div class="tool-top mono caps"><b>01</b><span class="where">Your machine</span></div><h3>pod_ctl.py</h3><p>It creates, lists, stops, starts and terminates pods, and shows your balance and GPU stock.</p></li>
+    <li class="tool"><div class="tool-top mono caps"><b>02</b><span class="where pod">Pod</span></div><h3>autostop.py</h3><p>The watchdog stops or terminates the pod when ComfyUI goes idle.</p></li>
+    <li class="tool"><div class="tool-top mono caps"><b>03</b><span class="where pod">Pod</span></div><h3>provision-comfyui.sh</h3><p>It installs ComfyUI, custom nodes and model sets in an order that keeps torch and CUDA consistent.</p></li>
+    <li class="tool"><div class="tool-top mono caps"><b>04</b><span class="where pod">Pod</span></div><h3>launch-sharded.sh</h3><p>It starts one ComfyUI per GPU and splits a batch across them.</p></li>
+    <li class="tool"><div class="tool-top mono caps"><b>05</b><span class="where pod">Pod</span></div><h3>hold-busy.sh</h3><p>It keeps the pod awake while a long job that is not ComfyUI runs, and lets go when the job ends.</p></li>
+    <li class="tool"><div class="tool-top mono caps"><b>06</b><span class="where">Your machine</span></div><h3>sync-outputs.sh</h3><p>It pulls results home while a batch runs, checks every file, and tells the watchdog which folders are safe.</p></li>
+    <li class="tool"><div class="tool-top mono caps"><b>07</b><span class="where">Your machine</span></div><h3>check-gpu-load.sh</h3><p>It fails when one GPU samples much slower than the others, which usually means a model did not fit.</p></li>
+    <li class="tool"><div class="tool-top mono caps"><b>08</b><span class="where">Either</span></div><h3>comfy_client.py</h3><p>A small client that drives a local or a remote ComfyUI in the same way.</p></li>
+    <li class="tool"><div class="tool-top mono caps"><b>09</b><span class="where">Your machine</span></div><h3>catalog.py</h3><p>It lists current open models by task and re-checks the catalogue against Hugging Face.</p></li>
+  </ol>
+</section>
+
+<section class="part wrap" id="gpus">
+  <div class="part-head">
+    <div><p class="part-no mono caps">5</p><h2>Choosing a GPU</h2></div>
+    <p class="intro">You pay for GPU-hours, so eight GPUs cost the same as one for the same work and finish sooner.</p>
+  </div>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>Configuration</th><th>Per hour</th><th class="stock">Stock</th><th>Work per dollar</th></tr></thead>
+      <tbody>
+        <tr><td><span class="big">8&#215; A40</span>48 GB each</td><td>$3.52</td><td class="stock">High</td><td>Best of the four<span class="meter"><i style="width:100%"></i></span></td></tr>
+        <tr><td><span class="big">4&#215; L40S</span>48 GB each</td><td>$3.96</td><td class="stock">Medium</td><td>80% of the best<span class="meter"><i style="width:80%"></i></span></td></tr>
+        <tr><td><span class="big">4&#215; RTX PRO 6000</span>96 GB each</td><td>$7.96</td><td class="stock">Medium</td><td>55%, and the fastest<span class="meter"><i style="width:55%"></i></span></td></tr>
+        <tr><td><span class="big">2&#215; H100</span>80 GB each</td><td>$5.98</td><td class="stock">High</td><td>51%<span class="meter"><i style="width:51%"></i></span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="figcap mono"><b class="caps">Fig. 4</b>&ensp;These are configurations for Wan 2.2 image-to-video at 480p, which needs 48 GB. Prices and stock are from mid-2026; <code>pod_ctl.py availability</code> shows today's. Speech jobs ran comfortably on one 24 GB L4 at $0.39 an hour.</p>
+
+  <div class="sub">
+    <h3>The same batch on managed services</h3>
+    <ul class="bars" aria-label="Cost of one 554-clip batch, about 4.6 GPU-hours">
+      <li class="best"><span>RunPod, 8&#215; A40</span><span class="track"><span class="fill" style="width:3.8%"></span><span class="range" style="left:3.8%;width:3.7%"></span></span><b>$2&#8211;4</b></li>
+      <li><span>fal or Replicate</span><span class="track"><span class="fill" style="width:32%"></span></span><b>~$17</b></li>
+      <li><span>RunComfy, A100</span><span class="track"><span class="fill" style="width:43.4%"></span></span><b>~$23</b></li>
+      <li><span>Comfy.ICU, L40S</span><span class="track"><span class="fill" style="width:100%"></span></span><b>~$53</b></li>
+    </ul>
+    <p class="figcap mono"><b class="caps">Fig. 5</b>&ensp;This is the estimated cost of one 554-clip video batch, about 4.6 GPU-hours. fal and Replicate endpoints cannot run a custom ComfyUI graph, and Comfy.ICU does not allow installing custom nodes.</p>
+  </div>
+</section>
+
+<section class="part wrap" id="models">
+  <div class="part-head">
+    <div><p class="part-no mono caps">6</p><h2>Model catalogue</h2></div>
+    <p class="intro">The catalogue lists <span>52</span> open models across <span>12</span> tasks, with the exact files ComfyUI loads. It was checked against Hugging Face on 23 October 2026, and <code>catalog.py --verify</code> checks it again.</p>
+  </div>
+  <p class="key mono"><span><span class="lic open">Open</span> licence allows commercial use</span><span><span class="lic">Terms</span> commercial use has conditions</span><span><span class="lic nc">NC</span> non-commercial only</span><span>GB is the VRAM it needs</span></p>
+  <div class="cat">
+    <section><h3><span>Text to image</span><span>5</span></h3><ul>
+      <li><span>FLUX 3 Image Klein</span><i>16 GB</i><span class="lic ">Terms</span></li>
+      <li><span>Qwen-Image 2.1</span><i>20 GB</i><span class="lic nc">NC</span></li>
+      <li><span>Krea 2</span><i>20 GB</i><span class="lic ">Terms</span></li>
+      <li><span>Z-Image Turbo</span><i>16 GB</i><span class="lic open">Open</span></li>
+      <li><span>MOSS-Image</span><i>16 GB</i><span class="lic open">Open</span></li>
+    </ul></section>
+    <section><h3><span>Image editing</span><span>4</span></h3><ul>
+      <li><span>Bria Fibo 2.0</span><i>16 GB</i><span class="lic nc">NC</span></li>
+      <li><span>Qwen-Image 2.1</span><i>20 GB</i><span class="lic nc">NC</span></li>
+      <li><span>Qwen-Image-Edit 2511</span><i>24 GB</i><span class="lic open">Open</span></li>
+      <li><span>FLUX.2 [klein] 4B</span><i>12 GB</i><span class="lic open">Open</span></li>
+    </ul></section>
+    <section><h3><span>Text to video</span><span>4</span></h3><ul>
+      <li><span>MiniMax H3</span><i>48 GB</i><span class="lic ">Terms</span></li>
+      <li><span>LTX-2.5</span><i>32 GB</i><span class="lic ">Terms</span></li>
+      <li><span>Wan 2.2 T2V A14B</span><i>24 GB</i><span class="lic open">Open</span></li>
+      <li><span>HunyuanVideo 1.5</span><i>16 GB</i><span class="lic ">Terms</span></li>
+    </ul></section>
+    <section><h3><span>Image to video</span><span>3</span></h3><ul>
+      <li><span>MiniMax H3 I2V / FLF2V / continuation</span><i>48 GB</i><span class="lic ">Terms</span></li>
+      <li><span>LTX-2.5 I2V / FLF2V / DFR</span><i>32 GB</i><span class="lic ">Terms</span></li>
+      <li><span>Wan 2.2 I2V A14B</span><i>24 GB</i><span class="lic open">Open</span></li>
+    </ul></section>
+    <section><h3><span>Video to video</span><span>5</span></h3><ul>
+      <li><span>Wan Animate 2</span><i>24 GB</i><span class="lic open">Open</span></li>
+      <li><span>SCAIL-2</span><i>24 GB</i><span class="lic open">Open</span></li>
+      <li><span>LTX-2.3 22B + IC-LoRAs</span><i>32 GB</i><span class="lic ">Terms</span></li>
+      <li><span>Wan 2.2 VACE-Fun A14B</span><i>24 GB</i><span class="lic open">Open</span></li>
+      <li><span>Netflix VOID</span><i>32 GB</i><span class="lic open">Open</span></li>
+    </ul></section>
+    <section><h3><span>Lip-sync and avatars</span><span>5</span></h3><ul>
+      <li><span>InfiniteTalk</span><i>24 GB</i><span class="lic open">Open</span></li>
+      <li><span>LTX-2.3 ID-LoRA TalkVid</span><i>32 GB</i><span class="lic ">Terms</span></li>
+      <li><span>Wan 2.2 S2V 14B</span><i>24 GB</i><span class="lic open">Open</span></li>
+      <li><span>HuMo 17B</span><i>24 GB</i><span class="lic open">Open</span></li>
+      <li><span>LatentSync 1.6</span><i>12 GB</i><span class="lic ">Terms</span></li>
+    </ul></section>
+    <section><h3><span>Upscaling</span><span>4</span></h3><ul>
+      <li><span>SeedVR2 3B/7B</span><i>16 GB</i><span class="lic open">Open</span></li>
+      <li><span>NVIDIA PiD</span><i>16 GB</i><span class="lic nc">NC</span></li>
+      <li><span>Real-ESRGAN x4plus</span><i>4 GB</i><span class="lic open">Open</span></li>
+      <li><span>RIFE v4.25 heavy / FILM frame interpolation</span><i>4 GB</i><span class="lic open">Open</span></li>
+    </ul></section>
+    <section><h3><span>3D</span><span>4</span></h3><ul>
+      <li><span>Pixal3D</span><i>16 GB</i><span class="lic open">Open</span></li>
+      <li><span>TRELLIS.2 4B</span><i>16 GB</i><span class="lic open">Open</span></li>
+      <li><span>TripoSplat</span><i>8 GB</i><span class="lic open">Open</span></li>
+      <li><span>Hunyuan3D 2.1</span><i>12 GB</i><span class="lic ">Terms</span></li>
+    </ul></section>
+    <section><h3><span>Speech</span><span>4</span></h3><ul>
+      <li><span>Qwen3-TTS 12Hz 1.7B</span><i>8 GB</i><span class="lic open">Open</span></li>
+      <li><span>VoxCPM2</span><i>8 GB</i><span class="lic open">Open</span></li>
+      <li><span>Resemble Chatterbox</span><i>6 GB</i><span class="lic open">Open</span></li>
+      <li><span>Ming 3.0 TTS</span><i></i><span class="lic open">Open</span></li>
+    </ul></section>
+    <section><h3><span>Music</span><span>4</span></h3><ul>
+      <li><span>MiniMax Music 3</span><i>16 GB</i><span class="lic ">Terms</span></li>
+      <li><span>ACE-Step 1.5 XL</span><i>16 GB</i><span class="lic open">Open</span></li>
+      <li><span>Stable Audio 3</span><i>12 GB</i><span class="lic ">Terms</span></li>
+      <li><span>YuE2 3B</span><i>8 GB</i><span class="lic nc">NC</span></li>
+    </ul></section>
+    <section><h3><span>Sound effects</span><span>5</span></h3><ul>
+      <li><span>LTX-2.3 Foley V2A LoRA</span><i>32 GB</i><span class="lic ">Terms</span></li>
+      <li><span>HunyuanVideo-Foley</span><i>12 GB</i><span class="lic ">Terms</span></li>
+      <li><span>MMAudio large 44k v2</span><i>6 GB</i><span class="lic nc">NC</span></li>
+      <li><span>Stable Audio 3 small-sfx</span><i>6 GB</i><span class="lic ">Terms</span></li>
+      <li><span>Xiaomi ControlFoley</span><i></i><span class="lic nc">NC</span></li>
+    </ul></section>
+    <section><h3><span>Utilities</span><span>5</span></h3><ul>
+      <li><span>SAM 3.1</span><i>4 GB</i><span class="lic ">Terms</span></li>
+      <li><span>Depth Anything 3</span><i>4 GB</i><span class="lic open">Open</span></li>
+      <li><span>BiRefNet</span><i>4 GB</i><span class="lic open">Open</span></li>
+      <li><span>SDPose wholebody + RT-DETR v4 detector</span><i>4 GB</i><span class="lic open">Open</span></li>
+      <li><span>MoGe 3</span><i>4 GB</i><span class="lic open">Open</span></li>
+    </ul></section>
+  </div>
+  <p class="figcap mono">Each entry in <a href="https://github.com/chickensintrees/remote-comfy/blob/main/docs/models.md" rel="noopener">docs/models.md</a> says when to pick it, its licence terms and its ComfyUI workflow. Before a batch, run <code>check_latest_models.py</code>, because new models ship every month.</p>
+</section>
+
+<section class="part wrap" id="traps">
+  <div class="part-head">
+    <div><p class="part-no mono caps">7</p><h2>Traps</h2></div>
+    <p class="intro">The repository lists 55 traps that cost time or money on a live pod, each with the rule that avoids it. Most are also an offline check that runs on every push.</p>
+  </div>
+  <ol class="traps">
+    <li class="trap"><div class="trap-top mono caps"><b>Trap</b><span class="date">2026-07-26</span></div><h3>Pod storage is scratch.</h3><p>A batch with no copy-back lost 200 to 400 frames and about $22 when the pod was reclaimed, so results now sync as they land.</p></li>
+    <li class="trap"><div class="trap-top mono caps"><b>Trap</b><span class="date">2026-07-25</span></div><h3>Stopping a pod can strand it.</h3><p>A restart needs a free GPU on the same host, so the watchdog stops a pod only when its GPU type has high stock.</p></li>
+    <li class="trap"><div class="trap-top mono caps"><b>Trap</b><span class="date">2026-07-26</span></div><h3>Only /workspace survives a restart.</h3><p>Every pip and apt install is gone after a stop and start, so provisioning runs its dependency step again.</p></li>
+    <li class="trap"><div class="trap-top mono caps"><b>Trap</b><span class="date">2026-07-27</span></div><h3>A busy flag outlived its job.</h3><p>It held an idle H100 for three hours, so the lock is now a heartbeat that the watchdog ignores once it goes stale.</p></li>
+    <li class="trap"><div class="trap-top mono caps"><b>Trap</b><span class="date">2026-07-26</span></div><h3>A leftover process halved a two-GPU render.</h3><p>One card took 494 seconds a frame instead of 127, so <code>check-gpu-load.sh</code> compares sampling speed across GPUs.</p></li>
+    <li class="trap"><div class="trap-top mono caps"><b>Trap</b><span class="date">2026-10-23</span></div><h3>The watchdog could not act, then exited.</h3><p>Its calls were refused and the pod kept billing, so it now retries every poll and never exits while the pod can bill.</p></li>
+  </ol>
+  <p class="more mono"><a href="https://github.com/chickensintrees/remote-comfy/blob/main/docs/traps.md" rel="noopener">All 55 traps are in docs/traps.md</a></p>
+</section>
+
+<section class="part wrap" id="status">
+  <div class="part-head">
+    <div><p class="part-no mono caps">8</p><h2>Status and limits</h2></div>
+  </div>
+  <div class="sub two even">
+    <div>
+      <h3>Status</h3>
+      <ul class="limits">
+        <li>The full run was tested live on 23 October 2026, on two A40 GPUs, for about $0.85.</li>
+        <li>In that test the watchdog terminated an idle L4 pod by itself, about a minute after it went idle.</li>
+        <li>The offline checks run on Python 3.9 and 3.12 in CI, and need no network, GPU or API key.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Limits</h3>
+      <ul class="limits">
+        <li>It works with RunPod only.</li>
+        <li>This rents real hardware with real money. You are responsible for your RunPod bill.</li>
+        <li>The watchdog reads the queue of the first ComfyUI only. The launcher keeps the pod busy while any GPU still has work.</li>
+        <li><a href="https://github.com/chickensintrees/remote-comfy/blob/main/docs/open-questions.md" rel="noopener">docs/open-questions.md</a> lists what has not been proven yet.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="get">
+    <div>
+      <h3>Repository</h3>
+    </div>
+    <a href="https://github.com/chickensintrees/remote-comfy" rel="noopener"><span class="mono caps">GitHub</span><strong>chickensintrees/&#8203;remote-comfy</strong></a>
+  </div>
+</section>
+</main>
+
+<footer id="colophon">
+  <div class="wrap">
+    <div>
+      <h2 class="caps">Credits</h2>
+      <p><a href="/">&#8592; billmoore.ai</a></p>
+      <p>Bill Moore</p>
+    </div>
+    <ul>
+      <li>ComfyUI by comfyanonymous and Comfy Org</li>
+      <li>GPUs rented from RunPod</li>
+      <li>Claude Code by Anthropic</li>
+      <li>Models from Hugging Face, each under its own licence</li>
+      <li>Not affiliated with RunPod or ComfyUI</li>
+      <li>Fonts under the Open Font License</li>
+    </ul>
+  </div>
+<div class="y97 y97-foot">
+  <hr>
+  <p>Traps on file: <span class="y97-counter">000055</span></p>
+  <p><span class="y97-badge">Best viewed with<i>Netscape Navigator 4.0 at 800&#215;600</i></span><span class="y97-badge">Made with<i>ComfyUI &amp; Claude Code</i></span></p>
+  <p><a href="https://github.com/chickensintrees/remote-comfy/issues" rel="noopener">Sign the guestbook</a> (it is the issue tracker)</p>
+</div>
+</footer>
+
+<script src="page.js"></script>
+</body>
+</html>
