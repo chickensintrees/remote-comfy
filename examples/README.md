@@ -11,7 +11,8 @@ Run STEP ZERO before copying this workflow: FLUX.1-dev is an example, not a
 recommendation. Export your own graphs with ComfyUI's *Save (API format)*.
 
 The tests check these files offline (workflow links resolve, harness shards and resumes).
-They have **not** been rendered end-to-end on a pod in this form.
+These exact files rendered all three jobs on a live 2x A40 pod on 2026-10-23
+(see `decisions/2026-10-23-live-smoke-test.md`).
 
 ```bash
 # on the pod, after provision-comfyui.sh flux:
