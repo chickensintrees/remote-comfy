@@ -176,6 +176,18 @@ h2 { font-family: var(--display); font-weight: 200; font-size: clamp(34px, 5vw, 
 .figcap b { font-weight: 500; }
 
 /* fig. 2 the run */
+.band { display: grid; gap: 12px; margin-top: clamp(28px, 3.4vw, 48px); }
+.band.b6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.band.b4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.band.b3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.band-it { display: block; text-decoration: none; }
+.band-it img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; border: 1px solid var(--ink); background: #000; display: block; }
+.band.wide .band-it img { aspect-ratio: 1792 / 768; }
+.band-it:hover img { outline: 2px solid var(--accent); outline-offset: 1px; }
+.band-it span { display: block; padding-top: 5px; font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-2); }
+.band-cap { margin-top: 8px; }
+.step-img { display: block; width: calc(100% + 36px); max-width: none; margin: -16px -18px 0; aspect-ratio: 16 / 10; object-fit: cover; border-bottom: 1px solid var(--ink); }
+.cat-img { display: block; width: 100%; aspect-ratio: 3 / 2; object-fit: cover; border: 1px solid var(--ink); margin: 6px 0 8px; }
 .fig { border: 1px solid var(--ink); display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); }
 .fig li { list-style: none; position: relative; padding: 16px 18px 20px; border-left: 1px solid var(--ink); }
 .fig li:first-child { border-left: 0; }
@@ -185,7 +197,7 @@ h2 { font-family: var(--display); font-weight: 200; font-size: clamp(34px, 5vw, 
 .fig strong { display: block; font-family: var(--display); font-weight: 500; text-transform: uppercase; font-size: clamp(20px, 2.2vw, 30px); line-height: 1; margin: 22px 0 10px; letter-spacing: -.01em; }
 .fig p { font-family: var(--mono); font-size: 12px; line-height: 1.55; }
 .fig li code { background: none; padding: 0; font-weight: 500; }
-.fig li + li::before { content: "\2192"; position: absolute; left: -14px; top: 38px; width: 27px; height: 27px; border-radius: 50%; border: 1px solid var(--ink); background: var(--paper); color: var(--ink); font-family: var(--mono); font-size: 14px; line-height: 25px; text-align: center; z-index: 1; }
+.fig li + li::before { content: "\2192"; position: absolute; left: -14px; top: 96px; width: 27px; height: 27px; border-radius: 50%; border: 1px solid var(--ink); background: var(--paper); color: var(--ink); font-family: var(--mono); font-size: 14px; line-height: 25px; text-align: center; z-index: 1; }
 
 /* sub-sections, tables */
 .sub { margin-top: clamp(40px, 5vw, 72px); }
@@ -276,6 +288,7 @@ footer h2 { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-
   .fig li:first-child { border-top: 0; }
   .fig strong { margin: 0 0 6px; font-size: 22px; grid-column: 2; }
   .fig p { grid-column: 2; }
+  .step-img { grid-column: 1 / -1; width: calc(100% + 32px); margin: -14px -16px 12px; }
   .fig li + li::before { content: "\2193"; left: auto; right: 16px; top: -14px; }
   .tools, .traps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .cat { columns: 2; }
@@ -289,6 +302,8 @@ footer h2 { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-
   .gallery, .gallery.g3 { grid-template-columns: minmax(0, 1fr); }
   .gallery.g5 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .gallery .gap { display: none; }
+  .band.b6, .band.b4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .band.b3 { grid-template-columns: minmax(0, 1fr); }
   .objs.o4 { grid-template-columns: minmax(0, 1fr); }
   .objs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
@@ -432,6 +447,8 @@ footer h2 { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-
     <button class="btn" id="copy-line" type="button" hidden>Copy</button>
   </div>
   <p class="cmdnote mono">You type your RunPod API key into your own terminal, so it never passes through the chat. Nothing is rented until you ask for a pod. To set it up by hand, follow the quickstart in the <a href="https://github.com/chickensintrees/remote-comfy#quickstart" rel="noopener">README</a>.</p>
+  <div class="band b6" aria-label="More images from the batch"><a class="band-it" href="media/uc/b-places-observatory.jpg"><img src="media/uc/b-places-observatory-s.jpg" alt="A white observatory under the Milky Way" loading="lazy"><span class="mono">Observatory</span></a><a class="band-it" href="media/uc/b-places-village.jpg"><img src="media/uc/b-places-village-s.jpg" alt="Red fishing houses in deep snow" loading="lazy"><span class="mono">Fishing village</span></a><a class="band-it" href="media/uc/b-nature-butterfly.jpg"><img src="media/uc/b-nature-butterfly-s.jpg" alt="A monarch butterfly on milkweed" loading="lazy"><span class="mono">Monarch</span></a><a class="band-it" href="media/uc/b-food-citrus.jpg"><img src="media/uc/b-food-citrus-s.jpg" alt="A market stall of citrus fruit" loading="lazy"><span class="mono">Citrus stall</span></a><a class="band-it" href="media/uc/b-machines-cranes.jpg"><img src="media/uc/b-machines-cranes-s.jpg" alt="Container cranes at night" loading="lazy"><span class="mono">Port cranes</span></a><a class="band-it" href="media/uc/b-graphic-isometric.jpg"><img src="media/uc/b-graphic-isometric-s.jpg" alt="An isometric harbour town" loading="lazy"><span class="mono">Isometric town</span></a></div>
+  <p class="figcap mono band-cap">More of the 24-image batch in section 3. Each one took 45 seconds on one rented L40S.</p>
 </section>
 
 <section class="part wrap" id="how">
@@ -523,13 +540,13 @@ footer h2 { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-
     <figcaption class="cap mono" id="fig1"><b class="caps">Fig. 1</b>&ensp;Your machine rents the pod and pulls the results home. The watchdog on the pod stops it when the work stops, and it will not destroy a pod whose results have not come home.</figcaption>
   </figure>
   <ol class="fig" aria-label="A batch from start to finish: check, rent, provision, render, sync">
-    <li><span class="n">A</span><strong>Check</strong><p><code>pod_ctl.py</code> reads your balance and which GPUs are in stock before anything is rented.</p></li>
-    <li><span class="n">B</span><strong>Rent</strong><p>It creates a pod on the cheapest GPU that fits the job, and re-reads the SSH address after every restart.</p></li>
-    <li><span class="n">C</span><strong>Provision</strong><p>The pod installs ComfyUI, its custom nodes and the models, and stops with an error if any file is missing.</p></li>
-    <li><span class="n">D</span><strong>Render</strong><p>One ComfyUI runs on each GPU, and the batch is split across them.</p></li>
-    <li><span class="n">E</span><strong>Sync</strong><p>Each result is copied to your machine as soon as it lands.</p></li>
+    <li><span class="n">A</span><img class="step-img" src="media/mv/step-1-s.jpg" alt="" loading="lazy"><strong>Check</strong><p><code>pod_ctl.py</code> reads your balance and which GPUs are in stock before anything is rented.</p></li>
+    <li><span class="n">B</span><img class="step-img" src="media/mv/step-2-s.jpg" alt="" loading="lazy"><strong>Rent</strong><p>It creates a pod on the cheapest GPU that fits the job, and re-reads the SSH address after every restart.</p></li>
+    <li><span class="n">C</span><img class="step-img" src="media/mv/step-3-s.jpg" alt="" loading="lazy"><strong>Provision</strong><p>The pod installs ComfyUI, its custom nodes and the models, and stops with an error if any file is missing.</p></li>
+    <li><span class="n">D</span><img class="step-img" src="media/mv/step-4-s.jpg" alt="" loading="lazy"><strong>Render</strong><p>One ComfyUI runs on each GPU, and the batch is split across them.</p></li>
+    <li><span class="n">E</span><img class="step-img" src="media/mv/step-5-s.jpg" alt="" loading="lazy"><strong>Sync</strong><p>Each result is copied to your machine as soon as it lands.</p></li>
   </ol>
-  <p class="figcap mono"><b class="caps">Fig. 2</b>&ensp;A batch from start to finish. The watchdog runs on the pod the whole time.</p>
+  <p class="figcap mono"><b class="caps">Fig. 2</b>&ensp;A batch from start to finish. The watchdog runs on the pod the whole time. The pictures are frames from the music video in section 3.</p>
 
   <div class="terms">
     <figure class="term"><figcaption class="term-bar"><span><b>A</b> Your machine</span><span>2026-11-14</span></figcaption><pre><span class="k">$ python remote_comfy/pod_ctl.py availability --min-vram 48</span>
@@ -592,6 +609,8 @@ comfy 8189 READY
       </table>
     </div>
   </div>
+  <div class="band b3 wide" aria-label="Frames from a music video"><a class="band-it" href="media/mv/guard-1.jpg"><img src="media/mv/guard-1-s.jpg" alt="A man in a patterned suit amid sheets of foil" loading="lazy"><span class="mono">Foil</span></a><a class="band-it" href="media/mv/guard-2.jpg"><img src="media/mv/guard-2-s.jpg" alt="A man standing in a wrecked office as paper falls" loading="lazy"><span class="mono">Wrecked office</span></a><a class="band-it" href="media/mv/guard-3.jpg"><img src="media/mv/guard-3-s.jpg" alt="A crowd in plastic sheeting before red screens" loading="lazy"><span class="mono">Plastic</span></a></div>
+  <p class="figcap mono band-cap">Frames from the music video in section 3: 554 frames on two rented L40S GPUs.</p>
 </section>
 
 <section class="part wrap" id="examples">
@@ -702,6 +721,8 @@ comfy 8189 READY
     <li class="tool"><div class="tool-top mono caps"><b>08</b><span class="where">Either</span></div><h3>comfy_client.py</h3><p>A small client that drives a local or a remote ComfyUI in the same way.</p></li>
     <li class="tool"><div class="tool-top mono caps"><b>09</b><span class="where">Your machine</span></div><h3>catalog.py</h3><p>It lists current open models by task and re-checks the catalogue against Hugging Face.</p></li>
   </ol>
+  <div class="band b4" aria-label="Images from the batch"><a class="band-it" href="media/uc/b-food-sourdough.jpg"><img src="media/uc/b-food-sourdough-s.jpg" alt="A sourdough loaf cut in half" loading="lazy"><span class="mono">Sourdough</span></a><a class="band-it" href="media/uc/b-graphic-map.jpg"><img src="media/uc/b-graphic-map-s.jpg" alt="A shaded-relief map of an alpine valley" loading="lazy"><span class="mono">Relief map</span></a><a class="band-it" href="media/uc/b-machines-turbines.jpg"><img src="media/uc/b-machines-turbines-s.jpg" alt="Wind turbines at sunset" loading="lazy"><span class="mono">Turbines</span></a><a class="band-it" href="media/uc/b-graphic-botanical.jpg"><img src="media/uc/b-graphic-botanical-s.jpg" alt="A botanical plate of a fern" loading="lazy"><span class="mono">Botanical plate</span></a></div>
+  <p class="figcap mono band-cap">From the batch in section 3.</p>
 </section>
 
 <section class="part wrap" id="gpus">
@@ -720,6 +741,8 @@ comfy 8189 READY
       </tbody>
     </table>
   </div>
+  <div class="band b3" aria-label="Images from the use cases"><a class="band-it" href="media/uc/b-machines-arcade.jpg"><img src="media/uc/b-machines-arcade-s.jpg" alt="The inside of an arcade cabinet" loading="lazy"><span class="mono">Arcade cabinet</span></a><a class="band-it" href="media/uc/d-tram-depth.jpg"><img src="media/uc/d-tram-depth-s.jpg" alt="A depth map of the tram street" loading="lazy"><span class="mono">Tram, depth</span></a><a class="band-it" href="media/uc/d-tram-normal.jpg"><img src="media/uc/d-tram-normal-s.jpg" alt="A normal map of the tram street" loading="lazy"><span class="mono">Tram, normals</span></a></div>
+  <p class="figcap mono band-cap">An image from the batch, and depth and normal maps of the tram street from section 3. A depth pass takes seconds; any GPU that fits the model will do.</p>
   <p class="figcap mono"><b class="caps">Fig. 4</b>&ensp;These are configurations for Wan 2.2 image-to-video at 480p, which needs 48 GB. Prices and stock are from mid-2026; <code>pod_ctl.py availability</code> shows today's. Speech jobs ran comfortably on one 24 GB L4 at $0.39 an hour.</p>
 
   <div class="sub">
@@ -759,6 +782,8 @@ __CATALOG__
     <li class="trap"><div class="trap-top mono caps"><b>Trap</b><span class="date">2026-07-26</span></div><h3>A leftover process halved a two-GPU render.</h3><p>One card took 494 seconds a frame instead of 127, so <code>check-gpu-load.sh</code> compares sampling speed across GPUs.</p></li>
     <li class="trap"><div class="trap-top mono caps"><b>Trap</b><span class="date">2026-10-23</span></div><h3>The watchdog could not act, then exited.</h3><p>Its calls were refused and the pod kept billing, so it now retries every poll and never exits while the pod can bill.</p></li>
   </ol>
+  <div class="band b4 wide" aria-label="Frames from a music video"><a class="band-it" href="media/mv/traps-1.jpg"><img src="media/mv/traps-1-s.jpg" alt="Red-suited workers in a trashed office" loading="lazy"><span class="mono">Trashed office</span></a><a class="band-it" href="media/mv/traps-2.jpg"><img src="media/mv/traps-2-s.jpg" alt="A statue-like woman under a spotlight" loading="lazy"><span class="mono">Spotlight</span></a><a class="band-it" href="media/mv/traps-3.jpg"><img src="media/mv/traps-3-s.jpg" alt="A long table of people under bright posters" loading="lazy"><span class="mono">Boardroom</span></a><a class="band-it" href="media/mv/traps-4.jpg"><img src="media/mv/traps-4-s.jpg" alt="A street crowded with signs and people" loading="lazy"><span class="mono">Street</span></a></div>
+  <p class="figcap mono band-cap">More frames from the music video.</p>
   <p class="more mono"><a href="https://github.com/chickensintrees/remote-comfy/blob/main/docs/traps.md" rel="noopener">All __TRAPS__ traps are in docs/traps.md</a></p>
 </section>
 

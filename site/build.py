@@ -24,6 +24,15 @@ TASKS = [  # order and labels on the page
 LIC = {"True": ("open", "Open"), "conditional": ("", "Terms"), "False": ("nc", "NC")}
 
 
+TASK_IMG = {  # one real output per task, from the 2026-11-15 use-cases run
+    "t2i": ("media/uc/b-graphic-poster-s.jpg", "An image made in the batch"),
+    "image-edit": ("media/uc/e-teapot-black-s.jpg", "An edit of the teapot"),
+    "i2v": ("media/uc/v-fern.jpg", "A frame of a clip made from an image"),
+    "3d": ("media/uc/o-camera-trellis2-tex_000.jpg", "A mesh made from an image"),
+    "utility": ("media/uc/d-library-depth-s.jpg", "A depth map"),
+}
+
+
 def catalog_block(models):
     by = {}
     for m in models:
@@ -40,8 +49,10 @@ def catalog_block(models):
             vram = "%s GB" % m["vram_gb"] if m.get("vram_gb") else ""
             rows.append('      <li><span>%s</span><i>%s</i><span class="lic %s">%s</span></li>'
                         % (html.escape(name), vram, cls, word))
-        out.append('    <section><h3><span>%s</span><span>%d</span></h3><ul>\n%s\n    </ul></section>'
-                   % (html.escape(label), len(rows), "\n".join(rows)))
+        img = TASK_IMG.get(task)
+        pic = '<img class="cat-img" src="%s" alt="%s" loading="lazy">' % img if img else ""
+        out.append('    <section><h3><span>%s</span><span>%d</span></h3>%s<ul>\n%s\n    </ul></section>'
+                   % (html.escape(label), len(rows), pic, "\n".join(rows)))
     return "\n".join(out)
 
 
