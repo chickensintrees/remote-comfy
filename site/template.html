@@ -186,7 +186,6 @@ h2 { font-family: var(--display); font-weight: 200; font-size: clamp(34px, 5vw, 
 .band-it:hover img { outline: 2px solid var(--accent); outline-offset: 1px; }
 .band-it span { display: block; padding-top: 5px; font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-2); }
 .band-cap { margin-top: 8px; }
-.step-img { display: block; width: calc(100% + 36px); max-width: none; margin: -16px -18px 0; aspect-ratio: 16 / 10; object-fit: cover; border-bottom: 1px solid var(--ink); }
 .cat-img { display: block; width: 100%; aspect-ratio: 3 / 2; object-fit: cover; border: 1px solid var(--ink); margin: 6px 0 8px; }
 .fig { border: 1px solid var(--ink); display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); }
 .fig li { list-style: none; position: relative; padding: 16px 18px 20px; border-left: 1px solid var(--ink); }
@@ -197,7 +196,7 @@ h2 { font-family: var(--display); font-weight: 200; font-size: clamp(34px, 5vw, 
 .fig strong { display: block; font-family: var(--display); font-weight: 500; text-transform: uppercase; font-size: clamp(20px, 2.2vw, 30px); line-height: 1; margin: 22px 0 10px; letter-spacing: -.01em; }
 .fig p { font-family: var(--mono); font-size: 12px; line-height: 1.55; }
 .fig li code { background: none; padding: 0; font-weight: 500; }
-.fig li + li::before { content: "\2192"; position: absolute; left: -14px; top: 96px; width: 27px; height: 27px; border-radius: 50%; border: 1px solid var(--ink); background: var(--paper); color: var(--ink); font-family: var(--mono); font-size: 14px; line-height: 25px; text-align: center; z-index: 1; }
+.fig li + li::before { content: "\2192"; position: absolute; left: -14px; top: 38px; width: 27px; height: 27px; border-radius: 50%; border: 1px solid var(--ink); background: var(--paper); color: var(--ink); font-family: var(--mono); font-size: 14px; line-height: 25px; text-align: center; z-index: 1; }
 
 /* sub-sections, tables */
 .sub { margin-top: clamp(40px, 5vw, 72px); }
@@ -288,7 +287,6 @@ footer h2 { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-
   .fig li:first-child { border-top: 0; }
   .fig strong { margin: 0 0 6px; font-size: 22px; grid-column: 2; }
   .fig p { grid-column: 2; }
-  .step-img { grid-column: 1 / -1; width: calc(100% + 32px); margin: -14px -16px 12px; }
   .fig li + li::before { content: "\2193"; left: auto; right: 16px; top: -14px; }
   .tools, .traps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .cat { columns: 2; }
@@ -540,13 +538,13 @@ footer h2 { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-
     <figcaption class="cap mono" id="fig1"><b class="caps">Fig. 1</b>&ensp;Your machine rents the pod and pulls the results home. The watchdog on the pod stops it when the work stops, and it will not destroy a pod whose results have not come home.</figcaption>
   </figure>
   <ol class="fig" aria-label="A batch from start to finish: check, rent, provision, render, sync">
-    <li><span class="n">A</span><img class="step-img" src="media/mv/step-1-s.jpg" alt="" loading="lazy"><strong>Check</strong><p><code>pod_ctl.py</code> reads your balance and which GPUs are in stock before anything is rented.</p></li>
-    <li><span class="n">B</span><img class="step-img" src="media/mv/step-2-s.jpg" alt="" loading="lazy"><strong>Rent</strong><p>It creates a pod on the cheapest GPU that fits the job, and re-reads the SSH address after every restart.</p></li>
-    <li><span class="n">C</span><img class="step-img" src="media/mv/step-3-s.jpg" alt="" loading="lazy"><strong>Provision</strong><p>The pod installs ComfyUI, its custom nodes and the models, and stops with an error if any file is missing.</p></li>
-    <li><span class="n">D</span><img class="step-img" src="media/mv/step-4-s.jpg" alt="" loading="lazy"><strong>Render</strong><p>One ComfyUI runs on each GPU, and the batch is split across them.</p></li>
-    <li><span class="n">E</span><img class="step-img" src="media/mv/step-5-s.jpg" alt="" loading="lazy"><strong>Sync</strong><p>Each result is copied to your machine as soon as it lands.</p></li>
+    <li><span class="n">A</span><strong>Check</strong><p><code>pod_ctl.py</code> reads your balance and which GPUs are in stock before anything is rented.</p></li>
+    <li><span class="n">B</span><strong>Rent</strong><p>It creates a pod on the cheapest GPU that fits the job, and re-reads the SSH address after every restart.</p></li>
+    <li><span class="n">C</span><strong>Provision</strong><p>The pod installs ComfyUI, its custom nodes and the models, and stops with an error if any file is missing.</p></li>
+    <li><span class="n">D</span><strong>Render</strong><p>One ComfyUI runs on each GPU, and the batch is split across them.</p></li>
+    <li><span class="n">E</span><strong>Sync</strong><p>Each result is copied to your machine as soon as it lands.</p></li>
   </ol>
-  <p class="figcap mono"><b class="caps">Fig. 2</b>&ensp;A batch from start to finish. The watchdog runs on the pod the whole time. The pictures are frames from the music video in section 3.</p>
+  <p class="figcap mono"><b class="caps">Fig. 2</b>&ensp;A batch from start to finish. The watchdog runs on the pod the whole time.</p>
 
   <div class="terms">
     <figure class="term"><figcaption class="term-bar"><span><b>A</b> Your machine</span><span>2026-11-14</span></figcaption><pre><span class="k">$ python remote_comfy/pod_ctl.py availability --min-vram 48</span>
@@ -609,8 +607,6 @@ comfy 8189 READY
       </table>
     </div>
   </div>
-  <div class="band b3 wide" aria-label="Frames from a music video"><a class="band-it" href="media/mv/guard-1.jpg"><img src="media/mv/guard-1-s.jpg" alt="A man in a patterned suit amid sheets of foil" loading="lazy"><span class="mono">Foil</span></a><a class="band-it" href="media/mv/guard-2.jpg"><img src="media/mv/guard-2-s.jpg" alt="A man standing in a wrecked office as paper falls" loading="lazy"><span class="mono">Wrecked office</span></a><a class="band-it" href="media/mv/guard-3.jpg"><img src="media/mv/guard-3-s.jpg" alt="A crowd in plastic sheeting before red screens" loading="lazy"><span class="mono">Plastic</span></a></div>
-  <p class="figcap mono band-cap">Frames from the music video in section 3: 554 frames on two rented L40S GPUs.</p>
 </section>
 
 <section class="part wrap" id="examples">
