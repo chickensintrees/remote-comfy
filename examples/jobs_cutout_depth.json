@@ -1,0 +1,23 @@
+[
+ {
+  "id": "cutout-camera",
+  "workflow": "workflows/cutout_birefnet.json",
+  "set": {
+   "1.image": "camera.png"
+  }
+ },
+ {
+  "id": "depth-library",
+  "workflow": "workflows/depth_moge.json",
+  "set": {
+   "1.image": "library.png"
+  }
+ },
+ {
+  "id": "depth-tram",
+  "workflow": "workflows/depth_moge.json",
+  "set": {
+   "1.image": "tram.png"
+  }
+ }
+]

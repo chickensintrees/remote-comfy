@@ -1,0 +1,194 @@
+[
+ {
+  "id": "places-library",
+  "workflow": "workflows/flux2_dev_txt2img.json",
+  "set": {
+   "4.text": "a brutalist concrete library at dawn, low fog around its base, wet plaza in front, natural light, sharp focus, photograph",
+   "7.noise_seed": 1000
+  }
+ },
+ {
+  "id": "places-tram",
+  "workflow": "workflows/flux2_dev_txt2img.json",
+  "set": {
+   "4.text": "a yellow tram climbing a narrow cobbled street in Lisbon just after rain, reflections on the stones, natural light, sharp focus, photograph",
+   "7.noise_seed": 1001
+  }
+ },
+ {
+  "id": "places-observatory",
+  "workflow": "workflows/flux2_dev_txt2img.json",
+  "set": {
+   "4.text": "a white-domed observatory on a desert ridge under the Milky Way, long exposure night photograph",
+   "7.noise_seed": 1002
+  }
+ },
+ {
+  "id": "places-village",
+  "workflow": "workflows/flux2_dev_txt2img.json",
+  "set": {
+   "4.text": "a Nordic fishing village of red wooden houses in deep snow, blue hour, fjord behind, natural light, sharp focus, photograph",
+   "7.noise_seed": 1003
+  }
+ },
+ {
+  "id": "objects-teapot",
+  "workflow": "workflows/flux2_dev_txt2img.json",
+  "set": {
+   "4.text": "a glazed celadon ceramic teapot on undyed linen, plain warm grey backdrop, studio product shot, centred, whole object in frame",
+   "7.noise_seed": 1004
+  }
+ },
+ {
+  "id": "objects-camera",
+  "workflow": "workflows/flux2_dev_txt2img.json",
+  "set": {
+   "4.text": "a 1970s 35mm film camera with a chrome body and leather grip on a walnut desk, three-quarter view, studio product shot, whole object in frame",
+   "7.noise_seed": 1005
+  }
+ },
+ {
+  "id": "objects-watch",
+  "workflow": "workflows/flux2_dev_txt2img.json",
+  "set": {
+   "4.text": "macro of an open brass pocket-watch movement, gears and jewels, shallow depth of field, natural light, sharp focus, photograph",
+   "7.noise_seed": 1006
+  }
+ },
+ {
+  "id": "objects-boots",
+  "workflow": "workflows/flux2_dev_txt2img.json",
+  "set": {
+   "4.text": "a pair of worn brown leather work boots on a scuffed oak floor, three-quarter view, whole boots in frame, natural light, sharp focus, photograph",
+   "7.noise_seed": 1007
+  }
+ },
+ {
+  "id": "food-ramen",
+  "workflow": "workflows/flux2_dev_txt2img.json",
+  "set": {
+   "4.text": "a bowl of tonkotsu ramen seen from directly above, egg, nori, spring onion, dark wooden table, natural light, sharp focus, photograph",
+   "7.noise_seed": 1008
+  }
+ },
+ {
+  "id": "food-sourdough",
+  "workflow": "workflows/flux2_dev_txt2img.json",
+  "set": {
+   "4.text": "a sourdough loaf cut in half on a floured board, open crumb, crust in focus, natural light, sharp focus, photograph",
+   "7.noise_seed": 1009
+  }
+ },
+ {
+  "id": "food-citrus",
+  "workflow": "workflows/flux2_dev_txt2img.json",
+  "set": {
+   "4.text": "a market stall piled with oranges, lemons and blood oranges, handwritten price cards, natural light, sharp focus, photograph",
+   "7.noise_seed": 1010
+  }
+ },
+ {
+  "id": "food-espresso",
+  "workflow": "workflows/flux2_dev_txt2img.json",
+  "set": {
+   "4.text": "espresso pouring from a bottomless portafilter into a glass cup, close up, dark café background, natural light, sharp focus, photograph",
+   "7.noise_seed": 1011
+  }
+ },
+ {
+  "id": "nature-waves",
+  "workflow": "workflows/flux2_dev_txt2img.json",
+  "set": {
+   "4.text": "waves breaking over black basalt rocks on an Icelandic beach, overcast, spray in the air, natural light, sharp focus, photograph",
+   "7.noise_seed": 1012
+  }
+ },
+ {
+  "id": "nature-butterfly",
+  "workflow": "workflows/flux2_dev_txt2img.json",
+  "set": {
+   "4.text": "a monarch butterfly on a milkweed flower, macro, soft green background, natural light, sharp focus, photograph",
+   "7.noise_seed": 1013
+  }
+ },
+ {
+  "id": "nature-fern",
+  "workflow": "workflows/flux2_dev_txt2img.json",
+  "set": {
+   "4.text": "a fern frond unfurling in rain, droplets on the curl, dark forest floor behind, macro, natural light, sharp focus, photograph",
+   "7.noise_seed": 1014
+  }
+ },
+ {
+  "id": "nature-fox",
+  "workflow": "workflows/flux2_dev_txt2img.json",
+  "set": {
+   "4.text": "a red fox standing in a snowy field, low winter sun, telephoto, natural light, sharp focus, photograph",
+   "7.noise_seed": 1015
+  }
+ },
+ {
+  "id": "machines-locomotive",
+  "workflow": "workflows/flux2_dev_txt2img.json",
+  "set": {
+   "4.text": "a black steam locomotive crossing a tall stone viaduct over a green valley, white steam trailing, natural light, sharp focus, photograph",
+   "7.noise_seed": 1016
+  }
+ },
+ {
+  "id": "machines-turbines",
+  "workflow": "workflows/flux2_dev_txt2img.json",
+  "set": {
+   "4.text": "a row of wind turbines on a ridge at sunset, long shadows across farmland, natural light, sharp focus, photograph",
+   "7.noise_seed": 1017
+  }
+ },
+ {
+  "id": "machines-cranes",
+  "workflow": "workflows/flux2_dev_txt2img.json",
+  "set": {
+   "4.text": "container-port gantry cranes at night under sodium lights, a ship being loaded, natural light, sharp focus, photograph",
+   "7.noise_seed": 1018
+  }
+ },
+ {
+  "id": "machines-arcade",
+  "workflow": "workflows/flux2_dev_txt2img.json",
+  "set": {
+   "4.text": "the open back of a 1980s arcade cabinet, circuit boards, wiring looms and a CRT tube, natural light, sharp focus, photograph",
+   "7.noise_seed": 1019
+  }
+ },
+ {
+  "id": "graphic-isometric",
+  "workflow": "workflows/flux2_dev_txt2img.json",
+  "set": {
+   "4.text": "an isometric illustration of a small harbour town with boats, a lighthouse and a market square, flat colours, clean lines",
+   "7.noise_seed": 1020
+  }
+ },
+ {
+  "id": "graphic-botanical",
+  "workflow": "workflows/flux2_dev_txt2img.json",
+  "set": {
+   "4.text": "a vintage botanical illustration plate of a fern, Latin labels, cream paper, fine engraving lines",
+   "7.noise_seed": 1021
+  }
+ },
+ {
+  "id": "graphic-poster",
+  "workflow": "workflows/flux2_dev_txt2img.json",
+  "set": {
+   "4.text": "a two-colour risograph poster in blue and fluorescent pink with large bold letters reading \"RENT THE GPU\", halftone texture",
+   "7.noise_seed": 1022
+  }
+ },
+ {
+  "id": "graphic-map",
+  "workflow": "workflows/flux2_dev_txt2img.json",
+  "set": {
+   "4.text": "a shaded-relief topographic map of an alpine valley with contour lines, rivers and small place labels, muted colours",
+   "7.noise_seed": 1023
+  }
+ }
+]

@@ -1,0 +1,38 @@
+[
+ {
+  "id": "video-waves",
+  "workflow": "workflows/wan22_i2v_14b.json",
+  "set": {
+   "9.image": "waves.png",
+   "7.text": "Waves roll in and break over the black rocks, spray rising and falling. The camera holds still.",
+   "11.noise_seed": 3000
+  }
+ },
+ {
+  "id": "video-locomotive",
+  "workflow": "workflows/wan22_i2v_14b.json",
+  "set": {
+   "9.image": "locomotive.png",
+   "7.text": "The steam locomotive moves steadily across the viaduct, steam drifting back in the wind. The camera holds still.",
+   "11.noise_seed": 3001
+  }
+ },
+ {
+  "id": "video-espresso",
+  "workflow": "workflows/wan22_i2v_14b.json",
+  "set": {
+   "9.image": "espresso.png",
+   "7.text": "Espresso streams steadily into the glass cup and the crema rises. The camera holds still.",
+   "11.noise_seed": 3002
+  }
+ },
+ {
+  "id": "video-fern",
+  "workflow": "workflows/wan22_i2v_14b.json",
+  "set": {
+   "9.image": "fern.png",
+   "7.text": "Rain falls on the fern, drops hit the frond and run down the curl. The camera holds still.",
+   "11.noise_seed": 3003
+  }
+ }
+]

@@ -16,7 +16,7 @@ trap 'rm -f "$LOCK"' EXIT        # ...but always release, even on failure
 
 export HF_HOME=/workspace/.hf HF_HUB_DISABLE_XET=1 HF_HUB_ENABLE_HF_TRANSFER=1
 cd /workspace
-[ -d ComfyUI ] || git clone --depth 1 https://github.com/comfyanonymous/ComfyUI
+[ -d ComfyUI ] || git clone --quiet --depth 1 https://github.com/comfyanonymous/ComfyUI
 cd ComfyUI
 pip install -q -r requirements.txt
 pip install -q "huggingface_hub[cli,hf_transfer]" sqlalchemy pillow numpy imageio-ffmpeg
@@ -36,7 +36,7 @@ mkdir -p models/{diffusion_models,vae,text_encoders,clip_vision,style_models,che
 # comfy/sd.py). So install nodes first, then pin the trio, then verify.
 cd custom_nodes
 for r in kijai/ComfyUI-WanVideoWrapper kijai/ComfyUI-KJNodes Kosinkadink/ComfyUI-VideoHelperSuite; do
-  d=$(basename "$r"); [ -d "$d" ] || git clone --depth 1 "https://github.com/$r"
+  d=$(basename "$r"); [ -d "$d" ] || git clone --quiet --depth 1 "https://github.com/$r"
   [ -f "$d/requirements.txt" ] && pip install -q -r "$d/requirements.txt" || true
 done
 cd /workspace/ComfyUI
@@ -90,8 +90,8 @@ for s in $SETS; do case "$s" in
     dl Comfy-Org/Wan_2.2_ComfyUI_Repackaged split_files/diffusion_models/wan2.2_i2v_low_noise_14B_fp8_scaled.safetensors models/diffusion_models
     dl Comfy-Org/Wan_2.1_ComfyUI_repackaged split_files/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors models/text_encoders
     dl Comfy-Org/Wan_2.1_ComfyUI_repackaged split_files/vae/wan_2.1_vae.safetensors models/vae ;;
-  qwen)
-    dl Comfy-Org/Qwen-Image-Edit_ComfyUI split_files/diffusion_models/qwen_image_edit_fp8_e4m3fn.safetensors models/diffusion_models
+  qwen)   # Qwen-Image-Edit 2511 (Apache-2.0); the 2025 original is superseded. Template: image_qwen_image_edit_2511
+    dl Comfy-Org/Qwen-Image-Edit split_files/diffusion_models/qwen_image_edit_2511_fp8mixed.safetensors models/diffusion_models
     dl Comfy-Org/Qwen-Image_ComfyUI split_files/text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors models/text_encoders
     dl Comfy-Org/Qwen-Image_ComfyUI split_files/vae/qwen_image_vae.safetensors models/vae ;;
   flux)   # all-in-one checkpoint (model+CLIP+VAE) -> CheckpointLoaderSimple, outputs 0/1/2

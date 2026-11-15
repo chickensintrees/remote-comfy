@@ -1,0 +1,47 @@
+[
+ {
+  "id": "edit-teapot-black",
+  "workflow": "workflows/qwen_image_edit_2511.json",
+  "set": {
+   "4.image": "teapot.png",
+   "6.prompt": "Change the glaze of the teapot to matte black. Keep its shape, the linen and the lighting the same.",
+   "13.seed": 2000
+  }
+ },
+ {
+  "id": "edit-teapot-window",
+  "workflow": "workflows/qwen_image_edit_2511.json",
+  "set": {
+   "4.image": "teapot.png",
+   "6.prompt": "Place the same teapot on a kitchen windowsill in soft morning light, with a garden blurred outside.",
+   "13.seed": 2001
+  }
+ },
+ {
+  "id": "edit-teapot-snow",
+  "workflow": "workflows/qwen_image_edit_2511.json",
+  "set": {
+   "4.image": "teapot.png",
+   "6.prompt": "Put the same teapot outdoors, half buried in fresh snow, on an overcast day.",
+   "13.seed": 2002
+  }
+ },
+ {
+  "id": "edit-teapot-drawing",
+  "workflow": "workflows/qwen_image_edit_2511.json",
+  "set": {
+   "4.image": "teapot.png",
+   "6.prompt": "Turn the image into a pencil technical drawing of the teapot on white paper, with dimension lines.",
+   "13.seed": 2003
+  }
+ },
+ {
+  "id": "edit-tram-night",
+  "workflow": "workflows/qwen_image_edit_2511.json",
+  "set": {
+   "4.image": "tram.png",
+   "6.prompt": "Make it the same street at night, wet stones reflecting warm street lamps and neon shop signs.",
+   "13.seed": 2004
+  }
+ }
+]

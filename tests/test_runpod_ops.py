@@ -629,6 +629,11 @@ def main():
           "docs records the transformers 5.x torch.load guard blocking .bin models")
     check("git clone --quiet" in readme,
           "docs says clone quietly so the log stays readable")
+    # LESSON (2026-11-15): the docs said it, the provisioner did not; ComfyUI's clone wrote
+    # ~1,300 progress updates into prov.log. Check the code, not just the prose.
+    clones = re.findall(r"git clone[^\n]*", io.open(P("provision-comfyui.sh"), encoding="utf-8").read())
+    check(clones and all("--quiet" in c for c in clones),
+          "every git clone in provision-comfyui.sh is --quiet %s" % [c for c in clones if "--quiet" not in c])
     check("MEASURE BEFORE YOU PROJECT" in readme,
           "docs warns runtime estimates were wrong 2-5x, twice")
     check("displayable" in readme or "4.2 MP" in readme,
@@ -687,6 +692,37 @@ def main():
     hsrc = io.open(os.path.join(ex, "batch_harness.py"), encoding="utf-8").read()
     check(all(f in hsrc for f in ('"--comfy"', '"--shard"', '"--of"')),
           "harness accepts the --comfy/--shard/--of contract launch-sharded.sh passes")
+
+    # Every example graph must run on a pod provisioned by this repo: each model file it loads
+    # is downloaded by some provision set (a graph naming a file no set fetches fails on the pod,
+    # after the rent has started). Every job list's overrides must hit a real node and input.
+    prov_files = set(os.path.basename(m) for m in re.findall(r"^\s*dl \S+ (\S+) ", prov, re.M))
+    file_inputs = ("unet_name", "clip_name", "vae_name", "lora_name", "ckpt_name",
+                   "style_model_name", "bg_removal_name", "model_name")
+    wfdir = os.path.join(ex, "workflows")
+    graphs = {}
+    for name in sorted(os.listdir(wfdir)):
+        if name.endswith(".json"):
+            graphs["workflows/" + name] = json.load(io.open(os.path.join(wfdir, name), encoding="utf-8"))
+    missing = sorted({(g, v) for g, wfx in graphs.items() for n in wfx.values()
+                      for k, v in n["inputs"].items() if k in file_inputs and v not in prov_files})
+    check(len(graphs) >= 5 and not missing,
+          "every model file an example graph loads is downloaded by a provision set %s" % (missing,))
+    dangling = sorted({(g, k) for g, wfx in graphs.items() for n in wfx.values()
+                       for k, v in n["inputs"].items() if isinstance(v, list) and str(v[0]) not in wfx})
+    check(not dangling, "every link in every example graph points at a node that exists %s" % (dangling,))
+    bad_sets = []
+    for jf in sorted(f for f in os.listdir(ex) if f.startswith("jobs") and f.endswith(".json")):
+        for j in json.load(io.open(os.path.join(ex, jf), encoding="utf-8")):
+            wfx = graphs.get(j["workflow"])
+            if wfx is None:
+                bad_sets.append((jf, j["id"], j["workflow"]))
+                continue
+            for key in j.get("set", {}):
+                node, field = key.split(".", 1)
+                if node not in wfx or field not in wfx[node]["inputs"]:
+                    bad_sets.append((jf, j["id"], key))
+    check(not bad_sets, "every job's overrides name a node and input its graph has %s" % (bad_sets,))
 
     # --- CATALOGUE: model lists rot fastest, so the catalogue is data with checks, not prose.
     ct = load("catalog", os.path.join(ROOT, "remote_comfy", "catalog.py"))
