@@ -95,23 +95,38 @@ h1 em { font-style: normal; color: var(--accent); }
 
 /* hero, strip, gallery */
 img { display: block; max-width: 100%; height: auto; }
-.hero-frame { border: 1px solid var(--ink); background: var(--ink); aspect-ratio: 1792 / 768; overflow: hidden; }
+.hero-frame { border: 1px solid var(--ink); background: var(--ink); aspect-ratio: 1810 / 806; overflow: hidden; }
 .hero-frame img { width: 100%; height: 100%; object-fit: cover; }
 .strip { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; margin-top: clamp(22px, 3vw, 40px); padding-top: 12px; border-top: 1px solid var(--ink); }
 .strip a { text-decoration: none; display: block; }
-.strip img, .gallery img { width: 100%; aspect-ratio: 1792 / 768; object-fit: cover; background: #000; border: 1px solid var(--ink); }
+.strip img, .gallery img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; background: #000; border: 1px solid var(--ink); }
+.gallery .wide img { aspect-ratio: 1792 / 768; }
+.gallery figure { margin: 0; }
+.gallery.g3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.gallery.g5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.gallery.pair { margin-top: 18px; }
+.gallery .src span { color: var(--ink-2); }
+.uc-meta { display: flex; flex-wrap: wrap; gap: 6px 26px; margin: 2px 0 16px; font-size: 11.5px; }
+.uc-meta div { display: flex; gap: 8px; }
+.uc-meta dt { text-transform: uppercase; letter-spacing: .1em; color: var(--ink-2); }
+.uc-meta dd { color: var(--ink); }
 .strip a:hover img, .gallery a:hover img { outline: 2px solid var(--accent); outline-offset: 1px; }
 .strip span, .gallery span { display: block; padding-top: 5px; font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-2); }
 .strip span b, .gallery span b { font-weight: 500; color: var(--ink); }
 .subh { font-family: var(--mono); font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: .12em; color: var(--accent-d); margin-bottom: 10px; }
 .gallery { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px clamp(14px, 2vw, 28px); }
 .gallery a { text-decoration: none; }
-.objs { list-style: none; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: clamp(14px, 2vw, 28px); }
+.objs { list-style: none; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(14px, 2vw, 28px); }
 .obj { border-top: 1px solid var(--ink); padding-top: 8px; }
 .obj-top { display: flex; gap: 10px; margin-bottom: 8px; }
 .obj-top b { font-weight: 500; color: var(--accent-d); white-space: nowrap; }
-.obj-in { width: 100%; aspect-ratio: 1; object-fit: cover; border: 1px solid var(--ink); }
-.obj-views { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; margin-top: 4px; }
+.obj-in { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; border: 1px solid var(--ink); }
+.obj-views { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; margin-top: 4px; }
+.objs.o4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.o4 .obj { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 4px; align-items: stretch; }
+.o4 .obj-top { grid-column: 1 / -1; }
+.o4 .obj-in { height: 100%; aspect-ratio: auto; }
+.o4 .obj-views { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 0; }
 .obj-views img { width: 100%; aspect-ratio: 1; object-fit: cover; background: #9a9aa0; }
 
 /* terminal captures: always dark, like a screenshot */
@@ -267,10 +282,14 @@ footer h2 { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-
   .strip { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .strip a:nth-child(n+4) { display: none; }
   .terms { grid-template-columns: minmax(0, 1fr); }
-  .objs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .objs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .gallery.g5 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 @media (max-width: 720px) {
-  .gallery { grid-template-columns: minmax(0, 1fr); }
+  .gallery, .gallery.g3 { grid-template-columns: minmax(0, 1fr); }
+  .gallery.g5 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .gallery .gap { display: none; }
+  .objs.o4 { grid-template-columns: minmax(0, 1fr); }
   .objs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 720px) {
@@ -358,7 +377,7 @@ footer h2 { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-
     <nav aria-label="Sections">
       <a href="#use"><span>1</span>Use it</a>
       <a href="#how"><span>2</span>How it works</a>
-      <a href="#examples"><span>3</span>Examples</a>
+      <a href="#examples"><span>3</span>Use cases</a>
       <a href="#tools"><span>4</span>Tools</a>
       <a href="#gpus"><span>5</span>GPUs</a>
       <a href="#models"><span>6</span>Models</a>
@@ -378,8 +397,8 @@ footer h2 { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-
 
   <div class="front">
     <figure>
-      <div class="hero-frame"><img src="media/hero.jpg" alt="A woman in a silver dress stands among floating crystals in a crowded room" width="1792" height="768"></div>
-      <figcaption class="cap mono"><b class="caps">Pl. 1</b>&ensp;A frame rendered with FLUX.2 [dev] on two rented L40S GPUs.</figcaption>
+      <div class="hero-frame"><img src="media/uc/hero.jpg" srcset="media/uc/hero-s.jpg 900w, media/uc/hero.jpg 1810w" sizes="(max-width: 900px) 100vw, 60vw" alt="A contact sheet of 24 images from one batch: buildings, objects, food, animals, machines and illustrations" width="1810" height="806"></div>
+      <figcaption class="cap mono"><b class="caps">Pl. 1</b>&ensp;One batch of 24 images, rendered with FLUX.2 [dev] on one rented L40S in 21 minutes.</figcaption>
     </figure>
     <div>
       <p class="lede">A toolkit for renting a GPU on RunPod, running ComfyUI on it, and driving it from your laptop. A watchdog on the pod shuts it down when the work stops, so a forgotten pod does not bill overnight.</p>
@@ -387,19 +406,19 @@ footer h2 { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-
         <div><dt>What</dt><dd>It is a set of small Python and shell tools, a step-by-step playbook, and a Claude Code skill.</dd></div>
         <div><dt>Needs</dt><dd>It needs Python 3.9 or newer, ssh, bash, and a RunPod account with credit.</dd></div>
         <div><dt>For</dt><dd>It is written for coding agents such as Claude Code, and every step also works by hand.</dd></div>
-        <div><dt>Status</dt><dd>This is version 0.1. It last ran on a live pod on 23 October 2026.</dd></div>
+        <div><dt>Status</dt><dd>This is version 0.1. It last ran on a live pod on 15 November 2026.</dd></div>
       </dl>
       <a class="cta" href="https://github.com/chickensintrees/remote-comfy" rel="noopener">github.com/chickensintrees/remote-comfy</a>
     </div>
   </div>
 
-  <div class="strip" aria-label="Frames rendered on rented GPUs">
-    <a href="#examples"><img src="media/f1-s.jpg" alt="" width="560" height="240" loading="lazy"><span><b>Pl. 2</b></span></a>
-    <a href="#examples"><img src="media/f2-s.jpg" alt="" width="560" height="240" loading="lazy"><span><b>Pl. 3</b></span></a>
-    <a href="#examples"><img src="media/f3-s.jpg" alt="" width="560" height="240" loading="lazy"><span><b>Pl. 4</b></span></a>
-    <a href="#examples"><img src="media/f4-s.jpg" alt="" width="560" height="240" loading="lazy"><span><b>Pl. 5</b></span></a>
-    <a href="#examples"><img src="media/f5-s.jpg" alt="" width="560" height="240" loading="lazy"><span><b>Pl. 6</b></span></a>
-    <a href="#examples"><img src="media/f6-s.jpg" alt="" width="560" height="240" loading="lazy"><span><b>Pl. 7</b></span></a>
+  <div class="strip" aria-label="Results from the use cases below">
+    <a href="#pl2"><img src="media/uc/b-places-tram-s.jpg" alt="" width="560" height="373" loading="lazy"><span><b>Pl. 2</b></span></a>
+    <a href="#pl14"><img src="media/uc/e-tram-night-s.jpg" alt="" width="560" height="373" loading="lazy"><span><b>Pl. 14</b></span></a>
+    <a href="#pl15"><img src="media/uc/v-waves.jpg" alt="" width="560" height="373" loading="lazy"><span><b>Pl. 15</b></span></a>
+    <a href="#uc-3d"><img src="media/uc/o-teapot-trellis2-tex_000.jpg" alt="" width="560" height="373" loading="lazy"><span><b>Pl. 19</b></span></a>
+    <a href="#pl24"><img src="media/uc/d-camera-cutout-s.jpg" alt="" width="560" height="373" loading="lazy"><span><b>Pl. 24</b></span></a>
+    <a href="#pl26"><img src="media/uc/d-library-depth-s.jpg" alt="" width="560" height="373" loading="lazy"><span><b>Pl. 26</b></span></a>
   </div>
 </header>
 
@@ -577,43 +596,93 @@ comfy 8189 READY
 
 <section class="part wrap" id="examples">
   <div class="part-head">
-    <div><p class="part-no mono caps">3</p><h2>Examples</h2></div>
-    <p class="intro">These were made on rented pods with this toolkit and its earlier versions.</p>
+    <div><p class="part-no mono caps">3</p><h2>Use cases</h2></div>
+    <p class="intro">Everything in this section came from one rented L40S on 15 November 2026: one setup, five graphs, 40 jobs, 1.9 hours and $2.03 in total. The graphs and job lists are in the repository's <a href="https://github.com/chickensintrees/remote-comfy/tree/main/examples" rel="noopener">examples</a> folder.</p>
   </div>
-  <div class="sub-first">
-    <h3 class="subh">Images</h3>
-    <div class="gallery">
-      <a class="shot" href="media/f1.jpg"><img src="media/f1-s.jpg" srcset="media/f1-s.jpg 560w, media/f1.jpg 1344w" sizes="(max-width: 720px) 100vw, 50vw" alt="An explosion of glass and gold around a dancing figure" width="560" height="240" loading="lazy"><span class="mono"><b>Pl. 2</b></span></a>
-      <a class="shot" href="media/f2.jpg"><img src="media/f2-s.jpg" srcset="media/f2-s.jpg 560w, media/f2.jpg 1344w" sizes="(max-width: 720px) 100vw, 50vw" alt="A portrait of a woman in a jewelled headdress" width="560" height="240" loading="lazy"><span class="mono"><b>Pl. 3</b></span></a>
-      <a class="shot" href="media/f3.jpg"><img src="media/f3-s.jpg" srcset="media/f3-s.jpg 560w, media/f3.jpg 1344w" sizes="(max-width: 720px) 100vw, 50vw" alt="An empty suit made of folded paper and foil" width="560" height="240" loading="lazy"><span class="mono"><b>Pl. 4</b></span></a>
-      <a class="shot" href="media/f4.jpg"><img src="media/f4-s.jpg" srcset="media/f4-s.jpg 560w, media/f4.jpg 1344w" sizes="(max-width: 720px) 100vw, 50vw" alt="A crowd dancing under falling confetti" width="560" height="240" loading="lazy"><span class="mono"><b>Pl. 5</b></span></a>
-      <a class="shot" href="media/f5.jpg"><img src="media/f5-s.jpg" srcset="media/f5-s.jpg 560w, media/f5.jpg 1344w" sizes="(max-width: 720px) 100vw, 50vw" alt="A woman beside a sculpture made of pearls" width="560" height="240" loading="lazy"><span class="mono"><b>Pl. 6</b></span></a>
-      <a class="shot" href="media/f6.jpg"><img src="media/f6-s.jpg" srcset="media/f6-s.jpg 560w, media/f6.jpg 1344w" sizes="(max-width: 720px) 100vw, 50vw" alt="A crowded shop floor under a red sign" width="560" height="240" loading="lazy"><span class="mono"><b>Pl. 7</b></span></a>
-      <a class="shot" href="media/f7.jpg"><img src="media/f7-s.jpg" srcset="media/f7-s.jpg 560w, media/f7.jpg 1344w" sizes="(max-width: 720px) 100vw, 50vw" alt="A hand holding a torn paper sign" width="560" height="240" loading="lazy"><span class="mono"><b>Pl. 8</b></span></a>
-      <a class="shot" href="media/f8.jpg"><img src="media/f8-s.jpg" srcset="media/f8-s.jpg 560w, media/f8.jpg 1344w" sizes="(max-width: 720px) 100vw, 50vw" alt="A portrait of a woman in front of gold lettering" width="560" height="240" loading="lazy"><span class="mono"><b>Pl. 9</b></span></a>
+
+  <div class="uc sub-first" id="uc-batch">
+    <h3 class="subh">A batch of images</h3>
+    <dl class="uc-meta mono"><div><dt>Model</dt><dd>FLUX.2 [dev], 20 steps</dd></div><div><dt>Graph</dt><dd>flux2_dev_txt2img.json</dd></div><div><dt>Jobs</dt><dd>jobs_batch.json, 24 prompts</dd></div></dl>
+    <div class="gallery g3">
+      <a class="shot" id="pl2" href="media/uc/b-places-tram.jpg"><img src="media/uc/b-places-tram-s.jpg" srcset="media/uc/b-places-tram-s.jpg 560w, media/uc/b-places-tram.jpg 1344w" sizes="(max-width: 720px) 100vw, 33vw" alt="A yellow tram on a wet cobbled street in Lisbon" width="560" height="373" loading="lazy"><span class="mono"><b>Pl. 2</b> Lisbon tram</span></a>
+      <a class="shot" href="media/uc/b-nature-fox.jpg"><img src="media/uc/b-nature-fox-s.jpg" srcset="media/uc/b-nature-fox-s.jpg 560w, media/uc/b-nature-fox.jpg 1344w" sizes="(max-width: 720px) 100vw, 33vw" alt="A red fox standing in a snowy field" width="560" height="373" loading="lazy"><span class="mono"><b>Pl. 3</b> Fox in snow</span></a>
+      <a class="shot" href="media/uc/b-food-ramen.jpg"><img src="media/uc/b-food-ramen-s.jpg" srcset="media/uc/b-food-ramen-s.jpg 560w, media/uc/b-food-ramen.jpg 1344w" sizes="(max-width: 720px) 100vw, 33vw" alt="A bowl of ramen seen from above" width="560" height="373" loading="lazy"><span class="mono"><b>Pl. 4</b> Ramen</span></a>
+      <a class="shot" href="media/uc/b-machines-locomotive.jpg"><img src="media/uc/b-machines-locomotive-s.jpg" srcset="media/uc/b-machines-locomotive-s.jpg 560w, media/uc/b-machines-locomotive.jpg 1344w" sizes="(max-width: 720px) 100vw, 33vw" alt="A steam locomotive crossing a stone viaduct" width="560" height="373" loading="lazy"><span class="mono"><b>Pl. 5</b> Viaduct</span></a>
+      <a class="shot" href="media/uc/b-objects-watch.jpg"><img src="media/uc/b-objects-watch-s.jpg" srcset="media/uc/b-objects-watch-s.jpg 560w, media/uc/b-objects-watch.jpg 1344w" sizes="(max-width: 720px) 100vw, 33vw" alt="The brass movement of an open pocket watch" width="560" height="373" loading="lazy"><span class="mono"><b>Pl. 6</b> Watch movement</span></a>
+      <a class="shot" href="media/uc/b-graphic-poster.jpg"><img src="media/uc/b-graphic-poster-s.jpg" srcset="media/uc/b-graphic-poster-s.jpg 560w, media/uc/b-graphic-poster.jpg 1344w" sizes="(max-width: 720px) 100vw, 33vw" alt="A blue and pink poster reading RENT THE GPU" width="560" height="373" loading="lazy"><span class="mono"><b>Pl. 7</b> Poster</span></a>
     </div>
-    <p class="figcap mono"><b class="caps">Pl. 2&#8211;9</b>&ensp;These are frames from a music video, rendered with FLUX.2 [dev] and a turbo LoRA at 8 steps on two rented L40S GPUs. A frame at 1792&#215;768 took about 82 seconds, and a 90-second layer of 554 frames costs about $11 in GPU time.</p>
+    <p class="figcap mono"><b class="caps">Pl. 1&#8211;7</b>&ensp;One job list of 24 prompts in six themes. Each 1536&#215;1024 image took 45 seconds; the first took 208 seconds because it loaded the models. The whole batch took 21 minutes, about $0.38. Pl. 1, at the top of the page, is the full batch.</p>
   </div>
-  <div class="sub">
-    <h3 class="subh">3D</h3>
-    <ol class="objs">
-      <li class="obj"><div class="obj-top mono caps"><b>Pl. 10</b><span>Clipboard</span></div>
-        <img class="obj-in" src="media/3d-clipboard-in.jpg" alt="The input image: clipboard" width="512" height="512" loading="lazy">
-        <div class="obj-views"><img src="media/3d-clipboard-000.jpg" alt="The mesh, turned 0 degrees" width="384" height="384" loading="lazy"><img src="media/3d-clipboard-090.jpg" alt="The mesh, turned 90 degrees" width="384" height="384" loading="lazy"><img src="media/3d-clipboard-180.jpg" alt="The mesh, turned 180 degrees" width="384" height="384" loading="lazy"></div></li>
-      <li class="obj"><div class="obj-top mono caps"><b>Pl. 11</b><span>Gold mascot</span></div>
-        <img class="obj-in" src="media/3d-gold_mascot-in.jpg" alt="The input image: gold mascot" width="512" height="512" loading="lazy">
-        <div class="obj-views"><img src="media/3d-gold_mascot-000.jpg" alt="The mesh, turned 0 degrees" width="384" height="384" loading="lazy"><img src="media/3d-gold_mascot-090.jpg" alt="The mesh, turned 90 degrees" width="384" height="384" loading="lazy"><img src="media/3d-gold_mascot-180.jpg" alt="The mesh, turned 180 degrees" width="384" height="384" loading="lazy"></div></li>
-      <li class="obj"><div class="obj-top mono caps"><b>Pl. 12</b><span>Robot clerk</span></div>
-        <img class="obj-in" src="media/3d-robot_clerk-in.jpg" alt="The input image: robot clerk" width="512" height="512" loading="lazy">
-        <div class="obj-views"><img src="media/3d-robot_clerk-000.jpg" alt="The mesh, turned 0 degrees" width="384" height="384" loading="lazy"><img src="media/3d-robot_clerk-090.jpg" alt="The mesh, turned 90 degrees" width="384" height="384" loading="lazy"><img src="media/3d-robot_clerk-180.jpg" alt="The mesh, turned 180 degrees" width="384" height="384" loading="lazy"></div></li>
-      <li class="obj"><div class="obj-top mono caps"><b>Pl. 13</b><span>Shopping cart</span></div>
-        <img class="obj-in" src="media/3d-shopping_cart-in.jpg" alt="The input image: shopping cart" width="512" height="512" loading="lazy">
-        <div class="obj-views"><img src="media/3d-shopping_cart-000.jpg" alt="The mesh, turned 0 degrees" width="384" height="384" loading="lazy"><img src="media/3d-shopping_cart-090.jpg" alt="The mesh, turned 90 degrees" width="384" height="384" loading="lazy"><img src="media/3d-shopping_cart-180.jpg" alt="The mesh, turned 180 degrees" width="384" height="384" loading="lazy"></div></li>
-      <li class="obj"><div class="obj-top mono caps"><b>Pl. 14</b><span>Top hat</span></div>
-        <img class="obj-in" src="media/3d-top_hat-in.jpg" alt="The input image: top hat" width="512" height="512" loading="lazy">
-        <div class="obj-views"><img src="media/3d-top_hat-000.jpg" alt="The mesh, turned 0 degrees" width="384" height="384" loading="lazy"><img src="media/3d-top_hat-090.jpg" alt="The mesh, turned 90 degrees" width="384" height="384" loading="lazy"><img src="media/3d-top_hat-180.jpg" alt="The mesh, turned 180 degrees" width="384" height="384" loading="lazy"></div></li>
+
+  <div class="uc sub" id="uc-edit">
+    <h3 class="subh">Editing an image</h3>
+    <dl class="uc-meta mono"><div><dt>Model</dt><dd>Qwen-Image-Edit 2511, 40 steps</dd></div><div><dt>Graph</dt><dd>qwen_image_edit_2511.json</dd></div><div><dt>Jobs</dt><dd>jobs_edit.json, 5 edits</dd></div></dl>
+    <div class="gallery g5">
+      <a class="shot src" id="pl8" href="media/uc/e-teapot.jpg"><img src="media/uc/e-teapot-s.jpg" alt="The source: a celadon teapot on linen" width="560" height="373" loading="lazy"><span class="mono"><b>Pl. 8</b> Source</span></a>
+      <a class="shot" href="media/uc/e-teapot-black.jpg"><img src="media/uc/e-teapot-black-s.jpg" alt="The same teapot with a matte black glaze" width="560" height="373" loading="lazy"><span class="mono"><b>Pl. 9</b> Matte black</span></a>
+      <a class="shot" href="media/uc/e-teapot-window.jpg"><img src="media/uc/e-teapot-window-s.jpg" alt="The same teapot on a kitchen windowsill" width="560" height="373" loading="lazy"><span class="mono"><b>Pl. 10</b> Windowsill</span></a>
+      <a class="shot" href="media/uc/e-teapot-snow.jpg"><img src="media/uc/e-teapot-snow-s.jpg" alt="The same teapot half buried in snow" width="560" height="373" loading="lazy"><span class="mono"><b>Pl. 11</b> In snow</span></a>
+      <a class="shot" href="media/uc/e-teapot-drawing.jpg"><img src="media/uc/e-teapot-drawing-s.jpg" alt="The same teapot as a pencil technical drawing" width="560" height="373" loading="lazy"><span class="mono"><b>Pl. 12</b> Drawing</span></a>
+    </div>
+    <div class="gallery g2 pair">
+      <a class="shot src" href="media/uc/b-places-tram.jpg"><img src="media/uc/b-places-tram-s.jpg" srcset="media/uc/b-places-tram-s.jpg 560w, media/uc/b-places-tram.jpg 1344w" sizes="(max-width: 720px) 100vw, 50vw" alt="The source: the tram street by day" width="560" height="373" loading="lazy"><span class="mono"><b>Pl. 13</b> Source</span></a>
+      <a class="shot" id="pl14" href="media/uc/e-tram-night.jpg"><img src="media/uc/e-tram-night-s.jpg" srcset="media/uc/e-tram-night-s.jpg 560w, media/uc/e-tram-night.jpg 1248w" sizes="(max-width: 720px) 100vw, 50vw" alt="The same street at night under street lamps and neon signs" width="560" height="373" loading="lazy"><span class="mono"><b>Pl. 14</b> Same street at night</span></a>
+    </div>
+    <p class="figcap mono"><b class="caps">Pl. 8&#8211;14</b>&ensp;Each edit is the source image and one sentence, such as &#8220;Change the glaze of the teapot to matte black.&#8221; An edit took 102 seconds; the first took 201. The labels on the drawing are not real words.</p>
+  </div>
+
+  <div class="uc sub" id="uc-video">
+    <h3 class="subh">Image to video</h3>
+    <dl class="uc-meta mono"><div><dt>Model</dt><dd>Wan 2.2 I2V A14B, 20 steps</dd></div><div><dt>Graph</dt><dd>wan22_i2v_14b.json</dd></div><div><dt>Jobs</dt><dd>jobs_i2v.json, 4 clips</dd></div></dl>
+    <div class="gallery g2 clips">
+      <figure class="shot" id="pl15"><picture><source media="(prefers-reduced-motion: reduce)" srcset="media/uc/v-waves.jpg"><img src="media/uc/v-waves.webp" alt="Waves breaking over black basalt rocks" width="560" height="376" loading="lazy"></picture><span class="mono"><b>Pl. 15</b> Waves</span></figure>
+      <figure class="shot"><picture><source media="(prefers-reduced-motion: reduce)" srcset="media/uc/v-locomotive.jpg"><img src="media/uc/v-locomotive.webp" alt="A steam locomotive moving across a viaduct" width="560" height="376" loading="lazy"></picture><span class="mono"><b>Pl. 16</b> Locomotive</span></figure>
+      <figure class="shot"><picture><source media="(prefers-reduced-motion: reduce)" srcset="media/uc/v-espresso.jpg"><img src="media/uc/v-espresso.webp" alt="Espresso pouring into a glass cup" width="560" height="376" loading="lazy"></picture><span class="mono"><b>Pl. 17</b> Espresso</span></figure>
+      <figure class="shot"><picture><source media="(prefers-reduced-motion: reduce)" srcset="media/uc/v-fern.jpg"><img src="media/uc/v-fern.webp" alt="Rain falling on an unfurling fern" width="560" height="376" loading="lazy"></picture><span class="mono"><b>Pl. 18</b> Fern in rain</span></figure>
+    </div>
+    <p class="figcap mono"><b class="caps">Pl. 15&#8211;18</b>&ensp;Each clip starts from one image of the batch and one sentence about the motion. A 5-second clip at 832&#215;560 and 16 fps took about 8 minutes; the first took 9. The four clips cost about $0.60. They are shown here as animated WebP at 560 pixels wide.</p>
+  </div>
+
+  <div class="uc sub" id="uc-3d">
+    <h3 class="subh">Image to 3D</h3>
+    <dl class="uc-meta mono"><div><dt>Model</dt><dd>TRELLIS.2 and Pixal3D, 60,000 faces</dd></div><div><dt>Graph</dt><dd>image_to_3d.json</dd></div><div><dt>Runner</dt><dd>one image, one model per job</dd></div></dl>
+    <ol class="objs o4">
+      <li class="obj"><div class="obj-top mono caps"><b>Pl. 19</b><span>Teapot, TRELLIS.2</span></div>
+        <img class="obj-in" src="media/uc/o-teapot-in.jpg" alt="The input image: teapot" width="600" height="400" loading="lazy">
+        <div class="obj-views"><img src="media/uc/o-teapot-trellis2-tex_000.jpg" alt="The mesh from the front" width="384" height="384" loading="lazy"><img src="media/uc/o-teapot-trellis2-tex_090.jpg" alt="The mesh turned 90 degrees" width="384" height="384" loading="lazy"><img src="media/uc/o-teapot-trellis2-tex_180.jpg" alt="The mesh from behind" width="384" height="384" loading="lazy"><img src="media/uc/o-teapot-trellis2-clay_045.jpg" alt="The bare geometry, without textures" width="384" height="384" loading="lazy"></div></li>
+      <li class="obj"><div class="obj-top mono caps"><b>Pl. 20</b><span>Teapot, Pixal3D</span></div>
+        <img class="obj-in" src="media/uc/o-teapot-in.jpg" alt="The input image: teapot" width="600" height="400" loading="lazy">
+        <div class="obj-views"><img src="media/uc/o-teapot-pixal3d-tex_000.jpg" alt="The mesh from the front" width="384" height="384" loading="lazy"><img src="media/uc/o-teapot-pixal3d-tex_090.jpg" alt="The mesh turned 90 degrees" width="384" height="384" loading="lazy"><img src="media/uc/o-teapot-pixal3d-tex_180.jpg" alt="The mesh from behind" width="384" height="384" loading="lazy"><img src="media/uc/o-teapot-pixal3d-clay_045.jpg" alt="The bare geometry, without textures" width="384" height="384" loading="lazy"></div></li>
+      <li class="obj"><div class="obj-top mono caps"><b>Pl. 21</b><span>Camera, TRELLIS.2</span></div>
+        <img class="obj-in" src="media/uc/o-camera-in.jpg" alt="The input image: camera" width="600" height="400" loading="lazy">
+        <div class="obj-views"><img src="media/uc/o-camera-trellis2-tex_000.jpg" alt="The mesh from the front" width="384" height="384" loading="lazy"><img src="media/uc/o-camera-trellis2-tex_090.jpg" alt="The mesh turned 90 degrees" width="384" height="384" loading="lazy"><img src="media/uc/o-camera-trellis2-tex_180.jpg" alt="The mesh from behind" width="384" height="384" loading="lazy"><img src="media/uc/o-camera-trellis2-clay_045.jpg" alt="The bare geometry, without textures" width="384" height="384" loading="lazy"></div></li>
+      <li class="obj"><div class="obj-top mono caps"><b>Pl. 22</b><span>Boots, TRELLIS.2</span></div>
+        <img class="obj-in" src="media/uc/o-boots-in.jpg" alt="The input image: boots" width="600" height="400" loading="lazy">
+        <div class="obj-views"><img src="media/uc/o-boots-trellis2-tex_000.jpg" alt="The mesh from the front" width="384" height="384" loading="lazy"><img src="media/uc/o-boots-trellis2-tex_090.jpg" alt="The mesh turned 90 degrees" width="384" height="384" loading="lazy"><img src="media/uc/o-boots-trellis2-tex_180.jpg" alt="The mesh from behind" width="384" height="384" loading="lazy"><img src="media/uc/o-boots-trellis2-clay_045.jpg" alt="The bare geometry, without textures" width="384" height="384" loading="lazy"></div></li>
     </ol>
-    <p class="figcap mono"><b class="caps">Pl. 10&#8211;14</b>&ensp;Each object is a TRELLIS.2 mesh made from the one image above it, on a rented RTX 4090 in about 51 seconds. That is about one cent of GPU time per object. The hosted 3D APIs in the same test cost $0.40 to $0.53 per object.</p>
+    <p class="figcap mono"><b class="caps">Pl. 19&#8211;22</b>&ensp;Each mesh comes from the one image beside it, taken from the batch. TRELLIS.2 took about 170 seconds per object (the first took 534, because it loaded the models), and Pixal3D took 178 seconds on the same teapot. The grey view is the bare geometry without textures.</p>
+  </div>
+
+  <div class="uc sub" id="uc-maps">
+    <h3 class="subh">Cutouts and depth</h3>
+    <dl class="uc-meta mono"><div><dt>Model</dt><dd>BiRefNet; MoGe 2</dd></div><div><dt>Graph</dt><dd>cutout_birefnet.json, depth_moge.json</dd></div><div><dt>Jobs</dt><dd>jobs_cutout_depth.json</dd></div></dl>
+    <div class="gallery g3">
+      <a class="shot src" href="media/uc/d-camera.jpg"><img src="media/uc/d-camera-s.jpg" alt="The source: a film camera on a walnut desk" width="560" height="373" loading="lazy"><span class="mono"><b>Pl. 23</b> Source</span></a>
+      <a class="shot" id="pl24" href="media/uc/d-camera-cutout.jpg"><img src="media/uc/d-camera-cutout-s.jpg" alt="The camera cut out, on a checkerboard that shows the transparent background" width="560" height="373" loading="lazy"><span class="mono"><b>Pl. 24</b> Cutout</span></a>
+      <span class="gap" aria-hidden="true"></span>
+      <a class="shot src" href="media/uc/d-library.jpg"><img src="media/uc/d-library-s.jpg" alt="The source: a concrete library in fog" width="560" height="373" loading="lazy"><span class="mono"><b>Pl. 25</b> Source</span></a>
+      <a class="shot" id="pl26" href="media/uc/d-library-depth.jpg"><img src="media/uc/d-library-depth-s.jpg" alt="A depth map of the library, near in red and far in blue" width="560" height="373" loading="lazy"><span class="mono"><b>Pl. 26</b> Depth</span></a>
+      <a class="shot" href="media/uc/d-library-normal.jpg"><img src="media/uc/d-library-normal-s.jpg" alt="A normal map of the library" width="560" height="373" loading="lazy"><span class="mono"><b>Pl. 27</b> Normals</span></a>
+    </div>
+    <p class="figcap mono"><b class="caps">Pl. 23&#8211;27</b>&ensp;The cutout took 9 seconds, and a depth and normal pass took 3 to 15 seconds. These are the cheapest jobs on the page, and they run on the same pod as the rest.</p>
+  </div>
+
+  <div class="uc sub" id="uc-earlier">
+    <h3 class="subh">Earlier: frames for a music video</h3>
+    <div class="gallery g2">
+      <a class="shot wide" href="media/f3.jpg"><img src="media/f3-s.jpg" srcset="media/f3-s.jpg 560w, media/f3.jpg 1344w" sizes="(max-width: 720px) 100vw, 50vw" alt="An empty suit made of folded paper and foil" width="560" height="240" loading="lazy"><span class="mono"><b>Pl. 28</b> One frame of 554</span></a>
+    </div>
+    <p class="figcap mono"><b class="caps">Pl. 28</b>&ensp;A 90-second layer of a music video, 554 frames at 1792&#215;768, rendered with FLUX.2 [dev] and a turbo LoRA at 8 steps on two rented L40S GPUs in July 2026. A frame took about 82 seconds, and the layer cost about $11 in GPU time.</p>
   </div>
 </section>
 
@@ -701,8 +770,8 @@ __CATALOG__
     <div>
       <h3>Status</h3>
       <ul class="limits">
-        <li>The full run was tested live on 23 October 2026, on two A40 GPUs, for about $0.85.</li>
-        <li>In that test the watchdog terminated an idle L4 pod by itself, about a minute after it went idle.</li>
+        <li>The full run was last tested live on 15 November 2026: setup and 40 jobs across five graphs on one L40S, in 1.9 hours, for $2.03.</li>
+        <li>On 23 October 2026 the watchdog terminated an idle L4 pod by itself, about a minute after it went idle.</li>
         <li>The offline checks run on Python 3.9 and 3.12 in CI, and need no network, GPU or API key.</li>
       </ul>
     </div>

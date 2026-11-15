@@ -1,6 +1,6 @@
 # remote-comfy
 
-![A frame rendered with FLUX.2 [dev] on two rented L40S GPUs](site/media/hero.jpg)
+![A batch of 24 images rendered with FLUX.2 [dev] on one rented L40S](site/media/uc/hero.jpg)
 
 remote-comfy is a toolkit for renting a GPU on [RunPod](https://www.runpod.io), running
 [ComfyUI](https://github.com/comfyanonymous/ComfyUI) on it, and driving it from your laptop.
@@ -111,15 +111,16 @@ whenever something looks like a hardware fault or a hung boot.
 
 ## Examples
 
-The [project page](https://billmoore.ai/remote-comfy/#examples) shows frames and 3D models
-made with this toolkit, and the logs of a live run. [`examples/`](examples/) holds a
-shard-aware batch harness and a minimal FLUX.1 workflow that you can copy for your own
-graphs.
+The [project page](https://billmoore.ai/remote-comfy/#examples) shows five use cases from
+one live run, each with its time and cost: a batch of images, image edits, image to video,
+image to 3D, and cutouts and depth. [`examples/`](examples/) holds the graph and job list
+for each, and the shard-aware batch harness that runs them.
 
 ## Status and limits
 
-- This is version 0.1. The full run was last tested live on 23 October 2026, on two A40
-  GPUs, for about $0.85 ([record](decisions/2026-10-23-live-smoke-test.md)).
+- This is version 0.1. The full run was last tested live on 15 November 2026: setup and
+  40 jobs across five graphs on one L40S, in 1.9 hours, for $2.03
+  ([record](decisions/2026-11-15-use-cases-run.md)).
 - The offline checks run in CI on Python 3.9 and 3.12 on every push. They need no
   network, GPU or API key.
 - It works with RunPod only.
@@ -144,7 +145,7 @@ local/               scripts that run on your machine against the pod
 catalog/             the model catalogue as JSON (docs/models.md is generated from it)
 docs/                playbook, traps, architecture, GPU choice, models, open questions
 decisions/           dated records of why one option was chosen over another
-examples/            a shard-aware batch harness and a minimal workflow
+examples/            graphs and job lists for five use cases, and the batch harness
 skills/remote-comfy/ the Claude Code skill
 scripts/             the skill installer
 site/                the project page (python site/build.py rebuilds it)
