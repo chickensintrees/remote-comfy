@@ -761,9 +761,9 @@ def main():
     check("host-lottery" in readme,
           "docs keeps uptime as the host-lottery check while banning it for own-CPU")
     check("NO CAPACITY, NOT BAD SYNTAX" in readme,
-          "docs records that a create 500 means no capacity")
+          "docs records that a create 400 means no capacity")
     check("gpuTypeId" in readme and "displayName" in readme,
-          "docs records the create/availability id-vocabulary mismatch")
+          "docs records the v1 create/availability id-vocabulary mismatch")
     check("VIDEO-SHAPED" in readme,
           "docs warns its own GPU table is video-shaped (audio overspends ~9x)")
     check("ACCOUNT-WIDE BALANCE" in readme,

@@ -44,9 +44,9 @@ python remote_comfy/pod_ctl.py create --name work --gpu "NVIDIA A40" --gpu-count
 python remote_comfy/pod_ctl.py conn <podId>             # ALWAYS re-read ip/port
 ```
 
-`create` wants a `gpuTypeId` (`"NVIDIA GeForce RTX 4090"`); `availability` prints a
-`displayName` (`"RTX 4090"`). A 500 from `create` means no capacity: try the next GPU in
-cost order. Use pod-local `--volume-gb`, not a network volume (they DC-lock you).
+`--gpu` takes the id `availability` prints (`"NVIDIA GeForce RTX 4090"`), or a comma list
+in cost order: a 400 from `create` means no capacity, and it moves on to the next type.
+Use pod-local `--volume-gb`, not a network volume (they DC-lock you).
 Immediately after create, `ssh … uptime`: a fresh pod on a saturated host (load 28+) is
 a bad draw, so terminate and redraw.
 
