@@ -24,3 +24,6 @@ step-by-step run is `$RC/docs/playbook.md`; the traps are `$RC/docs/traps.md`.
 4. Run `local/sync-outputs.sh` alongside every batch: pod storage is scratch.
 5. `pod_ctl.py conn <podId>` after every resume; the SSH port remaps.
 6. After changing the toolkit: `python "$RC/tests/test_runpod_ops.py"` must print ALL PASS.
+
+Short jobs on common models can skip the pod: Comfy Cloud via `connect("cloud")` or
+`batch_harness.py --comfy cloud` (playbook section 7; no TRELLIS.2, so not for 3D).

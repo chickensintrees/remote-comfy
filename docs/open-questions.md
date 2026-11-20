@@ -28,3 +28,7 @@ When you settle one, move the result into a test plus `docs/traps.md` (or a
   catalogue points at renamed repos (old names 307-redirect) and int8_convrot files; the
   built-in `flux`/`wan`/`qwen` provision sets still use the old repo names. `hf download`
   is expected to follow the redirect but has not been watched doing it.
+- **What a Comfy Cloud job costs, and how it compares with a pod.** The client ran live on
+  2026-11-20 (two 5-second cutouts), but no per-job cost or long-batch throughput has been
+  measured, and the 1-to-5 concurrent-job limits have not been hit. See
+  `decisions/2026-11-20-comfy-cloud-backend.md`.

@@ -135,3 +135,23 @@ python remote_comfy/pod_ctl.py terminate <podId>   # destroys pod-local disk; co
 After a resume only `/workspace` survives. Re-run `provision-comfyui.sh none` (idempotent;
 reinstalls deps, skips models). Stopping can strand a pod whose GPU type has low stock.
 Pause only on High-stock GPUs, and never with unsynced outputs.
+
+## 7. Or skip the pod: Comfy Cloud
+
+[Comfy Cloud](https://docs.comfy.org/development/cloud/overview) runs the same API-format graphs on its own GPUs and
+bills only while a job runs: no pod, provisioning, watchdog or sync loop. It suits short
+jobs on common models. Stay on a pod for long saturated batches, custom nodes or models
+it lacks, runs over 30 minutes (1 hour on Pro), or client images that must not leave
+hardware you control. Why and how: [`decisions/2026-11-20-comfy-cloud-backend.md`](../decisions/2026-11-20-comfy-cloud-backend.md).
+
+```bash
+python -m keyring set remote-comfy comfy-cloud      # key from platform.comfy.org; a paid plan
+python -c "import sys; sys.path.insert(0, 'remote_comfy'); from comfy_client import connect; \
+c = connect('cloud'); c.wait_ready(); print(c.has('LoadImage', 'WanVideoSampler'))"
+python examples/batch_harness.py --comfy cloud --inputs ./inputs --jobs jobs.json --out ./out
+```
+
+Check with `has()` that every node your graph uses exists before a batch. `--inputs`
+uploads each `set` value that names a file in that folder. Checked live on 2026-11-20:
+six of the seven example graphs have every node and model on Cloud; `image_to_3d` lacks
+the TRELLIS.2 weights, so 3D stays on a pod.

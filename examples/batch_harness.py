@@ -3,6 +3,7 @@
 
   python3 -u batch_harness.py --comfy http://127.0.0.1:8188 --shard 0 --of 1 \
       --jobs jobs.json --out /workspace/out
+  python3 -u batch_harness.py --comfy cloud --inputs ./inputs --jobs jobs.json --out ./out
 
 jobs.json is a list of {"id", "workflow": <API-format JSON path, relative to jobs.json>,
 "set": {"<node>.<input>": value}}. Shard N takes every job whose index % M == N.
@@ -10,13 +11,16 @@ A job is SKIPPED when any file named <id>_* already exists in --out, so a relaun
 resumes instead of redoing. Move --out aside before re-running with new settings
 (see the dedupe caveat in local/sync-outputs.sh).
 
+--inputs DIR uploads every `set` value that names a file in DIR (once each) and sets what
+the server returned in its place: needed on Comfy Cloud, where there is no disk to scp to.
+
 Runs on the pod beside comfy_client.py, or from a repo checkout.
 """
 import argparse, copy, glob, json, os, sys, time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path[:0] = [HERE, os.path.join(HERE, "..", "remote_comfy"), "/workspace"]
-from comfy_client import Comfy  # noqa: E402
+from comfy_client import connect  # noqa: E402
 
 
 def apply(workflow, sets):
@@ -37,6 +41,7 @@ def main(argv=None):
     ap.add_argument("--jobs", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--wait-min", type=float, default=30)
+    ap.add_argument("--inputs", default=None, help="upload set values naming files in this dir")
     a = ap.parse_args(argv)
 
     jobs = json.load(open(a.jobs))
@@ -48,12 +53,19 @@ def main(argv=None):
     if not todo:
         return 0
 
-    c = Comfy(a.comfy)
+    c = connect(a.comfy)
     c.wait_ready()
-    cache, fails = {}, 0
+    cache, uploaded, fails = {}, {}, 0
     for j in todo:
         path = os.path.join(base, j["workflow"])
-        wf = apply(cache.setdefault(path, json.load(open(path))), j.get("set", {}))
+        sets = dict(j.get("set", {}))
+        for k, v in sets.items():
+            f = os.path.join(a.inputs, v) if a.inputs and isinstance(v, str) else None
+            if f and os.path.isfile(f):
+                if v not in uploaded:
+                    uploaded[v] = c.upload(f)
+                sets[k] = uploaded[v]
+        wf = apply(cache.setdefault(path, json.load(open(path))), sets)
         t0 = time.time()
         try:
             outs = c.run(wf, wait_min=a.wait_min)

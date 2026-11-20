@@ -25,7 +25,7 @@ file fully before you spend a GPU-minute.
 | path | runs on | what |
 |---|---|---|
 | `remote_comfy/pod_ctl.py` | laptop | RunPod control: `list`, `status`, `balance`, `availability`, `create`, `conn`, `stop`, `start`, `terminate` |
-| `remote_comfy/comfy_client.py` | either | stdlib ComfyUI client: `Comfy(url).wait_ready() / upload() / run()` |
+| `remote_comfy/comfy_client.py` | either | stdlib ComfyUI client: `Comfy(url).wait_ready() / upload() / run()`; `connect("cloud")` gives `CloudComfy`, the same calls on Comfy Cloud |
 | `remote_comfy/check_latest_models.py` | laptop | STEP ZERO: what models exist *now* (live HF API) |
 | `remote_comfy/catalog.py` + `catalog/catalog.json` | laptop | curated current open models by task, with ComfyUI file paths; `--verify` re-checks HF, `--dl` feeds provisioning |
 | `remote_comfy/autostop.py` | **pod** | idle watchdog that stops/terminates the pod itself |
@@ -57,7 +57,9 @@ file fully before you spend a GPU-minute.
 7. **Monitor artifacts, not done-markers.** Count/size files on disk; a script's own
    `DONE` line has printed over total failure more than once.
 8. **Never put a secret on disk or in a URL.** `RUNPOD_API_KEY` goes in the pod's env
-   and the laptop's env/keyring only. See `.env.example`.
+   and the laptop's env/keyring only; `COMFY_CLOUD_API_KEY` stays on the laptop. See
+   `.env.example`. A key goes in a header, never a URL, and never follows a redirect to
+   storage (urllib re-sends every header on a redirect).
 
 ## Commands
 

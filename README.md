@@ -89,7 +89,7 @@ whether every output folder has reached your machine.
 | `pod/hold-busy.sh` | pod | It keeps the pod awake while a long job that is not ComfyUI runs, and lets go when the job ends. |
 | `local/sync-outputs.sh` | your machine | It pulls results home while a batch runs, checks every file, and tells the watchdog which folders are safe. |
 | `pod/check-gpu-load.sh` | your machine, over SSH | It fails when one GPU samples much slower than the others, which usually means a model did not fit. |
-| `remote_comfy/comfy_client.py` | either | It drives a local or a remote ComfyUI in the same way. |
+| `remote_comfy/comfy_client.py` | either | It drives a local or a remote ComfyUI in the same way, and Comfy Cloud with the same calls. |
 
 ## Choosing a GPU and a model
 
@@ -101,6 +101,15 @@ dollar, and `pod_ctl.py availability --min-vram <GB>` shows today's stock and pr
 music and utilities, with each one's licence, VRAM and the exact files ComfyUI loads. New
 models ship every month, so run `check_latest_models.py` and `catalog.py --verify` before
 you commit to a batch.
+
+## Comfy Cloud
+
+[Comfy Cloud](https://docs.comfy.org/development/cloud/overview) runs the same graphs on Comfy's own GPUs and bills
+only while a job runs, so there is no pod to set up or forget. `connect("cloud")` in
+`comfy_client.py` and `batch_harness.py --comfy cloud` use it, with the key in
+`COMFY_CLOUD_API_KEY` or the keyring. It needs a paid Comfy plan, has only the most-used
+custom nodes, and limits each run to 30 minutes (1 hour on Pro). Use a pod for long
+batches and anything it lacks. Setup is in [`docs/playbook.md`](docs/playbook.md#7-or-skip-the-pod-comfy-cloud).
 
 ## Traps
 
@@ -123,7 +132,9 @@ for each, and the shard-aware batch harness that runs them.
   ([record](decisions/2026-11-15-use-cases-run.md)).
 - The offline checks run in CI on Python 3.9 and 3.12 on every push. They need no
   network, GPU or API key.
-- It works with RunPod only.
+- Pods are rented on RunPod only. The Comfy Cloud client ran live on 20 November 2026
+  (a background-removal job through the batch harness); its cost per job has not been
+  measured yet ([record](decisions/2026-11-20-comfy-cloud-backend.md)).
 - The watchdog reads the queue of the first ComfyUI only. The launcher keeps the pod busy
   while any GPU still has work.
 - [`docs/open-questions.md`](docs/open-questions.md) lists what has not been proven yet.

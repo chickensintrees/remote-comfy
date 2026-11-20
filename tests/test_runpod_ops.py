@@ -63,6 +63,258 @@ class _Q(BaseHTTPRequestHandler):
         pass
 
 
+def cloud_checks():
+    """Comfy Cloud client against a fake server built from the docs as read on 2026-11-20.
+    These prove the client matches those docs, not that the docs match the service: see
+    decisions/2026-11-20-comfy-cloud-backend.md for what the first live run must settle."""
+    import urllib.error
+    cc = load("comfy_client", P("comfy_client.py"))
+    KEY = "ck-TESTKEY-123"
+    sent = []
+
+    class _R:
+        def __init__(self, body):
+            self.body = body if isinstance(body, bytes) else json.dumps(body).encode()
+
+        def read(self):
+            return self.body
+
+    def http_error(url, code, body=b"", headers=None):
+        return urllib.error.HTTPError(url, code, "x", headers or {}, io.BytesIO(body))
+
+    def make(script):
+        """script(req) -> a body to return, or an HTTPError to raise."""
+        c = cc.CloudComfy(key=KEY + "\r", poll=0)
+        c._sleep = lambda s: None
+
+        def raw(req, timeout):
+            sent.append(req)
+            r = script(req)
+            if isinstance(r, Exception):
+                raise r
+            return _R(r)
+        c._raw = raw
+        return c
+
+    def keyed(req):
+        return req.get_header("Authorization") or req.get_header("X-api-key")
+
+    # A job that queues, runs, succeeds with two outputs: one served by Comfy through a 302 to
+    # signed storage, one already an absolute storage URL.
+    polls = []
+
+    def job(req):
+        u, m = req.full_url, req.get_method()
+        if m == "POST" and u.endswith("/api/v2/jobs"):
+            return {"id": "j1", "status": "queued", "outputs": []}
+        if m == "GET" and u.endswith("/api/v2/jobs/j1"):
+            polls.append(1)
+            if len(polls) < 2:
+                return {"id": "j1", "status": "running"}
+            return {"id": "j1", "status": "succeeded", "error": None, "outputs": [
+                {"node_id": "9", "name": "rc_00001_.png", "type": "image",
+                 "url": "https://cloud.comfy.org/api/v2/assets/a1/content"},
+                {"node_id": "9", "name": "rc_00001_.png", "type": "image",
+                 "url": "https://storage.example.net/b2?sig=abc"},
+                {"node_id": "4", "name": "", "type": "text", "url": ""}]}
+        if u.endswith("/api/v2/assets/a1/content"):
+            return http_error(u, 302, headers={"Location": "https://storage.example.net/a1?sig=xyz"})
+        if u.startswith("https://storage.example.net/a1"):
+            return b"PNG-A"
+        if u.startswith("https://storage.example.net/b2"):
+            return b"PNG-B"
+        return http_error(u, 404, b'{"error":{"code":"not_found","message":"no"}}')
+
+    del sent[:]
+    outs = make(job).run({"9": {"class_type": "SaveImage", "inputs": {}}}, wait_min=1)
+    sub = sent[0]
+    check(sub.get_method() == "POST" and sub.full_url == "https://cloud.comfy.org/api/v2/jobs"
+          and json.loads(sub.data) == {"workflow": {"9": {"class_type": "SaveImage", "inputs": {}}}},
+          "cloud run submits the API-format workflow to POST /api/v2/jobs as {workflow}")
+    check(sub.get_header("Authorization") == "Bearer " + KEY and not sub.get_header("X-api-key"),
+          "cloud v2 calls send Bearer auth, key stripped of a pasted \\r")
+    check(bool(sub.get_header("Idempotency-key")),
+          "job submit carries an Idempotency-Key, so a retried POST cannot run the job twice")
+    check(outs == [("rc_00001_.png", b"PNG-A"), ("1_rc_00001_.png", b"PNG-B")],
+          "cloud run polls to succeeded and returns every output with a url, names kept unique")
+    storage = [r for r in sent if "storage.example.net" in r.full_url]
+    check(len(storage) == 2 and not any(keyed(r) for r in storage),
+          "signed storage URLs (redirect target or absolute) are fetched with NO key header")
+    check(not any(KEY in r.full_url for r in sent), "the cloud key never appears in a URL")
+
+    # The same through real urllib and two local servers: urllib's default redirect handler
+    # re-sends every header, so this proves _NoRedirect is what keeps the key at home.
+    heard = {}
+
+    class _Store(BaseHTTPRequestHandler):
+        def do_GET(self):
+            heard["store"] = dict(self.headers)
+            self.send_response(200); self.send_header("Content-Length", "3"); self.end_headers()
+            self.wfile.write(b"IMG")
+
+        def log_message(self, *a):
+            pass
+    store = HTTPServer(("127.0.0.1", 0), _Store)
+
+    class _Api(BaseHTTPRequestHandler):
+        def do_GET(self):
+            heard["api"] = dict(self.headers)
+            self.send_response(302)
+            self.send_header("Location", "http://127.0.0.1:%d/obj?sig=1" % store.server_port)
+            self.send_header("Content-Length", "0"); self.end_headers()
+
+        def log_message(self, *a):
+            pass
+    api = HTTPServer(("127.0.0.1", 0), _Api)
+    for s in (store, api):
+        threading.Thread(target=s.handle_request, daemon=True).start()
+    real = cc.CloudComfy(base="http://127.0.0.1:%d" % api.server_port, key=KEY, poll=0)
+    got = real._call("GET", "/api/v2/assets/a1/content", raw=True, timeout=10)
+    lower = lambda h: {k.lower(): v for k, v in (h or {}).items()}
+    check(got == b"IMG" and lower(heard.get("api")).get("authorization") == "Bearer " + KEY
+          and "authorization" not in lower(heard.get("store")) and "x-api-key" not in lower(heard.get("store")),
+          "real urllib: Comfy gets the key, the redirected storage host gets no key header")
+    store.server_close(); api.server_close()
+
+    # Failure carries Comfy's error code and message, never the key.
+    def failed(req):
+        if req.get_method() == "POST":
+            return {"id": "j2", "status": "failed",
+                    "error": {"code": "node_execution_error", "message": "bad " + KEY}}
+        return {}
+    try:
+        make(failed).run({}, wait_min=1)
+        msg = ""
+    except RuntimeError as e:
+        msg = str(e)
+    check("node_execution_error" in msg and KEY not in msg,
+          "a failed cloud job raises with Comfy's error code and the key scrubbed")
+
+    # A timeout cancels the job so it stops billing.
+    del sent[:]
+
+    def stuck(req):
+        if req.get_method() == "POST" and req.full_url.endswith("/api/v2/jobs"):
+            return {"id": "j3", "status": "queued"}
+        if req.full_url.endswith("/cancel"):
+            return {"id": "j3", "status": "canceling"}
+        return {"id": "j3", "status": "running"}
+    try:
+        make(stuck).run({}, wait_min=-1)
+        to = False
+    except TimeoutError:
+        to = True
+    check(to and any(r.full_url.endswith("/api/v2/jobs/j3/cancel") and r.get_method() == "POST"
+                     for r in sent), "a cloud job past --wait-min is CANCELLED, not left billing")
+
+    # 429 / 5xx retry with the same request; 402 surfaces Comfy's code.
+    del sent[:]
+    n = []
+
+    def busy(req):
+        n.append(1)
+        if len(n) == 1:
+            return http_error(req.full_url, 429, b'{"error":{"code":"queue_full","message":"wait"}}',
+                              {"Retry-After": "1"})
+        return {"id": "j4", "status": "succeeded", "outputs": []}
+    make(busy).run({}, wait_min=1)
+    keys = [r.get_header("Idempotency-key") for r in sent if r.get_method() == "POST"]
+    check(len(keys) == 2 and keys[0] == keys[1],
+          "a 429 on submit is retried with the SAME Idempotency-Key")
+    try:
+        make(lambda r: http_error(r.full_url, 402, ('{"error":{"code":"insufficient_credits",'
+                                                    '"message":"top up %s"}}' % KEY).encode())).run({})
+        err = None
+    except cc.CloudError as e:
+        err = e
+    check(err is not None and err.code == "insufficient_credits" and KEY not in str(err),
+          "a 402 raises CloudError with Comfy's code (insufficient_credits), key scrubbed")
+
+    # Uploads: v2 asset reference by default, v1 filename on request; node list is v1.
+    img = os.path.join(tempfile.mkdtemp(), "scene.png")
+    open(img, "wb").write(b"\x89PNG fake")
+    del sent[:]
+
+    def up(req):
+        if req.full_url.endswith("/api/v2/assets"):
+            return {"id": "as-1", "hash": "blake3:00", "file_path": "scene.png", "url": "u",
+                    "size_bytes": 9, "content_type": "image/png"}
+        if req.full_url.endswith("/api/upload/image"):
+            return {"name": "scene.png", "subfolder": "", "type": "input"}
+        if req.full_url.endswith("/api/object_info"):
+            return {"LoadImage": {}, "SaveImage": {}}
+        return {}
+    c = make(up)
+    ref = c.upload(img)
+    body = sent[-1].data
+    check(ref == {"__type": "core/ASSET", "info": {"id": "as-1", "hash": "blake3:00", "file_path": "scene.png"}},
+          "v2 upload returns the core/ASSET reference that replaces a LoadImage filename")
+    check(b'name="content_type"' in body and b'name="file_path"' in body
+          and body.rfind(b'name="file"') > body.rfind(b'name="file_path"'),
+          "v2 asset upload sends content_type and file_path BEFORE the file part (later fields are ignored)")
+    check(c.upload(img, api="v1") == "scene.png" and sent[-1].get_header("X-api-key") == KEY
+          and not sent[-1].get_header("Authorization") and b'name="image"' in sent[-1].data,
+          "v1 upload sends X-API-Key and the image field, and returns a plain filename")
+    check(c.has("LoadImage", "Nope") == {"LoadImage": True, "Nope": False}
+          and sent[-1].full_url.endswith("/api/object_info") and sent[-1].get_header("X-api-key") == KEY,
+          "cloud node list comes from v1 /api/object_info (v2 has none)")
+
+    # wait_ready: an unknown job's 404 proves the key; a 401 is raised.
+    check(make(lambda r: http_error(r.full_url, 404, b"{}")).wait_ready() is True,
+          "cloud wait_ready accepts a 404 for an unknown job (key works)")
+    try:
+        make(lambda r: http_error(r.full_url, 401, b'{"error":{"code":"unauthorized","message":"no"}}')).wait_ready()
+        bad = False
+    except cc.CloudError as e:
+        bad = e.status == 401
+    check(bad, "cloud wait_ready raises on 401 (bad key) instead of running a batch into it")
+
+    # Key: env first, stripped; missing key exits with the keyring hint, no crash.
+    old = os.environ.get("COMFY_CLOUD_API_KEY")
+    os.environ["COMFY_CLOUD_API_KEY"] = "k\r\n"
+    check(cc.cloud_key() == "k", "COMFY_CLOUD_API_KEY is read from the env and stripped")
+    if old is None:
+        del os.environ["COMFY_CLOUD_API_KEY"]
+    else:
+        os.environ["COMFY_CLOUD_API_KEY"] = old
+    check(isinstance(cc.connect("cloud"), cc.CloudComfy)
+          and isinstance(cc.connect("https://cloud.comfy.org"), cc.CloudComfy)
+          and isinstance(cc.connect("http://127.0.0.1:8189"), cc.Comfy),
+          "connect('cloud') picks Comfy Cloud; a URL picks a ComfyUI")
+    src = io.open(P("comfy_client.py"), encoding="utf-8").read()
+    check("token=" not in src and "/ws" not in src,
+          "the client never uses the v1 WebSocket, which carries the key in its URL")
+
+    # Harness --inputs: a set value naming a file in DIR is uploaded once and replaced.
+    ex = os.path.join(ROOT, "examples")
+    hx = load("batch_harness_cloud", os.path.join(ex, "batch_harness.py"))
+    d = tempfile.mkdtemp()
+    os.makedirs(os.path.join(d, "in"))
+    open(os.path.join(d, "in", "a.png"), "wb").write(b"x")
+    json.dump({"1": {"class_type": "LoadImage", "inputs": {"image": "?"}},
+               "2": {"class_type": "SaveImage", "inputs": {}}}, open(os.path.join(d, "wf.json"), "w"))
+    json.dump([{"id": "j%d" % i, "workflow": "wf.json", "set": {"1.image": "a.png"}} for i in range(2)],
+              open(os.path.join(d, "jobs.json"), "w"))
+    seen, ups = [], []
+
+    class _Fake:
+        def wait_ready(self):
+            return True
+
+        def upload(self, path):
+            ups.append(path)
+            return {"__type": "core/ASSET", "info": {"id": "as-9"}}
+
+        def run(self, wf, wait_min=20):
+            seen.append(wf["1"]["inputs"]["image"])
+            return [("o.png", b"1")]
+    hx.connect = lambda target: _Fake()
+    rc = hx.main(["--comfy", "cloud", "--inputs", os.path.join(d, "in"),
+                  "--jobs", os.path.join(d, "jobs.json"), "--out", os.path.join(d, "out")])
+    check(rc == 0 and len(ups) == 1 and seen == [{"__type": "core/ASSET", "info": {"id": "as-9"}}] * 2,
+          "harness --inputs uploads each named input once and sets the returned reference")
+
+
 def main():
     au = load("autostop", P("autostop.py"))
     pod_ctl_src = io.open(P("pod_ctl.py"), encoding="utf-8").read()
@@ -813,7 +1065,7 @@ def main():
         def __init__(self, url):
             contacted.append(url)
             raise RuntimeError("harness contacted ComfyUI")
-    real_comfy, hx.Comfy = hx.Comfy, _NoComfy
+    real_comfy, hx.connect = hx.connect, _NoComfy
     tout = tempfile.mkdtemp()
     for i, j in enumerate(jobs):
         if i % 2 == 0:
@@ -824,17 +1076,17 @@ def main():
     except RuntimeError:
         rc = None
     finally:
-        hx.Comfy = real_comfy
+        hx.connect = real_comfy
     check(rc == 0 and not contacted,
           "harness skips work already on disk (a relaunch resumes, not redoes)")
     # ...and shard 1 (one job, not on disk) DOES go to ComfyUI: sharding is index % of.
-    hx.Comfy = _NoComfy
+    hx.connect = _NoComfy
     try:
         hx.main(["--shard", "1", "--of", "2", "--jobs", os.path.join(ex, "jobs.json"), "--out", tout])
     except RuntimeError:
         pass
     finally:
-        hx.Comfy = real_comfy
+        hx.connect = real_comfy
     check(len(contacted) == 1, "shard 1 of 2 picks up its own unfinished job")
     hsrc = io.open(os.path.join(ex, "batch_harness.py"), encoding="utf-8").read()
     check(all(f in hsrc for f in ('"--comfy"', '"--shard"', '"--of"')),
@@ -965,7 +1217,7 @@ def main():
 
     # --- PUBLIC REPO HYGIENE: no keys, no absolute home paths in anything we ship.
     # Proven able to fail: a planted "rpa_" + 24 chars in a scratch file was caught.
-    leak = re.compile(r"(rpa_[A-Za-z0-9]{20,}|hf_[A-Za-z0-9]{30,}|sk-[A-Za-z0-9]{20,}"
+    leak = re.compile(r"(rpa_[A-Za-z0-9]{20,}|hf_[A-Za-z0-9]{30,}|sk-[A-Za-z0-9]{20,}|comfyui-[A-Za-z0-9]{24,}"
                       r"|[A-Z]:\\Users\\[A-Za-z]|/home/[a-z]+/|/Users/[A-Za-z]+/)")
     hits = []
     for dp, dn, fn in os.walk(ROOT):
@@ -994,6 +1246,8 @@ def main():
                 bare.append("%s: %s" % (rel, line.strip()[:60]))
     check(not bare, "every `& disown` launch redirects stdout, stderr and stdin off the ssh channel %s"
           % (bare[:4] or ""))
+
+    cloud_checks()
 
     print("\n%s" % ("FAILED: " + "; ".join(FAIL) if FAIL else "ALL PASS"))
     return 1 if FAIL else 0
