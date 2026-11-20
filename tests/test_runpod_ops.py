@@ -9,7 +9,7 @@ the lesson quietly rotting in a README.
 
 When you learn a new lesson, add its assertion HERE first, then the prose in docs/.
 """
-import importlib.util, io, os, sys, tempfile, threading, time, json
+import argparse, calendar, importlib.util, io, os, sys, tempfile, threading, time, json
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -75,8 +75,20 @@ def main():
     check("REMAP" in pod_ctl_src.upper() or "remaps" in pod_ctl_src,
           "pod_ctl documents the port-remap trap at the point of use")
 
+    # --- LESSON (2026-11-15): RunPod retired REST v1; rest.runpod.io no longer resolves, so
+    # every pod call (list, create, conn, stop, terminate) and the watchdog's stop/terminate
+    # failed with getaddrinfo. GraphQL is deprecated too (retires early 2027). Both tools use
+    # REST v2 only.
+    au_src0 = io.open(P("autostop.py"), encoding="utf-8").read()
+    for name, src in (("pod_ctl.py", pod_ctl_src), ("autostop.py", au_src0)):
+        check("https://rest.runpod.io" not in src and "/graphql" not in src.lower(),
+              "%s calls neither the retired REST v1 nor the deprecated GraphQL API" % name)
+        check("https://api.runpod.io/v2" in src, "%s uses RunPod REST v2" % name)
+    check("2026-11-15" in readme and "retired" in readme and "api.runpod.io/v2" in readme,
+          "docs record that REST v1 was retired on 2026-11-15 and the tools use v2")
+
     # --- LESSON: network volumes DC-lock you; default must be pod-local disk.
-    check('body["networkVolumeId"]' in pod_ctl_src and '"volumeInGb"' in pod_ctl_src,
+    check('"persistent"' in pod_ctl_src and '"network"' in pod_ctl_src,
           "pod_ctl supports pod-local volume (no network volume) to avoid DC-locking")
     check("--network-volume" in pod_ctl_src and 'default=None' in pod_ctl_src,
           "network volume is OPT-IN (default None), not the default")
@@ -199,12 +211,29 @@ def main():
     # terminate was swallowed, and main() EXITED, leaving the pod billing unguarded.
     seen = []
 
+    # REST v2 shapes (docs.runpod.io/api-reference-v2, read 2026-11-19): a pod has gpu.id,
+    # gpu.count, cloud and dataCenterId; the catalogue answers availability NONE/LOW/MEDIUM/
+    # HIGH per GPU and per data centre. This fake answers by URL, like the real API.
     class _Resp:
+        def __init__(self, body):
+            self.body = body
+
         def read(self):
-            return json.dumps({"machine": {"gpuTypeId": "X"}, "data": {"gpuTypes": [
-                {"id": "X", "lowestPrice": {"stockStatus": "Low"}}]}}).encode()
+            return json.dumps(self.body).encode() if self.body is not None else b""
+
+    def _fake_v2(r, timeout=None):
+        seen.append(r)
+        u = r.full_url
+        if "/catalog/gpus" in u:
+            return _Resp({"gpus": [{"id": "Y", "availability": "HIGH"},
+                                   {"id": "X", "availability": "HIGH",
+                                    "dataCenters": [{"id": "EU-NL-1", "availability": "LOW"}]}]})
+        if r.get_method() == "GET" and u.endswith("/pods/p"):
+            return _Resp({"id": "p", "status": "RUNNING", "cloud": "SECURE", "dataCenterId": "EU-NL-1",
+                          "gpu": {"id": "X", "count": 2}})
+        return _Resp(None)
     real_open, real_sleep = au.urllib.request.urlopen, au.time.sleep
-    au.urllib.request.urlopen = lambda r, timeout=None: (seen.append(r), _Resp())[1]
+    au.urllib.request.urlopen = _fake_v2
     au.time.sleep = lambda s: None
     try:
         au.stop_pod("p", "k", False); au.terminate_pod("p", "k", False)
@@ -213,8 +242,126 @@ def main():
         au.urllib.request.urlopen, au.time.sleep = real_open, real_sleep
     rp = [r for r in seen if "runpod.io" in r.full_url]
     check(len(rp) >= 4 and all("Mozilla" in (r.get_header("User-agent") or "") for r in rp),
-          "EVERY RunPod call from the watchdog (stop, terminate, REST + GraphQL stock) sends a browser UA")
-    check(stock == "Low", "gpu_stock reads the pod's GPU type and its stock through _runpod")
+          "EVERY RunPod call from the watchdog (stop, terminate, pod read, catalogue) sends a browser UA")
+    stops = [r for r in rp if r.full_url.endswith("/v2/pods/p/action")]
+    check(len(stops) == 1 and stops[0].get_method() == "POST"
+          and json.loads(stops[0].data) == {"action": "stop"},
+          "watchdog stops a pod with v2 POST /pods/{id}/action {\"action\": \"stop\"}")
+    check(any(r.get_method() == "DELETE" and r.full_url.endswith("/v2/pods/p") for r in rp),
+          "watchdog terminates a pod with v2 DELETE /pods/{id}")
+    cat = [r for r in rp if "/catalog/gpus" in r.full_url]
+    check(cat and "include=AVAILABILITY" in cat[0].full_url and "product=POD" in cat[0].full_url
+          and "count=2" in cat[0].full_url,
+          "the stock check asks the v2 catalogue for POD availability at this pod's GPU count")
+    check(stock == "Low",
+          "gpu_stock reads THIS pod's GPU type and its data centre's stock (LOW there, HIGH globally)")
+
+    # pod_ctl on v2: create body, GPU fall-through on a 400 (no capacity), conn from ssh.direct.
+    pc = load("pod_ctl", P("pod_ctl.py"))
+    sent = []
+
+    def _fake_ctl(r, timeout=None):
+        sent.append(r)
+        u, m = r.full_url, r.get_method()
+        if m == "POST" and u.endswith("/v2/pods"):
+            body = json.loads(r.data)
+            if body["gpu"]["id"] == "NVIDIA L40S":
+                raise pc.urllib.error.HTTPError(u, 400, "Bad Request", {}, io.BytesIO(
+                    b'{"title":"Bad Request","status":400,"detail":"no instances available"}'))
+            return _Resp({"id": "newpod", "status": "PROVISIONING"})
+        if m == "GET" and u.endswith("/v2/pods/newpod"):
+            # Shape recorded live 2026-11-20. ssh.direct holds a different (stale) port on
+            # purpose: conn must read the runtime mapping, not ssh.direct.
+            return _Resp({"id": "newpod", "status": "RUNNING",
+                          "startedAt": time.strftime("%Y-%m-%dT%H:%M:%S.5Z", time.gmtime(time.time() - 20)),
+                          "runtime": {"uptime": 9, "ports": [
+                              {"ip": "100.65.16.9", "private": 8188, "public": 60570, "type": "http"},
+                              {"ip": "1.2.3.4", "private": 22, "public": 40022, "type": "tcp"}]},
+                          "ssh": {"direct": {"host": "1.2.3.4", "port": 19618}}})
+        return _Resp({})
+    real_ctl_open, real_key = pc.urllib.request.urlopen, os.environ.get("RUNPOD_API_KEY")
+    pc.urllib.request.urlopen = _fake_ctl
+    os.environ["RUNPOD_API_KEY"] = "test-key"
+    out = io.StringIO()
+    real_stdout, sys.stdout = sys.stdout, out
+    try:
+        pc.cmd_create(argparse.Namespace(name="n", image="img", gpu="NVIDIA L40S,NVIDIA A40", gpu_count=2,
+                                         container_gb=30, volume_gb=120, network_volume=None,
+                                         ports="8188/http,22/tcp"))
+        pc.cmd_conn(argparse.Namespace(podId="newpod"))
+    finally:
+        sys.stdout = real_stdout
+        pc.urllib.request.urlopen = real_ctl_open
+        if real_key is None:
+            os.environ.pop("RUNPOD_API_KEY", None)
+        else:
+            os.environ["RUNPOD_API_KEY"] = real_key
+    creates = [json.loads(r.data) for r in sent if r.get_method() == "POST" and r.full_url.endswith("/v2/pods")]
+    check([c["gpu"]["id"] for c in creates] == ["NVIDIA L40S", "NVIDIA A40"],
+          "create tries the next GPU type when one has no capacity (v2 takes one type per pod)")
+    c = creates[-1] if creates else {}
+    check(c.get("gpu") == {"id": "NVIDIA A40", "count": 2} and c.get("image") == "img"
+          and c.get("disk") == 30 and c.get("ports") == ["8188/http", "22/tcp"]
+          and c.get("startSsh") is True and c.get("cloud") == "SECURE"
+          and c.get("mounts") == {"persistent": {"size": 120, "path": "/workspace"}},
+          "create sends the v2 body: gpu{id,count}, image, disk, ports, startSsh, SECURE, a pod-local /workspace")
+    text = out.getvalue()
+    check("SSH_HOST=1.2.3.4" in text and "SSH_PORT=40022" in text,
+          "conn reads this run's port-22 mapping from runtime.ports, not ssh.direct")
+
+    # LESSON (2026-11-20, live 4090): right after a start v2 served the PREVIOUS run's
+    # address (RUNNING, old port in ssh.direct and runtime.ports, uptime 582 s while
+    # startedAt was 11 s old); a stopped pod kept its old ssh.direct too.
+    t0 = calendar.timegm((2026, 11, 20, 4, 15, 44, 0, 0, 0))
+    live = {"status": "RUNNING", "startedAt": "2026-11-20T04:15:44.902Z",
+            "runtime": {"uptime": 582, "ports": [{"ip": "203.0.113.7", "private": 22,
+                                                  "public": 19618, "type": "tcp"}]},
+            "ssh": {"direct": {"host": "203.0.113.7", "port": 19618}}}
+    check(pc._fresh_ssh(live, now=t0 + 11) == ("", ""),
+          "conn refuses a stale address: runtime.uptime longer than the time since startedAt")
+    fresh = json.loads(json.dumps(live)); fresh["runtime"]["uptime"] = 9
+    fresh["runtime"]["ports"][0]["public"] = 12358
+    check(pc._fresh_ssh(fresh, now=t0 + 18) == ("203.0.113.7", 12358),
+          "conn accepts the new mapping once the uptime fits this start")
+    stopped = json.loads(json.dumps(fresh)); stopped["status"] = "EXITED"
+    check(pc._fresh_ssh(stopped, now=t0 + 18) == ("", ""),
+          "conn gives no address for a pod that is not RUNNING, whatever ssh.direct says")
+    blink = {"status": "RUNNING", "startedAt": "2026-11-20T04:15:44.902Z", "runtime": None,
+             "ssh": {"direct": None}}
+    check(pc._fresh_ssh(blink, now=t0 + 40) == ("", ""),
+          "conn treats a RUNNING pod with no runtime block (it blinks out) as not ready")
+
+    # LESSON (2026-11-20): a key piped from Windows Python ends in \r. urllib refused the
+    # header, so the watchdog could never stop the pod, and its error text quoted the key.
+    os.environ["RUNPOD_API_KEY"] = "test-key\r\n"
+    try:
+        check(pc.key() == "test-key", "pod_ctl strips a trailing CR/LF from the key")
+    finally:
+        if real_key is None:
+            os.environ.pop("RUNPOD_API_KEY", None)
+        else:
+            os.environ["RUNPOD_API_KEY"] = real_key
+    seen[:] = []
+    au.urllib.request.urlopen, au.time.sleep = _fake_v2, (lambda s: None)
+    try:
+        au.stop_pod("p", "k\r", False)
+    finally:
+        au.urllib.request.urlopen, au.time.sleep = real_open, real_sleep
+    check(seen and seen[-1].get_header("Authorization") == "Bearer k",
+          "the watchdog strips a CR from the key before it builds the header")
+    logged = io.StringIO()
+    real_stdout, sys.stdout = sys.stdout, logged
+    au.SECRETS.append("rpa_SECRET123")
+    try:
+        au.log("stock check failed: Invalid header value b'Bearer rpa_SECRET123\\r'")
+        au.log("echo rpa_SECRET123")
+        au.log("header was Bearer unregistered_TOKEN456")   # a key main() never saw
+    finally:
+        sys.stdout = real_stdout
+        au.SECRETS.remove("rpa_SECRET123")
+    check("SECRET123" not in logged.getvalue() and "TOKEN456" not in logged.getvalue()
+          and "***" in logged.getvalue(),
+          "the watchdog's log scrubs the key and any Bearer header from every line")
 
     def _fail(*a, **k):
         raise au.urllib.error.HTTPError("u", 403, "Forbidden", {}, io.BytesIO(b"1010"))
@@ -830,6 +977,23 @@ def main():
                     if leak.search(line):
                         hits.append("%s:%d" % (os.path.relpath(p, ROOT), i))
     check(not hits, "no API keys or absolute user paths in shipped files %s" % (hits[:5] or ""))
+
+    # LESSON (2026-11-20, timed live): `ssh pod 'nohup setsid job & disown; echo ok'` returned
+    # after 3 s with the job's output redirected and after 28 s (the job's whole life) without:
+    # a backgrounded job that keeps stdout holds the ssh channel open. Every launch line we
+    # ship or show, prose included, carries its redirects, because readers copy them.
+    bare = []
+    shipped = ["AGENTS.md"] + [os.path.join(d, f) for d in ("docs", "pod", "local", "scripts", "remote_comfy")
+                               if os.path.isdir(os.path.join(ROOT, d))
+                               for f in sorted(os.listdir(os.path.join(ROOT, d)))
+                               if f.endswith((".md", ".sh", ".py"))] + ["skills/remote-comfy/SKILL.md"]
+    for rel in shipped:
+        text = io.open(os.path.join(ROOT, rel), encoding="utf-8").read().replace("\\\n", " ")
+        for i, line in enumerate(text.splitlines(), 1):
+            if "& disown" in line and not ("2>&1" in line and "</dev/null" in line):
+                bare.append("%s: %s" % (rel, line.strip()[:60]))
+    check(not bare, "every `& disown` launch redirects stdout, stderr and stdin off the ssh channel %s"
+          % (bare[:4] or ""))
 
     print("\n%s" % ("FAILED: " + "; ".join(FAIL) if FAIL else "ALL PASS"))
     return 1 if FAIL else 0

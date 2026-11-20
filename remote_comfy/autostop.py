@@ -6,8 +6,9 @@ forgotten pod bills 24/7 ($0.44/hr = $10/day). This one lives on the machine it 
 so an abandoned pod still shuts itself off. Belt-and-braces with `pod_ctl.py watch`.
 
   # on the pod (RUNPOD_API_KEY in env, never written to disk):
-  RUNPOD_API_KEY=... nohup setsid python3 /workspace/autostop.py \
-      --pod-id <podId> --idle-min 15 > /workspace/autostop.log 2>&1 & disown
+  # key on ssh stdin, never a command line:
+  ... | ssh ... 'read -r K; RUNPOD_API_KEY=$K nohup setsid python3 /workspace/autostop.py \
+      --pod-id <podId> --idle-min 15 > /workspace/autostop.log 2>&1 </dev/null & disown'
 
 Idle = ComfyUI /queue has nothing running AND nothing pending, continuously, for
 --idle-min. Any queued job resets the clock.
@@ -16,27 +17,41 @@ LOCKFILE: while /workspace/.busy exists the watchdog never stops the pod. Long
 non-ComfyUI work (a 24GB model download, an rsync) must `touch /workspace/.busy`
 first and remove it after, or it will be killed mid-flight.
 """
-import argparse, json, os, sys, time, urllib.error, urllib.request
+import argparse, json, os, re, sys, time, urllib.error, urllib.parse, urllib.request
 
 LOCK = "/workspace/.busy"
-# Cloudflare answers 403/1010 to urllib's default User-Agent on rest.runpod.io AND the
-# GraphQL API. EVERY RunPod call must go through _runpod(): on 2026-10-23 the stock check,
-# stop and terminate all 403'd while only GraphQL carried a browser UA, so the watchdog
-# could never retire the pod it was guarding.
+# RunPod REST v2. REST v1 was retired on 2026-11-15 (its host no longer resolves) and
+# GraphQL is deprecated (retires early 2027), so the watchdog uses v2 only.
+RP = "https://api.runpod.io/v2"
+# Cloudflare answered 403/1010 to urllib's default User-Agent on the old APIs. EVERY RunPod
+# call goes through _runpod() with a browser UA: on 2026-10-23 the stock check, stop and
+# terminate all 403'd while only one call carried it, so the watchdog could never retire
+# the pod it was guarding.
 BROWSER_UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120 Safari/537.36"
 
 
 def _runpod(url, key, method="GET", body=None, timeout=30):
+    # strip(): a key piped from Windows Python arrives as "key\r"; the CR made every call
+    # raise "Invalid header value" and the watchdog could never act (2026-11-20).
     req = urllib.request.Request(url, method=method,
                                  data=(json.dumps(body).encode() if body is not None else
                                        (b"" if method == "POST" else None)),
-                                 headers={"Authorization": "Bearer " + key,
+                                 headers={"Authorization": "Bearer " + key.strip(),
                                           "Content-Type": "application/json",
                                           "User-Agent": BROWSER_UA})
     return urllib.request.urlopen(req, timeout=timeout).read()
 
 
+SECRETS = []   # filled by main(); never printed
+
+
 def log(msg):
+    """Every line goes through here, scrubbed: urllib's "Invalid header value" error quotes
+    the whole Authorization header, which once put the API key in the pod's log (2026-11-20)."""
+    msg = re.sub(r"Bearer\s+\S+", "Bearer ***", str(msg))
+    for s in SECRETS:
+        if s:
+            msg = msg.replace(s, "***")
     print("%s %s" % (time.strftime("%H:%M:%S"), msg), flush=True)
 
 
@@ -56,7 +71,7 @@ def stop_pod(pod_id, key, dry):
         return True
     for attempt in range(5):
         try:
-            _runpod("https://rest.runpod.io/v1/pods/%s/stop" % pod_id, key, method="POST")
+            _runpod("%s/pods/%s/action" % (RP, pod_id), key, method="POST", body={"action": "stop"})
             log("STOPPED pod %s" % pod_id)
             return True
         except urllib.error.HTTPError as e:
@@ -95,18 +110,26 @@ def gpu_stock(pod_id, key):
     refills and the pod can never restart — and everything on its pod-local volume
     (50GB of model weights, in our case) becomes unreachable while still billing storage.
     A stop is only a PAUSE when the card is easy to get back.
+
+    Returns "High", "Medium", "Low" or "None" (v2's HIGH/MEDIUM/LOW/NONE, title-cased), read
+    for this pod's data centre when the catalogue lists it, since a restart needs a GPU
+    there, not anywhere.
     """
     try:
-        pod = json.loads(_runpod("https://rest.runpod.io/v1/pods/" + pod_id, key, timeout=20))
-        want = (pod.get("machine") or {}).get("gpuTypeId") or pod.get("gpuTypeId")
+        pod = json.loads(_runpod("%s/pods/%s" % (RP, pod_id), key, timeout=20))
+        gpu = pod.get("gpu") or {}
+        want = gpu.get("id")
         if not want:
             return None
-        q = {"query": "query{gpuTypes{id lowestPrice(input:{gpuCount:1}){stockStatus}}}"}
-        types = json.loads(_runpod("https://api.runpod.io/graphql", key, method="POST", body=q,
-                                   timeout=20))["data"]["gpuTypes"]
-        for t in types:
-            if t["id"] == want:
-                return (t.get("lowestPrice") or {}).get("stockStatus")
+        q = urllib.parse.urlencode({"include": "AVAILABILITY", "product": "POD",
+                                    "count": gpu.get("count") or 1, "cloud": pod.get("cloud") or "SECURE"})
+        gpus = json.loads(_runpod("%s/catalog/gpus?%s" % (RP, q), key, timeout=20)).get("gpus") or []
+        for t in gpus:
+            if t.get("id") == want:
+                here = [d.get("availability") for d in (t.get("dataCenters") or [])
+                        if d.get("id") == pod.get("dataCenterId")]
+                level = (here[0] if here else t.get("availability")) or ""
+                return level.title() or None
     except Exception as e:
         log("stock check failed: %s" % str(e)[:100])
     return None
@@ -119,7 +142,7 @@ def terminate_pod(pod_id, key, dry):
         log("DRY-RUN: would TERMINATE pod %s now" % pod_id); return True
     for attempt in range(3):
         try:
-            _runpod("https://rest.runpod.io/v1/pods/" + pod_id, key, method="DELETE", timeout=45)
+            _runpod("%s/pods/%s" % (RP, pod_id), key, method="DELETE", timeout=45)
             log("TERMINATED pod %s (billing stops; pod-local disk destroyed)" % pod_id)
             return True
         except Exception as e:
@@ -239,7 +262,8 @@ def main():
                          "Long jobs must re-touch it (hold-busy.sh)")
     ap.add_argument("--dry-run", action="store_true")
     a = ap.parse_args()
-    key = os.environ.get("RUNPOD_API_KEY")
+    key = (os.environ.get("RUNPOD_API_KEY") or "").strip()
+    SECRETS.append(key)
     if not key and not a.dry_run:
         sys.exit("RUNPOD_API_KEY not in env - refusing to start (could never stop the pod)")
 

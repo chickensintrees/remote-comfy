@@ -56,10 +56,12 @@ a bad draw, so terminate and redraw.
 scp -P <port> pod/*.sh remote_comfy/autostop.py remote_comfy/comfy_client.py root@<ip>:/workspace/
 ssh -p <port> root@<ip> 'nohup setsid bash /workspace/provision-comfyui.sh flux2 \
     > /workspace/prov.log 2>&1 </dev/null & disown'
-ssh -p <port> root@<ip> "RUNPOD_API_KEY=$RUNPOD_API_KEY nohup setsid python3 /workspace/autostop.py \
-    --pod-id <podId> --idle-min 90 --outputs-root /workspace/out \
-    > /workspace/autostop.log 2>&1 </dev/null & disown"
+printf '%s\n' "$RUNPOD_API_KEY" | ssh -p <port> root@<ip> 'read -r K; RUNPOD_API_KEY=$K \
+    nohup setsid python3 /workspace/autostop.py --pod-id <podId> --idle-min 90 \
+    --outputs-root /workspace/out > /workspace/autostop.log 2>&1 </dev/null & disown'
 ```
+
+The key travels on ssh's stdin, never on a command line, where `ps` shows it on both ends.
 
 Use **direct-TCP SSH** (the IP + port from `conn`), not RunPod's SSH proxy: the proxy is
 PTY-only, so `scp`, `-L` and non-interactive commands fail. Model sets: `wan`, `qwen`,

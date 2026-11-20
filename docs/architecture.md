@@ -3,7 +3,7 @@
 ```
  LAPTOP                                          POD  (RunPod, /workspace = persistent volume)
  ──────                                          ───
- pod_ctl.py  ──REST/GraphQL──▶ RunPod API ◀──────── autostop.py   (stops/terminates ITSELF)
+ pod_ctl.py  ──REST v2───────▶ RunPod API ◀──────── autostop.py   (stops/terminates ITSELF)
                                                        │  polls
  comfy_client.py ──ssh -L 8189:8188──────────────▶ ComfyUI :8188 (+ :8189… one per GPU)
                                                        ▲

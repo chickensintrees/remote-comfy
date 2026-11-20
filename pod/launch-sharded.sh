@@ -64,7 +64,7 @@ for g in $(seq 0 $((NGPU-1))); do
     --shard $g --of $NGPU $EXTRA > "$WORKDIR/shard$g.log" 2>&1 </dev/null & disown
 done
 
-# 6. Sleep BEFORE the wait loop. `setsid … & disown` children are not visible to pgrep
+# 6. Sleep BEFORE the wait loop. `setsid … disown` children are not visible to pgrep
 #    immediately; without this the loop exits at once, prints DONE, and drops .busy while
 #    the whole batch is still queued — handing a busy pod to the idle watchdog.
 sleep 90

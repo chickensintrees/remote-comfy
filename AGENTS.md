@@ -51,7 +51,7 @@ file fully before you spend a GPU-minute.
 4. **Re-read the connection after every resume** (`pod_ctl.py conn <podId>`). The SSH
    port remaps on every stop/start, and pip/apt installs are discarded.
 5. **Check budget and stock before creating.** `pod_ctl.py balance` and
-   `pod_ctl.py availability --min-vram <GB>`. A `create` 500 means no capacity.
+   `pod_ctl.py availability --min-vram <GB>`. A `create` 400 means no capacity (`--gpu` takes a list, tried in order).
 6. **Measure before you project.** Time the first 3–5 real items under the final
    configuration before quoting a duration or a cost.
 7. **Monitor artifacts, not done-markers.** Count/size files on disk; a script's own
@@ -86,7 +86,8 @@ On Windows, `python3` may be the Microsoft Store stub (exits 49). Probe with
 - A design choice with a real alternative gets a dated note in `decisions/`
   (`YYYY-MM-DD-slug.md`): context, decision, what was tried, what would change it.
 - Pod-side scripts must not assume `curl`, `tmux`, `screen`, or system `ffmpeg` exist.
-  Use `python3` for HTTP. Launch long jobs with `nohup setsid … & disown`.
+  Use `python3` for HTTP. Launch long jobs with `nohup setsid <cmd> > <log> 2>&1 </dev/null & disown`: without the
+  redirects the job holds the ssh channel and `ssh` does not return until it ends.
 - Keep the tools **stdlib-only** (the pod has a bare Python). `keyring`, `PIL`, `numpy`
   are optional imports.
 - Nothing project- or person-specific belongs here: no pod IDs, volume IDs, private
