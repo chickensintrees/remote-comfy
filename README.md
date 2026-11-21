@@ -5,7 +5,8 @@
 remote-comfy is a toolkit for renting a GPU on [RunPod](https://www.runpod.io), running
 [ComfyUI](https://github.com/comfyanonymous/ComfyUI) on it, and driving it from your laptop.
 A watchdog on the pod shuts it down when the work stops, so a forgotten pod does not bill
-overnight, and a sync loop copies every result to your machine as it lands.
+overnight, and a sync loop copies every result to your machine as it lands. Short jobs can
+run on [Comfy Cloud](#comfy-cloud) instead, with the same client and no pod.
 
 It is a set of small Python and shell tools, a step-by-step playbook, and a Claude Code
 skill. It is written for coding agents such as Claude Code and Codex, and every step also
@@ -108,8 +109,10 @@ you commit to a batch.
 only while a job runs, so there is no pod to set up or forget. `connect("cloud")` in
 `comfy_client.py` and `batch_harness.py --comfy cloud` use it, with the key in
 `COMFY_CLOUD_API_KEY` or the keyring. It needs a paid Comfy plan, has only the most-used
-custom nodes, and limits each run to 30 minutes (1 hour on Pro). Use a pod for long
-batches and anything it lacks. Setup is in [`docs/playbook.md`](docs/playbook.md#7-or-skip-the-pod-comfy-cloud).
+custom nodes, and limits each run to 30 minutes (1 hour on Pro). On 20 November 2026 it
+had every node and model for six of the seven example graphs; image to 3D lacks the
+TRELLIS.2 weights. Use a pod for long batches and anything it lacks. Setup is in
+[`docs/playbook.md`](docs/playbook.md#7-or-skip-the-pod-comfy-cloud).
 
 ## Traps
 

@@ -14,6 +14,18 @@
  check-gpu-load.sh ──ssh──▶ greps comfy_g*.log for "loaded partially"
 ```
 
+Comfy Cloud has no pod, so only the client runs:
+
+```
+ LAPTOP
+ comfy_client.connect("cloud") ──Bearer──▶ cloud.comfy.org  /api/v2/jobs, /api/v2/assets
+                               ──X-API-Key─▶                /api/object_info (node list, v1)
+                               ◀──302────── output URL ──▶ signed storage (fetched with NO key)
+```
+
+No watchdog, sync loop or provisioning: Cloud bills only while a job runs, and outputs come
+back in the same call. Why: `decisions/2026-11-20-comfy-cloud-backend.md`.
+
 ## Why each piece lives where it does
 
 - **The watchdog is on the pod**, not the laptop: a laptop watchdog dies with the laptop,

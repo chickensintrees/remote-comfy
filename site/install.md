@@ -46,8 +46,12 @@ step at the end, and only on the person's explicit yes.
    public key must be in RunPod (Settings, SSH Public Keys) before their first
    pod. Show them their public key file if they have one; if they do not, offer
    to create one with `ssh-keygen` and ask first.
-9. Finish by pointing them at `docs/playbook.md` for the first run, and say that
-   it rents real hardware: the watchdog `autostop.py` goes on every pod.
+9. Optional, only if they ask or have a paid Comfy Cloud plan: they store a Comfy
+   key from platform.comfy.org the same way, typing it into their own terminal:
+   `python -m keyring set remote-comfy comfy-cloud` (or `COMFY_CLOUD_API_KEY`).
+   Playbook section 7 has the read-only check.
+10. Finish by pointing them at `docs/playbook.md` for the first run, and say that
+    it rents real hardware: the watchdog `autostop.py` goes on every pod.
 
 Source: https://github.com/chickensintrees/remote-comfy
 Project page: https://billmoore.ai/remote-comfy/

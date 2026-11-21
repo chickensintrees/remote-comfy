@@ -405,7 +405,7 @@ footer h2 { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-
 <div class="y97 y97-works" aria-hidden="true"><b>THIS SOFTWARE IS UNDER CONSTRUCTION (v0.1)</b></div>
 <main>
 <header class="title wrap" id="top">
-  <p class="over mono caps"><span>Open source &middot; MIT</span><span>RunPod + ComfyUI + Claude Code</span></p>
+  <p class="over mono caps"><span>Open source &middot; MIT</span><span>RunPod or Comfy Cloud + ComfyUI + Claude Code</span></p>
   <h1>remote-<br>comfy<em>.</em></h1>
 
   <div class="front">
@@ -414,12 +414,12 @@ footer h2 { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-
       <figcaption class="cap mono"><b class="caps">Pl. 1</b>&ensp;One batch of 24 images, rendered with FLUX.2 [dev] on one rented L40S in 21 minutes.</figcaption>
     </figure>
     <div>
-      <p class="lede">A toolkit for renting a GPU on RunPod, running ComfyUI on it, and driving it from your laptop. A watchdog on the pod shuts it down when the work stops, so a forgotten pod does not bill overnight.</p>
+      <p class="lede">A toolkit for renting a GPU on RunPod, running ComfyUI on it, and driving it from your laptop. A watchdog on the pod shuts it down when the work stops, so a forgotten pod does not bill overnight. Short jobs can run on Comfy Cloud instead, with the same client and no pod.</p>
       <dl class="spec">
         <div><dt>What</dt><dd>It is a set of small Python and shell tools, a step-by-step playbook, and a Claude Code skill.</dd></div>
-        <div><dt>Needs</dt><dd>It needs Python 3.9 or newer, ssh, bash, and a RunPod account with credit.</dd></div>
+        <div><dt>Needs</dt><dd>It needs Python 3.9 or newer, ssh, bash, and a RunPod account with credit or a paid Comfy Cloud plan.</dd></div>
         <div><dt>For</dt><dd>It is written for coding agents such as Claude Code, and every step also works by hand.</dd></div>
-        <div><dt>Status</dt><dd>This is version 0.1. It last ran on a live pod on 15 November 2026.</dd></div>
+        <div><dt>Status</dt><dd>This is version 0.1. It last ran on a live pod on 15 November 2026, and on Comfy Cloud on 20 November.</dd></div>
       </dl>
       <a class="cta" href="https://github.com/chickensintrees/remote-comfy" rel="noopener">github.com/chickensintrees/remote-comfy</a>
     </div>
@@ -607,6 +607,21 @@ comfy 8189 READY
       </table>
     </div>
   </div>
+
+  <div class="sub two" id="cloud">
+    <div class="prose">
+      <h3>Or skip the pod: Comfy Cloud</h3>
+      <p><a href="https://docs.comfy.org/development/cloud/overview" rel="noopener">Comfy Cloud</a> runs the same graphs on Comfy&#8217;s own GPUs and bills only while a job runs, so there is no pod to set up, watch or forget. <code>connect("cloud")</code> and <code>batch_harness.py --comfy cloud</code> use it, and <code>--inputs</code> uploads the images a job needs.</p>
+      <p>It needs a paid Comfy plan. A run is limited to 30 minutes, or 1 hour on Pro. On 20 November 2026 it had every node and model for six of the seven example graphs; image to 3D still needs a pod. Use a pod for long batches, custom nodes it lacks, or client images that must stay on hardware you rent.</p>
+      <p>The key goes only to Comfy, never in a URL, and never with the download that Comfy redirects to signed storage.</p>
+    </div>
+    <figure class="term"><figcaption class="term-bar"><span><b>E</b> Your machine, Comfy Cloud</span><span>2026-11-20</span></figcaption><pre><span class="k">$ python examples/batch_harness.py \
+    --comfy cloud --inputs ./inputs \
+    --jobs jobs.json --out ./out</span>
+shard 0/1: 1 jobs, 0 already on disk
+ok cut1  1 file(s)  4.9s
+shard 0 done: 1 ok, 0 failed</pre></figure>
+  </div>
 </section>
 
 <section class="part wrap" id="examples">
@@ -714,7 +729,7 @@ comfy 8189 READY
     <li class="tool"><div class="tool-top mono caps"><b>05</b><span class="where pod">Pod</span></div><h3>hold-busy.sh</h3><p>It keeps the pod awake while a long job that is not ComfyUI runs, and lets go when the job ends.</p></li>
     <li class="tool"><div class="tool-top mono caps"><b>06</b><span class="where">Your machine</span></div><h3>sync-outputs.sh</h3><p>It pulls results home while a batch runs, checks every file, and tells the watchdog which folders are safe.</p></li>
     <li class="tool"><div class="tool-top mono caps"><b>07</b><span class="where">Your machine</span></div><h3>check-gpu-load.sh</h3><p>It fails when one GPU samples much slower than the others, which usually means a model did not fit.</p></li>
-    <li class="tool"><div class="tool-top mono caps"><b>08</b><span class="where">Either</span></div><h3>comfy_client.py</h3><p>A small client that drives a local or a remote ComfyUI in the same way.</p></li>
+    <li class="tool"><div class="tool-top mono caps"><b>08</b><span class="where">Either</span></div><h3>comfy_client.py</h3><p>A small client that drives a local ComfyUI, a pod&#8217;s ComfyUI or Comfy Cloud with the same calls.</p></li>
     <li class="tool"><div class="tool-top mono caps"><b>09</b><span class="where">Your machine</span></div><h3>catalog.py</h3><p>It lists current open models by task and re-checks the catalogue against Hugging Face.</p></li>
   </ol>
   <div class="band b4" aria-label="Images from the batch"><a class="band-it" href="media/uc/b-food-sourdough.jpg"><img src="media/uc/b-food-sourdough-s.jpg" alt="A sourdough loaf cut in half" loading="lazy"><span class="mono">Sourdough</span></a><a class="band-it" href="media/uc/b-graphic-map.jpg"><img src="media/uc/b-graphic-map-s.jpg" alt="A shaded-relief map of an alpine valley" loading="lazy"><span class="mono">Relief map</span></a><a class="band-it" href="media/uc/b-machines-turbines.jpg"><img src="media/uc/b-machines-turbines-s.jpg" alt="Wind turbines at sunset" loading="lazy"><span class="mono">Turbines</span></a><a class="band-it" href="media/uc/b-graphic-botanical.jpg"><img src="media/uc/b-graphic-botanical-s.jpg" alt="A botanical plate of a fern" loading="lazy"><span class="mono">Botanical plate</span></a></div>
@@ -868,13 +883,14 @@ comfy 8189 READY
       <ul class="limits">
         <li>The full run was last tested live on 15 November 2026: setup and 40 jobs across five graphs on one L40S, in 1.9 hours, for $2.03.</li>
         <li>On 23 October 2026 the watchdog terminated an idle L4 pod by itself, about a minute after it went idle.</li>
+        <li>On 20 November 2026 a background-removal job ran on Comfy Cloud through the batch harness in 5 seconds.</li>
         <li>The offline checks run on Python 3.9 and 3.12 in CI, and need no network, GPU or API key.</li>
       </ul>
     </div>
     <div>
       <h3>Limits</h3>
       <ul class="limits">
-        <li>It works with RunPod only.</li>
+        <li>Pods are rented on RunPod only. Comfy Cloud has no TRELLIS.2 weights, so 3D runs on a pod.</li>
         <li>This rents real hardware with real money. You are responsible for your RunPod bill.</li>
         <li>The watchdog reads the queue of the first ComfyUI only. The launcher keeps the pod busy while any GPU still has work.</li>
         <li><a href="https://github.com/chickensintrees/remote-comfy/blob/main/docs/open-questions.md" rel="noopener">docs/open-questions.md</a> lists what has not been proven yet.</li>

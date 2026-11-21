@@ -1,6 +1,6 @@
 ---
 name: remote-comfy
-description: Rent a GPU on RunPod, run ComfyUI on it, and drive it from the laptop, for any batch image/video/audio generation that outgrows the local card. Holds the verified plain-pod playbook, the on-pod auto-stop cost guard, GPU choice by throughput-per-dollar, and ~50 traps that cost real time (SSH port remaps on resume, network volumes DC-lock you, serverless is not pods). Triggers: ComfyUI, RunPod, remote GPU, WanVideo, FLUX, i2v, batch render, pod, GPU cloud, "run it on a bigger GPU".
+description: Rent a GPU on RunPod, run ComfyUI on it, and drive it from the laptop, for any batch image/video/audio generation that outgrows the local card. Holds the verified plain-pod playbook, the on-pod auto-stop cost guard, GPU choice by throughput-per-dollar, and ~50 traps that cost real time (SSH port remaps on resume, network volumes DC-lock you, serverless is not pods). Also drives Comfy Cloud with the same client. Triggers: ComfyUI, RunPod, Comfy Cloud, remote GPU, WanVideo, FLUX, i2v, batch render, pod, GPU cloud, "run it on a bigger GPU".
 ---
 
 # remote-comfy
