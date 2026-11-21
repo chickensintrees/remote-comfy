@@ -1,8 +1,9 @@
 # AGENTS.md — remote-comfy
 
-You are working in a harness for **renting a GPU on RunPod, running ComfyUI on it, and
-driving it from a laptop**. Every rule here was paid for in pod time or money. Read this
-file fully before you spend a GPU-minute.
+You are working in a harness for **making assets with ComfyUI from Claude Code**: choosing a
+current model, building the workflow, running it on Comfy Cloud or on a GPU rented on
+RunPod, and bringing the files back to the project. Every rule here was paid for in pod
+time or money. Read this file fully before you spend a GPU-minute.
 
 ## Orientation (read in this order)
 

@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>remote-comfy: rent a GPU, run ComfyUI, never leave it billing</title>
-<meta name="description" content="An open-source toolkit for renting a GPU on RunPod, running ComfyUI on it and driving it from your laptop, with a watchdog on the pod that shuts it down when the work stops.">
+<title>remote-comfy: ask Claude Code for an asset, get the file back</title>
+<meta name="description" content="An open-source agentic toolkit for ComfyUI in Claude Code. Ask for an image, an edit, a video, a cutout or a 3D model, and Claude picks a model, builds the workflow, runs it on Comfy Cloud or a rented RunPod GPU, and brings the file back.">
 <link rel="canonical" href="https://billmoore.ai/remote-comfy">
-<meta property="og:title" content="remote-comfy: rent a GPU, run ComfyUI, never leave it billing">
-<meta property="og:description" content="An open-source toolkit for renting a GPU on RunPod, running ComfyUI on it and driving it from your laptop, with a watchdog on the pod that shuts it down when the work stops.">
+<meta property="og:title" content="remote-comfy: ask Claude Code for an asset, get the file back">
+<meta property="og:description" content="An open-source agentic toolkit for ComfyUI in Claude Code. Ask for an image, an edit, a video, a cutout or a 3D model, and Claude picks a model, builds the workflow, runs it on Comfy Cloud or a rented RunPod GPU, and brings the file back.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://billmoore.ai/remote-comfy">
 <meta name="twitter:card" content="summary">
@@ -401,11 +401,11 @@ footer h2 { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-
   </div>
 </div>
 
-<div class="y97 y97-banner" aria-hidden="true"><span>*** Welcome to the remote-comfy home page *** Rent a GPU, run ComfyUI on it, and never leave it billing *** scroll down for the traps ***</span></div>
+<div class="y97 y97-banner" aria-hidden="true"><span>*** Welcome to the remote-comfy home page *** Ask Claude for an asset and get the file back *** scroll down for the traps ***</span></div>
 <div class="y97 y97-works" aria-hidden="true"><b>THIS SOFTWARE IS UNDER CONSTRUCTION (v0.1)</b></div>
 <main>
 <header class="title wrap" id="top">
-  <p class="over mono caps"><span>Open source &middot; MIT</span><span>RunPod or Comfy Cloud + ComfyUI + Claude Code</span></p>
+  <p class="over mono caps"><span>Open source &middot; MIT</span><span>Claude Code + ComfyUI, on Comfy Cloud or RunPod</span></p>
   <h1>remote-<br>comfy<em>.</em></h1>
 
   <div class="front">
@@ -414,11 +414,11 @@ footer h2 { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-
       <figcaption class="cap mono"><b class="caps">Pl. 1</b>&ensp;One batch of 24 images, rendered with FLUX.2 [dev] on one rented L40S in 21 minutes.</figcaption>
     </figure>
     <div>
-      <p class="lede">A toolkit for renting a GPU on RunPod, running ComfyUI on it, and driving it from your laptop. A watchdog on the pod shuts it down when the work stops, so a forgotten pod does not bill overnight. Short jobs can run on Comfy Cloud instead, with the same client and no pod.</p>
+      <p class="lede">An agentic toolkit for working in ComfyUI through Claude Code. Ask Claude for an asset and it picks a current model, builds the ComfyUI workflow, runs it on Comfy Cloud or on a GPU it rents on RunPod, and saves the result in your project. You do not install ComfyUI or look after a GPU.</p>
       <dl class="spec">
-        <div><dt>What</dt><dd>It is a set of small Python and shell tools, a step-by-step playbook, and a Claude Code skill.</dd></div>
+        <div><dt>What</dt><dd>It is a Claude Code skill, a ComfyUI client, a model catalogue, tested example workflows, and tools that rent RunPod pods and shut them down when the work stops.</dd></div>
         <div><dt>Needs</dt><dd>It needs Python 3.9 or newer, ssh, bash, and a RunPod account with credit or a paid Comfy Cloud plan.</dd></div>
-        <div><dt>For</dt><dd>It is written for coding agents such as Claude Code, and every step also works by hand.</dd></div>
+        <div><dt>For</dt><dd>It is written for Claude Code and other coding agents, and every step also works by hand.</dd></div>
         <div><dt>Status</dt><dd>This is version 0.1. It last ran on a live pod on 15 November 2026, and on Comfy Cloud on 20 November.</dd></div>
       </dl>
       <a class="cta" href="https://github.com/chickensintrees/remote-comfy" rel="noopener">github.com/chickensintrees/remote-comfy</a>
@@ -444,7 +444,7 @@ footer h2 { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-
     <code id="the-line">Set up remote-comfy with me by following https://billmoore.ai/remote-comfy/install.md</code>
     <button class="btn" id="copy-line" type="button" hidden>Copy</button>
   </div>
-  <p class="cmdnote mono">You type your RunPod API key into your own terminal, so it never passes through the chat. Nothing is rented until you ask for a pod. To set it up by hand, follow the quickstart in the <a href="https://github.com/chickensintrees/remote-comfy#quickstart" rel="noopener">README</a>.</p>
+  <p class="cmdnote mono">Then ask for what you need in plain words, such as &#8220;cut the background out of these product shots&#8221; or &#8220;make a 3D model of this photo&#8221;. You type your API keys into your own terminal, so they never pass through the chat. Nothing is rented until you ask for a pod. To set it up by hand, follow the quickstart in the <a href="https://github.com/chickensintrees/remote-comfy#quickstart" rel="noopener">README</a>.</p>
   <div class="band b6" aria-label="More images from the batch"><a class="band-it" href="media/uc/b-places-observatory.jpg"><img src="media/uc/b-places-observatory-s.jpg" alt="A white observatory under the Milky Way" loading="lazy"><span class="mono">Observatory</span></a><a class="band-it" href="media/uc/b-places-village.jpg"><img src="media/uc/b-places-village-s.jpg" alt="Red fishing houses in deep snow" loading="lazy"><span class="mono">Fishing village</span></a><a class="band-it" href="media/uc/b-nature-butterfly.jpg"><img src="media/uc/b-nature-butterfly-s.jpg" alt="A monarch butterfly on milkweed" loading="lazy"><span class="mono">Monarch</span></a><a class="band-it" href="media/uc/b-food-citrus.jpg"><img src="media/uc/b-food-citrus-s.jpg" alt="A market stall of citrus fruit" loading="lazy"><span class="mono">Citrus stall</span></a><a class="band-it" href="media/uc/b-machines-cranes.jpg"><img src="media/uc/b-machines-cranes-s.jpg" alt="Container cranes at night" loading="lazy"><span class="mono">Port cranes</span></a><a class="band-it" href="media/uc/b-graphic-isometric.jpg"><img src="media/uc/b-graphic-isometric-s.jpg" alt="An isometric harbour town" loading="lazy"><span class="mono">Isometric town</span></a></div>
   <p class="figcap mono band-cap">More of the 24-image batch in section 3. Each one took 45 seconds on one rented L40S.</p>
 </section>
@@ -452,7 +452,20 @@ footer h2 { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-
 <section class="part wrap" id="how">
   <div class="part-head">
     <div><p class="part-no mono caps">2</p><h2>How it works</h2></div>
-    <p class="intro">A batch runs on the pod, next to the GPUs. Your machine only rents the pod, starts the work and pulls the results home.</p>
+    <p class="intro">You ask Claude Code for an asset. Claude does the work with the tools in this repository and brings the file back to your project.</p>
+  </div>
+  <ol class="fig" aria-label="From a request to a file: ask, choose, build, run, return">
+    <li><span class="n">1</span><strong>Ask</strong><p>You say what you need: a batch of images, an edit, a video clip, a cutout, a depth map or a 3D model.</p></li>
+    <li><span class="n">2</span><strong>Choose</strong><p>Claude checks which models exist today and picks one from the catalogue that fits the task, the licence and the memory.</p></li>
+    <li><span class="n">3</span><strong>Build</strong><p>It starts from a tested example graph or writes a new one in ComfyUI&#8217;s API format.</p></li>
+    <li><span class="n">4</span><strong>Run</strong><p>Short jobs go to Comfy Cloud. Long batches, custom nodes and 3D go to a RunPod pod that it rents, sets up and shuts down.</p></li>
+    <li><span class="n">5</span><strong>Return</strong><p>The files land in your project, and Claude tells you what it made.</p></li>
+  </ol>
+  <p class="figcap mono"><b class="caps">Fig. 1</b>&ensp;From a request to a file.</p>
+
+  <div class="sub prose">
+    <h3>On a rented GPU</h3>
+    <p>A batch runs on the pod, next to the GPUs. Your machine only rents the pod, starts the work and pulls the results home.</p>
   </div>
   <figure class="diagram-fig">
     <div class="diagram" role="img" aria-labelledby="fig1">
@@ -535,7 +548,7 @@ footer h2 { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-
         <text class="l2" x="300" y="600" text-anchor="middle">read before any terminate</text>
       </svg>
     </div>
-    <figcaption class="cap mono" id="fig1"><b class="caps">Fig. 1</b>&ensp;Your machine rents the pod and pulls the results home. The watchdog on the pod stops it when the work stops, and it will not destroy a pod whose results have not come home.</figcaption>
+    <figcaption class="cap mono" id="fig1"><b class="caps">Fig. 2</b>&ensp;Your machine rents the pod and pulls the results home. The watchdog on the pod stops it when the work stops, and it will not destroy a pod whose results have not come home.</figcaption>
   </figure>
   <ol class="fig" aria-label="A batch from start to finish: check, rent, provision, render, sync">
     <li><span class="n">A</span><strong>Check</strong><p><code>pod_ctl.py</code> reads your balance and which GPUs are in stock before anything is rented.</p></li>
@@ -544,7 +557,7 @@ footer h2 { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-
     <li><span class="n">D</span><strong>Render</strong><p>One ComfyUI runs on each GPU, and the batch is split across them.</p></li>
     <li><span class="n">E</span><strong>Sync</strong><p>Each result is copied to your machine as soon as it lands.</p></li>
   </ol>
-  <p class="figcap mono"><b class="caps">Fig. 2</b>&ensp;A batch from start to finish. The watchdog runs on the pod the whole time.</p>
+  <p class="figcap mono"><b class="caps">Fig. 3</b>&ensp;A batch from start to finish. The watchdog runs on the pod the whole time.</p>
 
   <div class="terms">
     <figure class="term"><figcaption class="term-bar"><span><b>A</b> Your machine</span><span>2026-11-14</span></figcaption><pre><span class="k">$ python remote_comfy/pod_ctl.py availability --min-vram 48</span>
@@ -585,7 +598,7 @@ comfy 8189 READY
 <span class="k">18:53:20 idle 10.0min >= 10.0min | gpu stock=None | outputs synced=True</span>
 18:53:20 stock=None: a stop would likely STRAND this pod. Outputs are synced, so terminating instead — re-provisioning is cheaper than an unreachable volume.</pre></figure>
   </div>
-  <p class="figcap mono"><b class="caps">Fig. 3</b>&ensp;Panel A is today's stock. Panels B to D are logs from the live test on two A40 GPUs, with the pod ID removed and repeated lines cut. Three images reached the laptop 153 seconds after launch. The refused API call in panel D is the last trap in section 7, and it is fixed.</p>
+  <p class="figcap mono"><b class="caps">Fig. 4</b>&ensp;Panel A is today's stock. Panels B to D are logs from the live test on two A40 GPUs, with the pod ID removed and repeated lines cut. Three images reached the laptop 153 seconds after launch. The refused API call in panel D is the last trap in section 7, and it is fixed.</p>
 
 
   <div class="sub two">
@@ -719,7 +732,7 @@ shard 0 done: 1 ok, 0 failed</pre></figure>
 <section class="part wrap" id="tools">
   <div class="part-head">
     <div><p class="part-no mono caps">4</p><h2>Tools</h2></div>
-    <p class="intro">The tools use only the Python standard library, because a fresh pod has a bare Python.</p>
+    <p class="intro">Claude drives these tools, and each one also works by hand. They use only the Python standard library, because a fresh pod has a bare Python.</p>
   </div>
   <ol class="tools">
     <li class="tool"><div class="tool-top mono caps"><b>01</b><span class="where">Your machine</span></div><h3>pod_ctl.py</h3><p>It creates, lists, stops, starts and terminates pods, and shows your balance and GPU stock.</p></li>
@@ -754,7 +767,7 @@ shard 0 done: 1 ok, 0 failed</pre></figure>
   </div>
   <div class="band b3" aria-label="Images from the use cases"><a class="band-it" href="media/uc/b-machines-arcade.jpg"><img src="media/uc/b-machines-arcade-s.jpg" alt="The inside of an arcade cabinet" loading="lazy"><span class="mono">Arcade cabinet</span></a><a class="band-it" href="media/uc/d-tram-depth.jpg"><img src="media/uc/d-tram-depth-s.jpg" alt="A depth map of the tram street" loading="lazy"><span class="mono">Tram, depth</span></a><a class="band-it" href="media/uc/d-tram-normal.jpg"><img src="media/uc/d-tram-normal-s.jpg" alt="A normal map of the tram street" loading="lazy"><span class="mono">Tram, normals</span></a></div>
   <p class="figcap mono band-cap">An image from the batch, and depth and normal maps of the tram street from section 3. A depth pass takes seconds; any GPU that fits the model will do.</p>
-  <p class="figcap mono"><b class="caps">Fig. 4</b>&ensp;These are configurations for Wan 2.2 image-to-video at 480p, which needs 48 GB. Prices and stock are from mid-2026; <code>pod_ctl.py availability</code> shows today's. Speech jobs ran comfortably on one 24 GB L4 at $0.39 an hour.</p>
+  <p class="figcap mono"><b class="caps">Fig. 5</b>&ensp;These are configurations for Wan 2.2 image-to-video at 480p, which needs 48 GB. Prices and stock are from mid-2026; <code>pod_ctl.py availability</code> shows today's. Speech jobs ran comfortably on one 24 GB L4 at $0.39 an hour.</p>
 
   <div class="sub">
     <h3>The same batch on managed services</h3>
@@ -764,7 +777,7 @@ shard 0 done: 1 ok, 0 failed</pre></figure>
       <li><span>RunComfy, A100</span><span class="track"><span class="fill" style="width:43.4%"></span></span><b>~$23</b></li>
       <li><span>Comfy.ICU, L40S</span><span class="track"><span class="fill" style="width:100%"></span></span><b>~$53</b></li>
     </ul>
-    <p class="figcap mono"><b class="caps">Fig. 5</b>&ensp;This is the estimated cost of one 554-clip video batch, about 4.6 GPU-hours. fal and Replicate endpoints cannot run a custom ComfyUI graph, and Comfy.ICU does not allow installing custom nodes.</p>
+    <p class="figcap mono"><b class="caps">Fig. 6</b>&ensp;This is the estimated cost of one 554-clip video batch, about 4.6 GPU-hours. fal and Replicate endpoints cannot run a custom ComfyUI graph, and Comfy.ICU does not allow installing custom nodes.</p>
   </div>
 </section>
 

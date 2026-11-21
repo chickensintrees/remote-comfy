@@ -50,8 +50,9 @@ step at the end, and only on the person's explicit yes.
    key from platform.comfy.org the same way, typing it into their own terminal:
    `python -m keyring set remote-comfy comfy-cloud` (or `COMFY_CLOUD_API_KEY`).
    Playbook section 7 has the read-only check.
-10. Finish by pointing them at `docs/playbook.md` for the first run, and say that
-    it rents real hardware: the watchdog `autostop.py` goes on every pod.
+10. Finish by saying they can now ask for an asset in plain words, point them at
+    `docs/playbook.md` for the first run, and say that a pod rents real hardware:
+    the watchdog `autostop.py` goes on every pod.
 
 Source: https://github.com/chickensintrees/remote-comfy
 Project page: https://billmoore.ai/remote-comfy/

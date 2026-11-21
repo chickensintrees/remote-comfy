@@ -2,15 +2,20 @@
 
 ![A batch of 24 images rendered with FLUX.2 [dev] on one rented L40S](site/media/uc/hero.jpg)
 
-remote-comfy is a toolkit for renting a GPU on [RunPod](https://www.runpod.io), running
-[ComfyUI](https://github.com/comfyanonymous/ComfyUI) on it, and driving it from your laptop.
-A watchdog on the pod shuts it down when the work stops, so a forgotten pod does not bill
-overnight, and a sync loop copies every result to your machine as it lands. Short jobs can
-run on [Comfy Cloud](#comfy-cloud) instead, with the same client and no pod.
+remote-comfy is an agentic toolkit for working in
+[ComfyUI](https://github.com/comfyanonymous/ComfyUI) through Claude Code. Ask Claude for an
+asset (a batch of images, an edit, a video clip, a cutout, a depth map or a 3D model) and it
+picks a current model, builds the ComfyUI workflow, runs it, and saves the result in your
+project. You do not install ComfyUI or look after a GPU.
 
-It is a set of small Python and shell tools, a step-by-step playbook, and a Claude Code
-skill. It is written for coding agents such as Claude Code and Codex, and every step also
-works by hand. The project page is [billmoore.ai/remote-comfy](https://billmoore.ai/remote-comfy/).
+Short jobs run on [Comfy Cloud](#comfy-cloud). Long batches, custom nodes and 3D run on a GPU
+that Claude rents on [RunPod](https://www.runpod.io); a watchdog on the pod shuts it down when
+the work stops, so a forgotten pod does not bill overnight, and a sync loop copies every
+result to your machine as it lands.
+
+It is a Claude Code skill, a ComfyUI client, a model catalogue, tested example workflows, a
+step-by-step playbook, and small Python and shell tools for the pods. It is written for
+coding agents such as Claude Code and Codex, and every step also works by hand. The project page is [billmoore.ai/remote-comfy](https://billmoore.ai/remote-comfy/).
 
 ## Set it up
 
