@@ -5,8 +5,8 @@
 remote-comfy is an agentic toolkit for working in
 [ComfyUI](https://github.com/comfyanonymous/ComfyUI) through Claude Code. Ask Claude for an
 asset (a batch of images, an edit, a video clip, a cutout, a depth map or a 3D model) and it
-picks a current model, builds the ComfyUI workflow, runs it, and saves the result in your
-project. You do not install ComfyUI or look after a GPU.
+picks the best available SOTA model for the task, builds the ComfyUI workflow, runs it, and
+saves the result in your project. You do not install ComfyUI or look after a GPU.
 
 Short jobs run on [Comfy Cloud](#comfy-cloud). Long batches, custom nodes and 3D run on a GPU
 that Claude rents on [RunPod](https://www.runpod.io); a watchdog on the pod shuts it down when
