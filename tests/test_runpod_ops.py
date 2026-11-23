@@ -361,6 +361,18 @@ def gallery_checks():
           "the skill sends the outputs themselves, never an HTML page the app shows as a blank card")
 
 
+def version_checks():
+    # LESSON (2026-11-23): the version is written in four places (pyproject, README, the
+    # page's banner and its Status list); bumping one and not the others would go unseen.
+    import re
+    ver = re.search(r'^version = "(\d+)\.(\d+)\.\d+"', io.open(os.path.join(ROOT, "pyproject.toml"), encoding="utf-8").read(), re.M)
+    short = "%s.%s" % ver.groups()
+    readme = io.open(os.path.join(ROOT, "README.md"), encoding="utf-8").read()
+    page = io.open(os.path.join(ROOT, "site", "template.html"), encoding="utf-8").read()
+    check("This is version %s." % short in readme and "(v%s)" % short in page and "Version %s." % short in page,
+          "README and the page state the pyproject version (%s)" % short)
+
+
 def main():
     au = load("autostop", P("autostop.py"))
     pod_ctl_src = io.open(P("pod_ctl.py"), encoding="utf-8").read()
@@ -1295,6 +1307,7 @@ def main():
 
     cloud_checks()
     gallery_checks()
+    version_checks()
 
     print("\n%s" % ("FAILED: " + "; ".join(FAIL) if FAIL else "ALL PASS"))
     return 1 if FAIL else 0

@@ -116,9 +116,8 @@ you commit to a batch.
 only while a job runs, so there is no pod to set up or forget. `connect("cloud")` in
 `comfy_client.py` and `batch_harness.py --comfy cloud` use it, with the key in
 `COMFY_CLOUD_API_KEY` or the keyring. It needs a paid Comfy plan, has only the most-used
-custom nodes, and limits each run to 30 minutes (1 hour on Pro). On 20 November 2026 it
-had every node and model for six of the seven example graphs; image to 3D lacks the
-TRELLIS.2 weights. Use a pod for long batches and anything it lacks. Setup is in
+custom nodes, and limits each run to 30 minutes (1 hour on Pro). Use a pod for long
+batches, 3D, and anything it lacks. Setup is in
 [`docs/playbook.md`](docs/playbook.md#7-or-skip-the-pod-comfy-cloud).
 
 ## Traps
@@ -137,14 +136,10 @@ for each, and the shard-aware batch harness that runs them.
 
 ## Status and limits
 
-- This is version 0.1. The full run was last tested live on 15 November 2026: setup and
-  40 jobs across five graphs on one L40S, in 1.9 hours, for $2.03
-  ([record](decisions/2026-11-15-use-cases-run.md)).
+- This is version 0.2.
 - The offline checks run in CI on Python 3.9 and 3.12 on every push. They need no
   network, GPU or API key.
-- Pods are rented on RunPod only. The Comfy Cloud client ran live on 20 November 2026
-  (a background-removal job through the batch harness); its cost per job has not been
-  measured yet ([record](decisions/2026-11-20-comfy-cloud-backend.md)).
+- Pods are rented on RunPod only. 3D runs on a pod.
 - The watchdog reads the queue of the first ComfyUI only. The launcher keeps the pod busy
   while any GPU still has work.
 - [`docs/open-questions.md`](docs/open-questions.md) lists what has not been proven yet.

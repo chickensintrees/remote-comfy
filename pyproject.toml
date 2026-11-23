@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "remote-comfy"
-version = "0.1.0"
+version = "0.2.0"
 description = "Rent a RunPod GPU, run ComfyUI on it, drive it from your laptop, and never leave it billing."
 readme = "README.md"
 license = {text = "MIT"}
