@@ -155,3 +155,17 @@ Check with `has()` that every node your graph uses exists before a batch. `--inp
 uploads each `set` value that names a file in that folder. Checked live on 2026-11-20:
 six of the seven example graphs have every node and model on Cloud; `image_to_3d` lacks
 the TRELLIS.2 weights, so 3D stays on a pod.
+
+## 8. Show the result
+
+Claude Code has no built-in media viewer, so a run ends when the person has seen it, not
+when files land. Look at every output first (your file-reading tool shows you images), then
+send the files themselves through the app's file tool (SendUserFile in the Claude desktop
+and web apps), several in one call. The app shows a sent image as a picture, but a sent
+HTML page as a blank card. For a big batch, send the best handful and offer the gallery:
+
+```bash
+python remote_comfy/gallery.py ./out              # out/gallery.html, open it in a browser
+```
+
+In a plain terminal, give the paths and offer to open `out/gallery.html`. Why: [`decisions/2026-11-23-show-the-result.md`](../decisions/2026-11-23-show-the-result.md).

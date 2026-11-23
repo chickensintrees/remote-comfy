@@ -24,6 +24,26 @@ step-by-step run is `$RC/docs/playbook.md`; the traps are `$RC/docs/traps.md`.
 4. Run `local/sync-outputs.sh` alongside every batch: pod storage is scratch.
 5. `pod_ctl.py conn <podId>` after every resume; the SSH port remaps.
 6. After changing the toolkit: `python "$RC/tests/test_runpod_ops.py"` must print ALL PASS.
+7. **Show the result.** A job is not done when the files are on disk; it is done when the
+   person has seen them in this session (below).
 
 Short jobs on common models can skip the pod: Comfy Cloud via `connect("cloud")` or
 `batch_harness.py --comfy cloud` (playbook section 7; no TRELLIS.2, so not for 3D).
+
+## Show the result
+
+Claude Code has no built-in way to show generated media, so this step is yours.
+
+1. **Look first.** Open every output with your file-reading tool (it shows you images) and
+   check it is what was asked for: subject, framing, no black or blank frames, alpha where a
+   cutout needs it. For video, check the file size and duration. Fix or re-run before showing.
+2. **Show it.** If you have a tool that sends files to the person (SendUserFile in the
+   Claude desktop and web apps), send the files themselves, several in one call: the app
+   shows each image as a picture in the session. Do not send an HTML page; the app shows it
+   as a blank card. For a big batch, send the best handful, then build
+   `python "$RC/remote_comfy/gallery.py" <out dir>` and offer to open it in the browser
+   (`start`, `open` or `xdg-open`).
+3. **No file tool** (a plain terminal): give each output's path, build the gallery, and
+   offer to open it.
+4. Say in one line what you made, with which model and where it ran. A 3D file cannot play
+   inline: show the preview images the graph wrote, or the input image, and give its path.

@@ -22,6 +22,7 @@ PATHS = {
     "pod_ctl.py": "remote_comfy/pod_ctl.py",
     "comfy_client.py": "remote_comfy/comfy_client.py",
     "check_latest_models.py": "remote_comfy/check_latest_models.py",
+    "gallery.py": "remote_comfy/gallery.py",
     "provision-comfyui.sh": "pod/provision-comfyui.sh",
     "launch-sharded.sh": "pod/launch-sharded.sh",
     "hold-busy.sh": "pod/hold-busy.sh",
@@ -313,6 +314,51 @@ def cloud_checks():
                   "--jobs", os.path.join(d, "jobs.json"), "--out", os.path.join(d, "out")])
     check(rc == 0 and len(ups) == 1 and seen == [{"__type": "core/ASSET", "info": {"id": "as-9"}}] * 2,
           "harness --inputs uploads each named input once and sets the returned reference")
+
+
+def gallery_checks():
+    # LESSON (2026-11-23): the harness saved results to disk and stopped, so the person
+    # had to go and find them. Claude Code has no built-in way to show generated media,
+    # so the agent must look at every output itself and then send the files themselves:
+    # the desktop app shows a sent image as a picture but a sent HTML page as a blank
+    # card (seen 2026-11-23). gallery.py is for opening a big batch from disk. Record:
+    # decisions/2026-11-23-show-the-result.md
+    g = load("gallery", P("gallery.py"))
+    with tempfile.TemporaryDirectory() as d:
+        out = os.path.join(d, "out")
+        os.makedirs(os.path.join(out, "sub"))
+        for name in ("b.png", "a&b #1.jpg", "clip.mp4", "voice.wav", "mesh.glb",
+                     "workflow_api.json", ".hidden.png", os.path.join("sub", "c.webp")):
+            open(os.path.join(out, name), "wb").write(b"x" * 10)
+        html_path = g.build([out])
+        html = io.open(html_path, encoding="utf-8").read()
+        check(html_path == os.path.join(out, "gallery.html"), "gallery.py writes gallery.html beside the outputs")
+        check(html.count("<img ") == 3 and "sub/c.webp" in html,
+              "gallery shows every image, subfolders included")
+        check("<video " in html and "controls" in html and "<audio " in html,
+              "gallery plays video and audio in place")
+        check("mesh.glb" in html and "workflow_api.json" not in html and ".hidden" not in html,
+              "gallery lists other outputs (3D) but skips graphs and hidden files")
+        check("a&amp;b #1.jpg" in html and 'src="a%26b%20%231.jpg"' in html,
+              "gallery escapes file names in text and in URLs")
+        check(d.replace("\\", "/") not in html.replace("\\", "/"),
+              "gallery links outputs by relative path, so the page moves with its folder")
+        again = g.build([out])
+        check(io.open(again, encoding="utf-8").read().count("<img ") == 3,
+              "a rebuilt gallery does not list itself")
+        empty = os.path.join(d, "empty"); os.makedirs(empty)
+        try:
+            g.build([empty]); raised = False
+        except SystemExit:
+            raised = True
+        check(raised, "gallery refuses an empty folder instead of showing a blank page")
+    text = "\n".join(io.open(os.path.join(ROOT, f), encoding="utf-8").read() for f in DOCS)
+    skill = io.open(os.path.join(ROOT, "skills", "remote-comfy", "SKILL.md"), encoding="utf-8").read()
+    check("gallery.py" in skill and "Show the result" in skill and "Show the result" in text,
+          "the skill tells Claude to look at every output and show it to the person")
+    check("send the files themselves" in skill and "--embed" not in skill + text
+          and "embed" not in io.open(P("gallery.py"), encoding="utf-8").read(),
+          "the skill sends the outputs themselves, never an HTML page the app shows as a blank card")
 
 
 def main():
@@ -1248,6 +1294,7 @@ def main():
           % (bare[:4] or ""))
 
     cloud_checks()
+    gallery_checks()
 
     print("\n%s" % ("FAILED: " + "; ".join(FAIL) if FAIL else "ALL PASS"))
     return 1 if FAIL else 0

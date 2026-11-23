@@ -29,6 +29,7 @@ time or money. Read this file fully before you spend a GPU-minute.
 | `remote_comfy/comfy_client.py` | either | stdlib ComfyUI client: `Comfy(url).wait_ready() / upload() / run()`; `connect("cloud")` gives `CloudComfy`, the same calls on Comfy Cloud |
 | `remote_comfy/check_latest_models.py` | laptop | STEP ZERO: what models exist *now* (live HF API) |
 | `remote_comfy/catalog.py` + `catalog/catalog.json` | laptop | curated current open models by task, with ComfyUI file paths; `--verify` re-checks HF, `--dl` feeds provisioning |
+| `remote_comfy/gallery.py` | laptop | one page that shows a run's images, video and audio, to open a big batch in a browser |
 | `remote_comfy/autostop.py` | **pod** | idle watchdog that stops/terminates the pod itself |
 | `pod/provision-comfyui.sh` | **pod** | install ComfyUI + nodes + models in the only order that works |
 | `pod/launch-sharded.sh` | **pod** | one ComfyUI per GPU, shard a batch harness across them |
@@ -61,6 +62,9 @@ time or money. Read this file fully before you spend a GPU-minute.
    and the laptop's env/keyring only; `COMFY_CLOUD_API_KEY` stays on the laptop. See
    `.env.example`. A key goes in a header, never a URL, and never follows a redirect to
    storage (urllib re-sends every header on a redirect).
+9. **Show the result.** Look at every output yourself, then show it to the person in the
+   session; Claude Code has no built-in media viewer. See the skill's "Show the result" and
+   `docs/playbook.md` section 8.
 
 ## Commands
 

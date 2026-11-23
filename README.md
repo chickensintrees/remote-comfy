@@ -6,7 +6,8 @@ remote-comfy is an agentic toolkit for working in
 [ComfyUI](https://github.com/comfyanonymous/ComfyUI) through Claude Code. Ask Claude for an
 asset (a batch of images, an edit, a video clip, a cutout, a depth map or a 3D model) and it
 picks the best available SOTA model for the task, builds the ComfyUI workflow, runs it, and
-saves the result in your project. You do not install ComfyUI or look after a GPU.
+saves the result in your project and shows it to you in your Claude Code session. You do not
+install ComfyUI or look after a GPU.
 
 Short jobs run on [Comfy Cloud](#comfy-cloud). Long batches, custom nodes and 3D run on a GPU
 that Claude rents on [RunPod](https://www.runpod.io); a watchdog on the pod shuts it down when
@@ -88,6 +89,7 @@ whether every output folder has reached your machine.
 |---|---|---|
 | `remote_comfy/pod_ctl.py` | your machine | It creates, lists, stops, starts and terminates pods, shows your balance and GPU stock, and prints the pod's current SSH address, which changes on every restart. |
 | `remote_comfy/check_latest_models.py` | your machine | It lists the newest models on Hugging Face, so you choose from what exists today. |
+| `remote_comfy/gallery.py` | your machine | It makes one page of a run's images, video and audio, so you can look through a big batch in your browser. |
 | `remote_comfy/catalog.py` | your machine | It lists current open models by task with the files ComfyUI loads, and checks the catalogue against Hugging Face again. |
 | `remote_comfy/autostop.py` | pod | It is the watchdog that stops or terminates the pod when ComfyUI goes idle. |
 | `pod/provision-comfyui.sh` | pod | It installs ComfyUI, custom nodes and model sets (`wan`, `qwen`, `flux`, `flux2`, `kontext`, `3d`) in an order that keeps torch and CUDA consistent. |

@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>remote-comfy: ask Claude Code for an asset, get the file back</title>
-<meta name="description" content="An open-source agentic toolkit for ComfyUI in Claude Code. Ask for an asset, and Claude picks the best available SOTA model for the task, builds the workflow, runs it on Comfy Cloud or a rented RunPod GPU, and brings the file back.">
+<title>remote-comfy: ask Claude Code for an asset, see it in the session</title>
+<meta name="description" content="An open-source agentic toolkit for ComfyUI in Claude Code. Ask for an asset, and Claude picks the best available SOTA model for the task, builds the workflow, runs it on Comfy Cloud or a rented RunPod GPU, and shows you the result in Claude Code.">
 <link rel="canonical" href="https://billmoore.ai/remote-comfy">
-<meta property="og:title" content="remote-comfy: ask Claude Code for an asset, get the file back">
-<meta property="og:description" content="An open-source agentic toolkit for ComfyUI in Claude Code. Ask for an asset, and Claude picks the best available SOTA model for the task, builds the workflow, runs it on Comfy Cloud or a rented RunPod GPU, and brings the file back.">
+<meta property="og:title" content="remote-comfy: ask Claude Code for an asset, see it in the session">
+<meta property="og:description" content="An open-source agentic toolkit for ComfyUI in Claude Code. Ask for an asset, and Claude picks the best available SOTA model for the task, builds the workflow, runs it on Comfy Cloud or a rented RunPod GPU, and shows you the result in Claude Code.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://billmoore.ai/remote-comfy">
 <meta name="twitter:card" content="summary">
@@ -401,7 +401,7 @@ footer h2 { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-
   </div>
 </div>
 
-<div class="y97 y97-banner" aria-hidden="true"><span>*** Welcome to the remote-comfy home page *** Ask Claude for an asset and get the file back *** scroll down for the traps ***</span></div>
+<div class="y97 y97-banner" aria-hidden="true"><span>*** Welcome to the remote-comfy home page *** Ask Claude for an asset and see it in the session *** scroll down for the traps ***</span></div>
 <div class="y97 y97-works" aria-hidden="true"><b>THIS SOFTWARE IS UNDER CONSTRUCTION (v0.1)</b></div>
 <main>
 <header class="title wrap" id="top">
@@ -414,7 +414,7 @@ footer h2 { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-
       <figcaption class="cap mono"><b class="caps">Pl. 1</b>&ensp;24 images from FLUX.2 [dev] on one rented L40S, for $0.38 of GPU time.</figcaption>
     </figure>
     <div>
-      <p class="lede">An agentic toolkit for working in ComfyUI through Claude Code. Ask Claude for an asset and it picks the best available SOTA model for the task, builds the workflow, runs it on Comfy Cloud or a rented RunPod GPU, and saves the result in your project.</p>
+      <p class="lede">An agentic toolkit for working in ComfyUI through Claude Code. Ask Claude for an asset and it picks the best available SOTA model for the task, builds the workflow, runs it on Comfy Cloud or a rented RunPod GPU, saves the result in your project and shows it to you in your Claude Code session.</p>
       <dl class="spec">
         <div><dt>What</dt><dd>A Claude Code skill, a ComfyUI client, a model catalogue, example workflows and pod tools.</dd></div>
         <div><dt>Needs</dt><dd>Python 3.9+, ssh, bash, and RunPod credit or a paid Comfy Cloud plan.</dd></div>
@@ -452,14 +452,14 @@ footer h2 { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-
 <section class="part wrap" id="how">
   <div class="part-head">
     <div><p class="part-no mono caps">2</p><h2>How it works</h2></div>
-    <p class="intro">You ask for an asset. The file lands in your project.</p>
+    <p class="intro">You ask for an asset. You see it in the session, and the file is in your project.</p>
   </div>
-  <ol class="fig" aria-label="From a request to a file: ask, choose, build, run, return">
+  <ol class="fig" aria-label="From a request to a result: ask, choose, build, run, show">
     <li><span class="n">1</span><strong>Ask</strong><p>An image, an edit, a video clip, a cutout, a depth map or a 3D model.</p></li>
     <li><span class="n">2</span><strong>Choose</strong><p>Claude picks the best available SOTA model for the task.</p></li>
     <li><span class="n">3</span><strong>Build</strong><p>It adapts a tested example workflow or writes a new one.</p></li>
     <li><span class="n">4</span><strong>Run</strong><p>Short jobs on Comfy Cloud. Long batches and 3D on a RunPod pod it rents and shuts down.</p></li>
-    <li><span class="n">5</span><strong>Return</strong><p>The files land in your project.</p></li>
+    <li><span class="n">5</span><strong>Show</strong><p>Claude checks the result, then shows it to you in the session.</p></li>
   </ol>
   
   <div class="sub prose">
@@ -741,6 +741,7 @@ shard 0 done: 1 ok, 0 failed</pre></figure>
     <li class="tool"><div class="tool-top mono caps"><b>07</b><span class="where">Your machine</span></div><h3>check-gpu-load.sh</h3><p>It fails when one GPU samples much slower than the others, which usually means a model did not fit.</p></li>
     <li class="tool"><div class="tool-top mono caps"><b>08</b><span class="where">Either</span></div><h3>comfy_client.py</h3><p>A small client that drives a local ComfyUI, a pod&#8217;s ComfyUI or Comfy Cloud with the same calls.</p></li>
     <li class="tool"><div class="tool-top mono caps"><b>09</b><span class="where">Your machine</span></div><h3>catalog.py</h3><p>It lists current open models by task and re-checks the catalogue against Hugging Face.</p></li>
+    <li class="tool"><div class="tool-top mono caps"><b>10</b><span class="where">Your machine</span></div><h3>gallery.py</h3><p>One page of a run&#8217;s images, video and audio, to look through a big batch in your browser.</p></li>
   </ol>
   <div class="band b4" aria-label="Images from the batch"><a class="band-it" href="media/uc/b-food-sourdough.jpg"><img src="media/uc/b-food-sourdough-s.jpg" alt="A sourdough loaf cut in half" loading="lazy"><span class="mono">Sourdough</span></a><a class="band-it" href="media/uc/b-graphic-map.jpg"><img src="media/uc/b-graphic-map-s.jpg" alt="A shaded-relief map of an alpine valley" loading="lazy"><span class="mono">Relief map</span></a><a class="band-it" href="media/uc/b-machines-turbines.jpg"><img src="media/uc/b-machines-turbines-s.jpg" alt="Wind turbines at sunset" loading="lazy"><span class="mono">Turbines</span></a><a class="band-it" href="media/uc/b-graphic-botanical.jpg"><img src="media/uc/b-graphic-botanical-s.jpg" alt="A botanical plate of a fern" loading="lazy"><span class="mono">Botanical plate</span></a></div>
   <p class="figcap mono band-cap">From the batch.</p>
